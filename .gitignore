@@ -1,0 +1,17 @@
+# dependencies & build
+node_modules/
+diasec_backend/target/
+diasec_frontend/build/
+
+# secrets (GitHub에 올리지 않음)
+diasec_backend/src/main/resources/application.properties
+.env
+.env.*
+
+# IDE / OS
+.vscode/
+.idea/
+.DS_Store
+
+# 서버 업로드 (소스가 아님)
+uploads/

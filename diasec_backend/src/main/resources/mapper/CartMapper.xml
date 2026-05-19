@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.diasec.diasec_backend.dao.CartMapper">
+
+    <insert id="insertCartItems">
+        INSERT INTO cart (id, pid, title, category, price, thumbnail, size, quantity, finish_type)
+        VALUES
+        <foreach collection="list" item="c" separator=",">
+            (#{c.id}, #{c.pid}, #{c.title}, #{c.category}, #{c.price}, #{c.thumbnail}, #{c.size}, #{c.quantity}, #{c.finishType})
+        </foreach>
+    </insert>
+
+    <select id="getCartByUserId" resultType="com.diasec.diasec_backend.vo.CartVo">
+        SELECT cid, id, pid, title, price, category, thumbnail, size, quantity, finish_type as finishType, created_at as createdAt FROM cart WHERE id = #{id} ORDER BY created_at DESC
+    </select>
+
+    <update id="updateQuantity">
+        UPDATE cart
+        SET quantity = #{quantity}
+        WHERE cid = #{cid}
+    </update>
+
+    <delete id="deleteItemByCid">
+        DELETE FROM cart WHERE cid = #{cid}
+    </delete>
+
+    <delete id="deleteCartItems">
+        DELETE FROM cart WHERE id = #{id} AND cid IN
+        <foreach item="cid" collection="pidList" open="(" separator="," close=")">
+            #{cid}
+        </foreach>
+    </delete>
+
+    <delete id="deleteCartItemsById">
+        DELETE FROM cart WHERE id = #{id}
+    </delete>
+
+</mapper>

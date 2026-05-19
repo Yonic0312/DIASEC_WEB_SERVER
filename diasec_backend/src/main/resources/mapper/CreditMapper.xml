@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.diasec.diasec_backend.dao.CreditMapper">
+
+    <insert id="insertCreditHistory">
+        INSERT INTO credit_history (id, type, amount, description, created_at, oid)
+        VALUES (#{id}, #{type}, #{amount}, #{description}, NOW(), #{oid})
+    </insert>
+
+    <select id="getCreditHistoryByMemberId" resultType="com.diasec.diasec_backend.vo.CreditVo">
+        SELECT c.cid, c.id, c.type, c.amount, c.description, c.created_at AS createdAt, 
+        c.oid, m.credit AS credit, MIN(o.title) AS title,
+        COUNT(o.item_id) AS totalCount
+        FROM credit_history c JOIN member m
+        ON c.id = m.id LEFT JOIN order_items o
+        ON o.oid = c.oid
+        WHERE c.id = #{id}
+        GROUP BY
+            c.cid, c.id, c.type, c.amount, c.description,
+            c.created_at, c.oid, m.credit
+        ORDER BY c.created_at DESC
+    </select>
+
+    <delete id="deleteCreditByCid">
+        DELETE FROM credit_history WHERE cid = #{cid}
+    </delete>
+
+    <delete id="deleteCreditById">
+        DELETE FROM credit_history WHERE id = #{id}
+    </delete>
+
+</mapper>

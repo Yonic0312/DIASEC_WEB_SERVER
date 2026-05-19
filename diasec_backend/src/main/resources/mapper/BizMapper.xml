@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.diasec.diasec_backend.dao.BizMapper">
+    <insert id="registerOrder" parameterType="BizVo" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO biz_order (
+            title, company_name, manager_name, phone, email, business_number,
+            due_date, size, message, postcode, address, detail_address,
+            password, is_secret, request_estimate, created_at
+        ) VALUES (
+            #{title}, #{companyName}, #{managerName}, #{phone}, #{email}, #{businessNumber},
+            #{dueDate}, #{size}, #{message}, #{postcode}, #{address}, #{detailAddress},
+            #{password}, #{isSecret}, #{requestEstimate}, NOW()
+        )
+    </insert>
+
+    <insert id="insertOrderFile">
+        INSERT INTO biz_order_file (id, file_path, original_name)
+        VALUES (#{id}, #{imageUrl}, #{originalName})
+    </insert>
+
+    <!-- 조회 -->
+    <select id="getOrderList" resultType="BizVo">
+        SELECT
+        b.id, b.title, b.company_name AS companyName, b.manager_name AS managerName,
+        b.phone, b.email, b.business_number AS businessNumber,
+        b.due_date AS dueDate, b.quantity, b.size, b.message,
+        b.postcode, b.address, b.detail_address AS detailAddress,
+        b.is_secret AS isSecret,
+        b.created_at AS createdAt,
+
+        -- 각 행의 답변 존재 여부
+        EXISTS (SELECT 1 FROM biz_order_reply r WHERE r.id = b.id) AS replyExists,
+
+        -- ✅ 총 미답변 개수(답변이 하나도 없는 주문 수)
+        (
+        SELECT COUNT(*)
+        FROM biz_order b2
+        WHERE NOT EXISTS (
+            SELECT 1 FROM biz_order_reply r2
+            WHERE r2.id = b2.id
+        )
+        ) AS unansweredCount
+    FROM biz_order b
+    ORDER BY b.created_at DESC;
+
+    </select>
+
+    <select id="getBizDetail" resultType="BizVo" parameterType="long">
+        SELECT 
+            id, title, company_name AS companyName, manager_name AS managerName,
+            phone, email, business_number AS businessNumber,
+            due_date AS dueDate, quantity, size, message,
+            postcode, address, detail_address AS detailAddress,
+            is_secret AS isSecret, request_estimate AS requestEstimate,
+            created_at AS createdAt
+            FROM biz_order
+            WHERE id = #{id}
+    </select>
+
+    <select id="getBizFiles" resultType="BizFileVo" parameterType="long">
+        SELECT 
+            oid, id, file_path AS filePath, original_name AS originalName, created_at AS createdAt
+        FROM biz_order_file WHERE id = #{id}
+    </select>
+
+    <select id="getBizReply" resultType="BizReplyVo" parameterType="long">
+        SELECT reply_id AS replyId, id, content, created_at AS createdAt
+        FROM biz_order_reply
+        WHERE id = #{id}
+    </select>
+
+    <delete id="deleteBiz" parameterType="long">
+        DELETE FROM biz_order WHERE id = #{id}
+    </delete>
+
+    <insert id="insertReply" parameterType="BizReplyVo">
+        INSERT INTO biz_order_reply (id, content)
+        VALUES (#{id}, #{content})
+    </insert>
+
+    <update id="updateReply" parameterType="BizReplyVo">
+        UPDATE biz_order_reply
+        SET content = #{content}, created_at = NOW()
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteReply" parameterType="long">
+        DELETE FROM biz_order_reply WHERE reply_id = #{replyId}
+    </delete>
+
+    <!-- 비밀글만 가져오기 -->
+    <select id="getPostById" resultType="BizVo">
+        SELECT * FROM biz_order
+        WHERE id = #{id}
+    </select>
+</mapper>

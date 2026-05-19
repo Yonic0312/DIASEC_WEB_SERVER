@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.diasec.diasec_backend.dao.EventMapper">
+    
+    <!-- 이벤트 목록 전체 가져오기 -->
+    <select id="getEventsByStatus" resultType="EventVo">
+        SELECT event_id as eventId, title, thumbnail_url as thumbnailUrl, detail_image_url as detailImageUrl, period, status, content, created_at as createdAt 
+        FROM event 
+        WHERE (#{status} = 'all' OR status = #{status})
+        ORDER BY created_at DESC
+    </select>
+
+    <!-- 이벤트 상세 보기 -->
+    <select id="getEventById" resultType="EventVo">
+        SELECT event_id as eventId, title, thumbnail_url as thumbnailUrl, detail_image_url as detailImageUrl, period, status, content, created_at as createdAt 
+        FROM event WHERE event_id = #{eventId} ORDER BY created_at DESC
+    </select>
+
+    <!-- 이벤트 추가 -->
+    <insert id="insertEvent">
+        INSERT INTO event (title, thumbnail_url, detail_image_url, period, status, content)
+        VALUES (#{title}, #{thumbnailUrl}, #{detailImageUrl}, #{period}, #{status}, #{content})
+    </insert>
+
+    <!-- 이벤트 수정 -->
+    <update id="updateEvent">
+        UPDATE event
+        SET  title = #{title}, thumbnail_url = #{thumbnailUrl}, detail_image_url = #{detailImageUrl}, 
+            period = #{period}, status = #{status}, content = #{content}
+        WHERE event_id = #{eventId}
+    </update>
+
+    <delete id="deleteEvent">
+        DELETE FROM event WHERE event_id = #{eventId}
+    </delete>
+
+</mapper>

@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.diasec.diasec_backend.dao.FaqMapper">
+
+    <!-- 전체 목록 가져오기 -->
+    <select id="getAllFaqs" resultType="com.diasec.diasec_backend.vo.FaqVo">
+        SELECT faq_id as faqId, category, question, answer, created_at as createdAt FROM faq
+        ORDER BY created_at DESC
+    </select>
+
+    <!-- 검색어로 필터 -->
+    <select id="getFilteredFaqs" resultType="com.diasec.diasec_backend.vo.FaqVo">
+        SELECT faq_id as faqId, category, question, answer, created_at as createdAt FROM faq
+        <where>
+            <if test="category != null and category != ''">
+                AND category = #{category}
+            </if>
+            <if test="keyword != null and keyword != ''">
+                AND (question Like CONCAT('%', #{keyword}, '%')
+                    OR answer LIKE CONCAT('%', #{keyword}, '%'))
+            </if>
+        </where>
+        ORDER BY created_at DESC
+    </select>
+
+    <!-- 조회수 올리기 -->
+    <update id="updateViewCount">
+        UPDATE faq
+        SET view_count = view_count + 1
+        WHERE faq_id = #{id}
+    </update>
+
+    <!-- TOP5 조회 -->
+    <select id="getTopFaqs" resultType="com.diasec.diasec_backend.vo.FaqVo">
+        SELECT * FROM faq
+        ORDER BY view_count DESC
+        LIMIT #{limit}
+    </select>
+
+    <!-- 관리자 - 등록 -->
+    <insert id="insertFaq">
+        INSERT INTO faq (category, question, answer, created_at)
+        VALUES (#{category}, #{question}, #{answer}, NOW())
+    </insert>
+
+    <!-- 관리자 - 수정 -->
+    <update id="updateFaq" parameterType="com.diasec.diasec_backend.vo.FaqVo">
+        UPDATE faq 
+        SET category = #{category},
+            question = #{question},
+            answer = #{answer}
+        WHERE faq_id = #{faqId}
+    </update>
+
+    <!-- 관리자 - 삭제 -->
+    <delete id="deleteFaq" parameterType="long">
+        DELETE FROM faq WHERE faq_id = #{id}
+    </delete>
+
+</mapper>

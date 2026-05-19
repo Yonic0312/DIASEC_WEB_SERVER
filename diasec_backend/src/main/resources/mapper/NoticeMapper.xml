@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+ "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+ <mapper namespace="com.diasec.diasec_backend.dao.NoticeMapper">
+
+    <!-- 모든 공지사항 가져오기 -->
+    <select id="getAllNotices" resultType="com.diasec.diasec_backend.vo.NoticeVo">
+        SELECT title, content, pinned, created_at as createdAt, image_url as imageUrl, notice_id as noticeId
+        FROM notices
+        ORDER BY pinned DESC, created_at DESC
+    </select>
+
+    <!-- 공지사항 추가 -->
+    <insert id="insertNotice" parameterType="com.diasec.diasec_backend.vo.NoticeVo">
+        INSERT INTO notices (title, content, pinned, created_at, image_url)
+        VALUES (#{title}, #{content}, #{pinned}, NOW(), #{imageUrl})
+    </insert>
+    
+    <!-- 공지사항 상세보기 -->
+    <select id="getNoticeById" resultType="com.diasec.diasec_backend.vo.NoticeVo">
+        SELECT title, content, pinned, created_at as createdAt, image_url as imageUrl, notice_id as noticeId
+        FROM notices WHERE notice_id = #{noticeId}
+    </select>
+  
+    <!-- 공지사항 업데이트 -->
+    <update id="updateNotice">
+        UPDATE notices
+        SET title = #{title},
+            content = #{content},
+            pinned = #{pinned},
+            image_url = #{imageUrl}
+        WHERE notice_id = #{noticeId}
+    </update>
+  
+    <!-- 공지사항 삭제 -->
+    <delete id="deleteNotice" parameterType="long">
+        DELETE FROM notices WHERE notice_id = #{noticeId}
+    </delete>
+
+    <!-- 삭제 전 image_url 불러오기 -->
+    <select id="getImageUrlByNoticeId" resultType="string">
+        SELECT image_url as imageUrl FROM notices WHERE notice_id = #{noticeId}
+    </select>
+
+    <!-- 고객센터 홈에서 불러올 공지사항 -->
+    <select id="getLatestNotices">
+        SELECT title, content, pinned, created_at as createdAt, image_url as imageUrl, notice_id as noticeId
+        FROM notices
+        ORDER BY created_at DESC
+        LIMIT #{limit}
+    </select>
+    
+</mapper>

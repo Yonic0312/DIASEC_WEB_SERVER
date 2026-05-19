@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+  <mapper namespace="com.diasec.diasec_backend.dao.WishlistMapper">
+
+    <insert id="insertWishlist" parameterType="com.diasec.diasec_backend.vo.WishlistVo">
+        INSERT INTO wishlist (`id`, pid, category)
+        VALUES (#{id}, #{pid}, #{category});
+    </insert>
+
+    <select id="getWishlistByUserId" parameterType="String" resultType="com.diasec.diasec_backend.vo.WishlistVo">
+        SELECT w.wid, w.id, w.pid, w.category,
+               p.title, p.price, p.author,
+               pi.image_url AS thumbnail
+        FROM wishlist w
+        JOIN product p ON w.pid = p.pid
+        LEFT JOIN product_images pi 
+        ON pi.pid = p.pid AND pi.img_order = 1
+        WHERE w.id = #{id}
+        ORDER BY w.wid DESC
+    </select>
+    
+    <delete id="deleteByWid" parameterType="list">
+        DELETE FROM wishlist WHERE wid IN
+        <foreach collection="list" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+    <delete id="deleteByUserId">
+        DELETE FROM wishlist WHERE id = #{id}
+    </delete>
+
+    <select id="existsWishlist" parameterType="com.diasec.diasec_backend.vo.WishlistVo" resultType="int">
+        SELECT COUNT(*)
+        FROM wishlist
+        WHERE id = #{id}
+            AND pid = #{pid}
+            AND category = #{category}
+    </select>
+  </mapper>

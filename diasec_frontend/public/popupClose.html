@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8" />
+    <title>로그인 처리</title>
+</head>
+<body>
+    <p>처리 중...</p>
+
+    <script>
+        (function () {
+            const params = new URLSearchParams(window.location.search);
+            const status = params.get("status");
+            const message = params.get("message");
+
+            console.log("[popupClose] status:", status, "message:", message);
+            console.log("[popupClose] opener:", !!window.opener, "closed:", window.opener?.closed);
+
+            const payload = {
+            type: status === "LINK_REQUIRED" ? "LINK_REQUIRED"
+                : status === "FAIL" ? "OAUTH_FAIL"
+                : "OAUTH_SUCCESS",
+            message: message || null,
+            };
+
+            console.log("[popupClose] postMessage payload:", payload);
+
+            // OAuth 팝업은 항상 https://diasec.co.kr 에서 열리지만, 부모는 www 일 수 있음.
+            // targetOrigin 을 부모와 맞추려면 * (부모는 origin 검증 필수) — 아니면 www 에서 메시지가 버려짐.
+            if (window.opener && !window.opener.closed) {
+            window.opener.postMessage(payload, "*");
+            console.log("[popupClose] postMessage sent");
+            } else {
+            console.log("[popupClose] opener missing -> cannot postMessage");
+            }
+
+            window.close();
+        })();
+    </script>
+    <p>로그인에 성공했습니다. 창이 곧 닫힙니다...</p>
+</body>
+</html>

@@ -1,0 +1,251 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.diasec.diasec_backend.dao.AuthorMapper">
+
+    <!-- member의 작가/기본정보 갱신 (넘어온 값 업데이트) -->
+    <update id="updateMemberAuthorInfo">
+        UPDATE member
+        <set>
+            author_name = #{authorName},
+            author_intro = #{authorIntro},
+            portfolio_url = #{portfolioUrl},
+            account_holder = #{accountHolder},
+            bank_name = #{bankName},
+            account_number = #{accountNumber},
+            author_profile_image = #{author_profile_image},
+            updated_at = CURRENT_TIMESTAMP
+            <if test="name != null and name != ''">
+                , name = #{name},
+            </if>
+            <if test="email != null and email != ''">
+                , email = #{email}
+            </if>
+            <if test="phone != null and phone != ''">
+                , phone = #{phone}
+            </if>
+        </set>
+        WHERE id = #{memberId}
+    </update>
+
+    <!-- 신청하면 상태 PENDING -->
+    <update id="markAuthorPending">
+        UPDATE member
+        SET author_status = 'PENDING'
+        WHERE id = #{memberId}
+    </update>
+
+    <!-- 이미지저장 -->
+    <insert id="insertAuthorImage">
+        INSERT INTO author_image (member_id, title, image_url, created_at)
+        VALUES (#{memberId}, #{title}, #{imageUrl}, CURRENT_TIMESTAMP)
+    </insert>
+
+    <!-- 어드민 목록 -->
+    <select id="selectAuthors" resultType="map">
+        SELECT 
+            m.id, m.name, m.phone, m.email, m.author_name, m.author_intro, m.portfolio_url, 
+            m.account_holder, m.bank_name, m.account_number,
+            m.author_status, m.author_profile_image, 
+
+            -- 승인/반려 건수
+            (SELECT COUNT(*) FROM author_image ai WHERE ai.member_id = m.id AND ai.status = 'PENDING') AS pending_count,
+            (SELECT COUNT(*) FROM author_image ai WHERE ai.member_id = m.id AND ai.status = 'APPROVED') AS approved_count,
+
+            <!-- 정산대기 건수 -->
+            (SELECT COUNT(*)
+                FROM order_items oi
+                JOIN product p ON oi.pid = p.pid
+                WHERE p.author COLLATE utf8mb4_general_ci = m.author_name COLLATE utf8mb4_general_ci
+                
+                AND oi.settlement_date IS NULL
+                ) AS settlement_pending_count,
+            
+            <!-- 정산 대기 금액 -->
+            (SELECT COALESCE(SUM(oi.price * oi.quantity) * 0.13, 0)
+                FROM order_items oi
+                JOIN product p ON oi.pid = p.pid
+                WHERE p.author COLLATE utf8mb4_general_ci = m.author_name COLLATE utf8mb4_general_ci
+                
+                AND oi.settlement_date IS NULL
+            ) AS settlement_pending_amount,
+
+            <!-- 정산완료 건수 -->
+            (SELECT COUNT(*)
+                FROM order_items oi
+                JOIN product p ON oi.pid = p.pid
+                WHERE p.author COLLATE utf8mb4_general_ci = m.author_name COLLATE utf8mb4_general_ci
+                
+                AND oi.settlement_date IS NOT NULL
+                ) AS ok_settlement_pending_count,
+
+            <!-- 정산완료 금액 -->
+            (SELECT COALESCE(SUM(oi.price * oi.quantity) * 0.13, 0)
+                FROM order_items oi
+                JOIN product p ON oi.pid = p.pid
+                WHERE p.author COLLATE utf8mb4_general_ci = m.author_name COLLATE utf8mb4_general_ci
+                
+                AND oi.settlement_date IS NOT NULL
+            ) AS ok_settlement_pending_amount
+
+            
+        FROM member m
+        <where>
+            <if test="status != null and status != ''">
+                AND m.author_status = #{status}
+            </if>
+            <if test="keyword != null and keyword != ''">
+                AND (
+                    m.id LIKE CONCAT('%', #{keyword}, '%')
+                    OR m.name LIKE CONCAT('%', #{keyword}, '%')
+                    OR m.author_name LIKE CONCAT('%', #{keyword}, '%')
+                )
+            </if>
+        </where>
+        ORDER BY m.updated_at DESC
+    </select>
+
+
+    <!-- 작가 신청(PENDING) 상태인 사람 수 -->
+    <select id="countPendingAuthors" resultType="int">
+        SELECT COUNT(*)
+        FROM member
+        WHERE author_status = 'PENDING'
+    </select>
+
+    <!-- 유저 상세정보 조회 -->
+    <select id="selectById" resultType="map">
+        SELECT 
+           author_status, 
+           author_reject_reason,
+           author_profile_image
+        FROM member
+        WHERE id = #{memberId}
+    </select>
+
+    <!-- 상세 이미지들 -->
+    <select id="selectAuthorImages" resultType="map">
+        SELECT img_id, member_id, title, image_url, created_at
+        FROM author_image
+        WHERE member_id = #{memberId}
+        ORDER BY img_id DESC
+    </select>
+
+    <!-- 승인/반려 -->
+    <update id="updateAuthorStatus">
+        UPDATE member
+        SET author_status = #{status},
+            author_reject_reason = CASE WHEN #{status} = 'REJECTED' THEN #{note} ELSE NULL END
+        WHERE id = #{id}
+    </update>
+
+    <!-- 작가 프로필 가져오기 -->
+    <select id="getAuthorProfile">
+        SELECT * from member
+        WHERE id = #{memberId}
+    </select>
+
+    <!-- 작가 프로필 업데이트 -->
+    <update id="updateAuthorProfile">
+        UPDATE member
+        <set>
+            <if test="nickname != null and nickname != ''">
+                author_name = #{nickname},
+            </if>
+            <if test="authorIntro != null and authorIntro != ''">
+                author_intro = #{authorIntro},
+            </if>
+            <if test="imageUrl != null and imageUrl != ''">
+                author_profile_image = #{imageUrl}
+            </if>
+        </set>
+        WHERE id = #{memberId}
+    </update>
+
+    <!-- 작품 목록 + 페이징 -->
+    <select id="listAuthorImages" resultType="map">
+        SELECT
+            img_id, member_id, title, image_url, status, reject_reason, created_at
+        FROM author_image
+        WHERE member_id = #{memberId}
+        <if test="status != null and status != ''">
+            AND status = #{status}
+        </if>
+        ORDER BY img_id DESC
+        LIMIT #{limit} OFFSET #{offset}
+    </select>
+
+    <select id="countAuthorImages" resultType="int">
+        SELECT COUNT(*)
+        FROM author_image
+        WHERE member_id = #{memberId}
+        <if test="status != null and status != ''">
+            AND status = #{status}
+        </if>
+    </select>
+    
+    <!-- 단건 조회: 수정/삭제 전에 기존 url/소유자 확인용 -->
+    <select id="findAuthorImage" resultType="map">
+        SELECT img_id, member_id, title, image_url, status, reject_reason, created_at
+        FROM author_image
+        WHERE img_id = #{imgId}
+    </select>
+
+    <!-- 작품 수정: 제목/이미지 둘 다 선택적 -->
+    <update id="updateAuthorImage">
+        UPDATE author_image
+        <set>
+            <if test="title != null">title = #{title},</if>
+            <if test="imageUrl != null">image_url = #{imageUrl}</if>
+        </set>
+        WHERE img_id = #{imgId}
+    </update>
+
+    <delete id="deleteAuthorImage">
+        DELETE FROM author_image
+        WHERE img_id = #{imgId}
+    </delete>
+    
+    <!-- 작품 상태 변경 (승인/반려) -->
+    <update id="setAuthorImageStatus">
+        UPDATE author_image
+        SET
+            status = #{status},
+            reject_reason = CASE WHEN #{status} = 'REJECTED' THEN #{rejectReason} ELSE NULL END
+            WHERE img_id = #{imgId}
+    </update>
+
+    <select id="selectSettlementList" resultType="map">
+        SELECT
+            oi.item_id, oi.oid, oi.pid, p.author, p.title, oi.category, oi.quantity, oi.price, (oi.quantity * oi.price) AS total_price,
+            oi.order_status, o.created_at, oi.settlement_date,
+            CASE WHEN oi.settlement_date IS NOT NULL THEN '정산완료'
+                ELSE '미정산'
+            END AS settlement_status
+        FROM order_items oi
+        JOIN product p ON oi.pid = p.pid
+        JOIN orders o ON oi.oid = o.oid
+        WHERE p.category LIKE 'authorCollection%'
+            AND p.author = #{author}
+        ORDER BY o.created_at DESC
+    </select>
+
+    <!-- 정산처리 -->
+    <update id="settleOrderItem">
+        UPDATE order_items
+        SET settlement_date = NOW()
+        WHERE item_id = #{itemId}
+    </update>
+
+    <!-- 정산 취소 -->
+    <update id="cancelSettlement">
+        UPDATE order_items
+        SET settlement_date = NULL
+        WHERE item_id = #{itemId}
+    </update>
+
+    <delete id="deleteAuthorById">
+        DELETE FROM author_image WHERE member_id = #{id}
+    </delete>
+</mapper>

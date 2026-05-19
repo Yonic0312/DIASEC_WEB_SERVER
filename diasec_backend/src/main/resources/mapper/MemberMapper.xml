@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+ "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+ <mapper namespace="com.diasec.diasec_backend.dao.MemberMapper">
+
+    <insert id="registerMember" parameterType="com.diasec.diasec_backend.vo.MemberVo">
+        INSERT INTO member (id, password, name, phone, email, smsAgree, emailAgree, credit)
+            values (#{id}, #{password}, #{name}, #{phone}, #{email}, #{smsAgree}, #{emailAgree}, #{credit});
+    </insert>
+
+    <select id="selectMemberById" resultType="com.diasec.diasec_backend.vo.MemberVo">
+        SELECT * from member WHERE id = #{id};
+    </select>
+
+    <select id="selectMemberByEmail" resultType="com.diasec.diasec_backend.vo.MemberVo">
+        SELECT * from member WHERE email = #{email};
+    </select>
+
+    <select id="countByPhone" parameterType="string" resultType="int">
+        SELECT COUNT(*)
+        FROM member
+        WHERE phone = #{phone}
+    </select>
+
+    <select id="selectMemberByNameAndEmail" resultType="com.diasec.diasec_backend.vo.MemberVo">
+        SELECT * from member WHERE name = #{name} AND email = #{email};
+    </select>
+    
+    <select id="selectMemberByNameAndPhone" resultType="com.diasec.diasec_backend.vo.MemberVo">
+        SELECT * from member WHERE name = #{name} AND phone = #{phone};
+    </select>
+
+    <select id="getRoleByEmailAndProvider" resultType="string">
+        SELECT role FROM member
+        WHERE email = #{email} AND provider = #{provider}
+    </select>
+
+    <select id="findByIdNameAndEmailOrPhone" resultType="com.diasec.diasec_backend.vo.MemberVo">
+        SELECT * FROM member WHERE id = #{id} AND name = #{name} AND (email = #{email} OR phone = #{phone})
+    </select>
+
+    <update id="updatePassword">
+        UPDATE member SET password = #{password} WHERE id = #{id}
+    </update>
+
+    <update id="updateMember" parameterType="com.diasec.diasec_backend.vo.MemberVo">
+        UPDATE member SET
+            name = #{name}, 
+            email = #{email}, 
+            gender = #{gender}, 
+            birth = #{birth}, 
+            region = #{region},
+            smsAgree = #{smsAgree}, 
+            emailAgree = #{emailAgree}
+            <if test="phone != null and phone != ''">
+                , phone = #{phone}
+            </if>
+            <if test="password != null and password != ''">
+                , password = #{password}
+            </if>
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteMember" parameterType="String">
+        DELETE FROM member WHERE id = #{id}
+    </delete>
+
+    <!-- 카카오 로그인 -->
+    <select id="findByEmailAndProvider" resultType="com.diasec.diasec_backend.vo.MemberVo">
+        SELECT * FROM member WHERE email = #{email} AND provider = #{provider}
+    </select>
+
+    <insert id="insertMember">
+        INSERT INTO member (id, password, name, phone, email, nickname, provider)
+        VALUES (#{id}, #{password}, #{name}, #{phone}, #{email}, #{nickname}, #{provider})
+    </insert>
+
+    <!-- 모든 회원 목록 가져오기 -->
+    <select id="getAllMembers" resultType="com.diasec.diasec_backend.vo.MemberVo">
+        SELECT id, name, email, created_at AS createdAt, role
+        FROM member
+        ORDER BY created_at DESC
+    </select>
+
+    <!-- 회원 역할 변경 -->
+    <update id="updateRole">
+        UPDATE member SET role = #{role} WHERE id = #{id}
+    </update>
+
+    <update id="updateKakaoUid">
+        UPDATE member
+        SET kakao_uid = #{kakaoUid}
+        WHERE id = #{id}
+    </update>
+
+    <update id="updateNaverUid">
+        UPDATE member
+        SET naver_uid = #{naverUid}
+        WHERE id = #{id}
+    </update>
+
+    <select id="selectByKakaoUid" resultType="com.diasec.diasec_backend.vo.MemberVo">
+        SELECT * FROM member WHERE kakao_uid = #{kakaoUid}
+    </select>
+
+    <select id="selectByNaverUid" resultType="com.diasec.diasec_backend.vo.MemberVo">
+        SELECT * FROM member WHERE naver_uid = #{naverUid}
+    </select>
+
+    <select id="selectWebMemberByEmail" resultType="com.diasec.diasec_backend.vo.MemberVo">
+        SELECT * FROM member WHERE email = #{email} AND provider = 'web'
+    </select>
+
+    <insert id="insertSocialMember" parameterType="com.diasec.diasec_backend.vo.MemberVo">
+        INSERT INTO member (
+            id, password, name, phone, email, nickname, provider, role, smsAgree, emailAgree,
+            kakao_uid, naver_uid
+        ) 
+        VALUES (
+            #{id}, #{password}, #{name}, #{phone}, #{email}, #{nickname}, #{provider}, #{role}, #{smsAgree}, #{emailAgree}, #{kakao_uid}, #{naver_uid}
+        )
+    </insert>
+
+    <select id="selectCreditById" resultType="int">
+        SELECT credit FROM member WHERE id = #{id}
+    </select>
+</mapper>

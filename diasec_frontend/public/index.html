@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="ko" translate="no">
+  <head>
+    <meta charset="utf-8" />
+    <!-- 네이버 -->
+    <meta name="naver-site-verification" content="98e712471b4acdbfa22554f8a203628a9b5df5b0" />
+
+    <!-- 카드결제 아임포트 api -->
+    <script src="https://cdn.iamport.kr/js/iamport.payment-1.2.0.js"></script>
+
+    <!-- 파비콘: Google은 보통 48×48 이상 권장. 브랜드 이미지로 public/icon.png 교체 권장 -->
+    <link rel="icon" type="image/png" sizes="32x32" href="%PUBLIC_URL%/icon.png" />
+    <link rel="icon" type="image/png" sizes="192x192" href="%PUBLIC_URL%/icon.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#000000" />
+    <meta
+      name="description"
+      content="디아섹코리아에서 디아섹 액자와 맞춤 액자를 만나보세요. 작품과 사진에 맞춘 고급 액자 제작 서비스를 제공합니다."
+    />
+    <meta property="og:site_name" content="디아섹코리아" />
+    <link rel="apple-touch-icon" href="%PUBLIC_URL%/icon.png" />
+    <!--
+      manifest.json provides metadata used when your web app is installed on a
+      user's mobile device or desktop. See https://developers.google.com/web/fundamentals/web-app-manifest/
+    -->
+    <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
+    <!--
+      Notice the use of %PUBLIC_URL% in the tags above.
+      It will be replaced with the URL of the `public` folder during the build.
+      Only files inside the `public` folder can be referenced from the HTML.
+
+      Unlike "/favicon.ico" or "favicon.ico", "%PUBLIC_URL%/favicon.ico" will
+      work correctly both with client-side routing and a non-root public URL.
+      Learn how to configure a non-root public URL by running `npm run build`.
+    -->
+    <title>디아섹 액자·맞춤액자 전문 디아섹코리아 | 20% 오픈할인</title>
+    <!-- Google 검색 결과 사이트명: https://developers.google.com/search/docs/appearance/site-names -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "name": "디아섹코리아",
+        "alternateName": ["Diasec Korea", "DIASEC KOREA", "diasec.co.kr"],
+        "url": "https://diasec.co.kr/"
+      }
+    </script>
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "Organization",
+        "name": "디아섹코리아",
+        "url": "https://diasec.co.kr/",
+        "logo": "https://diasec.co.kr/icon.png"
+      }
+    </script>
+  </head>
+  <body class="overflow-y-scroll">
+    <noscript>You need to enable JavaScript to run this app.</noscript>
+    <div id="root"></div>
+    <!-- 리뷰 사진 모달창 -->
+    <div id="modal-root"></div>
+    <!--
+      This HTML file is a template.
+      If you open it directly in the browser, you will see an empty page.
+
+      You can add webfonts, meta tags, or analytics to this file.
+      The build step will place the bundled scripts into the <body> tag.
+
+      To begin the development, run `npm start` or `yarn start`.
+      To create a production bundle, use `npm run build` or `yarn build`.
+    -->
+  </body>
+</html>

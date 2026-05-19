@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.diasec.diasec_backend.dao.AdminOrderMapper">
+
+    <resultMap id="orderMap" type="OrderItemsVo">
+        <id property="itemId" column="item_id"/>
+        <result property="oid" column="oid"/>
+        <result property="cid" column="cid"/>
+        <result property="pid" column="pid"/>
+        <result property="category" column="category"/>
+        <result property="title" column="title"/>
+        <result property="quantity" column="quantity"/>
+        <result property="price" column="price"/>
+        <result property="size" column="size"/>
+        <result property="thumbnail" column="thumbnail"/>
+        <result property="thumbnailPreview" column="thumbnail_preview"/>
+        <result property="orderStatus" column="order_status"/>
+        <result property="trackingNumber" column="tracking_number"/>
+        <result property="trackingCompany" column="tracking_company"/>
+        <result property="reason" column="return_reason"/>
+        <result property="detail" column="return_detail"/>
+        <result property="bankName" column="bank_name"/>
+        <result property="accountNumber" column="account_number"/>
+        <result property="accountHolder" column="account_holder"/>
+        <result property="leaseStart" column="lease_start"/>
+        <result property="leaseEnd" column="lease_end"/>
+        <result property="id" column="user_id"/>
+    </resultMap>
+
+    <!-- 주문 상태 목록 가져오기 -->
+    <select id="selectOrderItemsByStatus" resultMap="orderMap" resultType="com.diasec.diasec_backend.vo.OrderItemsVo">
+        SELECT oi.*, o.id AS user_id, o.used_credit as usedCredit, o.created_at AS createdAt
+        FROM order_items oi 
+        JOIN orders o ON oi.oid = o.oid
+        <where>
+            <if test="status != null and status != '전체'">
+                oi.order_status = #{status}
+            </if>
+            <if test="category != null and category != '전체'">
+                AND oi.category = #{category}
+            </if>
+            <if test="startDate != null and startDate != '' and endDate != null and endDate != ''">     
+                AND o.created_at BETWEEN CONCAT(#{startDate}, ' 00:00:00') AND CONCAT(#{endDate}, ' 23:59:59')
+            </if>
+            
+            <if test="keyword != null and keyword != ''">
+                AND (o.id LIKE CONCAT('%', #{keyword}, '%') or oi.title LIKE CONCAT('%', #{keyword}, '%')
+                )
+            </if>
+        </where>
+        ORDER BY oi.oid DESC
+    </select>
+
+    <!-- 목록에서 진행상태 업데이트 -->
+    <update id="updateOrderItemStatus">
+        UPDATE order_items
+        SET order_status = #{orderStatus}
+        WHERE item_id = #{itemId}
+    </update>
+
+
+    <!-- 상세 정보에서 배송 정보 업데이트 -->
+    <update id="updateOrderDetail">
+        UPDATE order_items
+        SET tracking_company = #{trackingCompany},
+            tracking_number = #{trackingNumber},
+            bank_name = #{bankName},
+            account_number = #{accountNumber},
+            account_holder = #{accountHolder}
+        WHERE item_id = #{itemId}
+    </update>
+
+    <select id="selectShippingNotificationTarget" resultType="map">
+        SELECT
+            oi.item_id AS itemId,
+            oi.oid AS oid,
+            oi.order_status AS orderStatus,
+            oi.title AS title,
+            oi.tracking_company AS trackingCompany,
+            oi.tracking_number AS trackingNumber,
+            o.recipient AS recipient,
+            o.recipient_phone AS recipientPhone,
+            o.orderer_phone AS ordererPhone
+        FROM order_items oi
+        JOIN orders o ON oi.oid = o.oid
+        WHERE oi.item_id = #{itemId}
+    </select>
+
+    <!-- 리스정보 수정 -->
+    <update id="updateLeasePeriod">
+        UPDATE order_items
+        SET 
+            lease_start = #{leaseStart},
+            lease_end = #{leaseEnd}
+        WHERE
+         item_id = #{itemId}
+    </update>
+
+    <select id="selectThumbnailByItemId" resultType="string">
+        SELECT thumbnail
+        FROM order_items
+        WHERE item_id = #{itemId}
+    </select>
+
+    <update id="clearThumbnail">
+        UPDATE order_items
+        SET thumbnail = NULL
+        WHERE item_id = #{itemId}
+
+    </update>
+
+    <update id="markCreditRefundedIfNotYet">
+        UPDATE order_items
+        SET credit_refunded = 1
+        WHERE item_id = #{value}
+            AND (credit_refunded = 0 OR credit_refunded IS NULL)
+    </update>
+
+    <update id="updateCustomFrameDeliveredAtIfNull">
+        UPDATE order_items
+        SET custom_frame_delivered_at = NOW()
+        WHERE item_id = #{itemId}
+            AND category = 'customFrames'
+            AND custom_frame_delivered_at IS NULL
+    </update>
+</mapper>

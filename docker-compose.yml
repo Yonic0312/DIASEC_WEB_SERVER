@@ -1,0 +1,62 @@
+services:
+    backend:
+        build: ./diasec_backend
+        ports:
+            - "8080:8080"
+        depends_on:
+            db:
+                condition: service_healthy
+            redis:
+                condition: service_started
+        environment:
+            TZ: Asiz/Seoul
+            SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/diasecDB
+            SPRING_DATASOURCE_USERNAME: root
+            SPRING_DATASOURCE_PASSWORD: diasec0504
+            FILE_UPLOAD_DIR: /var/www/diasec/uploads
+            FILE_ACCESS_URL: https://diasec.co.kr/uploads
+            SPRING_DATA_REDIS_HOST: redis
+            SPRING_DATA_REDIS_PORT: 6379
+        volumes:
+            - /var/www/diasec/uploads:/var/www/diasec/uploads
+
+    frontend:
+        build: ./diasec_frontend
+        ports:
+            - "3000:3000"
+        depends_on:
+            - backend
+
+    db:
+        image: mysql:5.7
+        restart: always
+        environment:
+            MYSQL_ROOT_PASSWORD: diasec0504
+            MYSQL_DATABASE: diasecDB
+            TZ: Asia/Seoul
+            MYSQL_CHARACTER_SET_SERVER: utf8mb4
+            MYSQL_COLLATION_SERVER: utf8mb4_unicode_ci
+        ports:
+           - "3306:3306"
+        volumes:
+            # New name => empty datadir. Old diasec_mysql_data (MariaDB files) is unused; remove with: docker volume rm diasecweb_diasec_mysql_data
+            - diasec_mysql:/var/lib/mysql
+        healthcheck:
+            test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+            interval: 10s
+            retries: 10
+            start_period: 60s
+            timeout: 10s
+        
+    redis:
+        image: redis:7-alpine
+        restart: always
+        ports:
+            - "6379:6379"
+        volumes:
+            - diasec_redis_data:/data
+  
+
+volumes:
+    diasec_mysql:
+    diasec_redis_data:

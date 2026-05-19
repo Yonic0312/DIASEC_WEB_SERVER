@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.diasec.diasec_backend.dao.InquiryMapper">
+    <insert id="insertInquiry" useGeneratedKeys="true" keyProperty="iid">
+        INSERT INTO inquiries (iid, pid, id, title, category, content, is_private, status)
+        VALUES (#{iid}, #{pid}, #{id}, #{title}, #{category}, #{content}, #{isPrivate}, #{status})
+    </insert>
+
+    <insert id="insertInquiryImage">
+        INSERT INTO inquiry_images (iid, image_url)
+        VALUES (#{iid}, #{imageUrl})
+    </insert>
+
+    <!-- 문의사항 리스트 가져오기 -->
+    <select id="selectInquiriesByPid" resultType="com.diasec.diasec_backend.vo.InquiryVo">
+        SELECT i.iid, i.pid, i.id, i.title, p.title as productName, i.category, i.content, i.is_private as isPrivate, i.status, i.created_at as createdAt, 
+        r.reply_id as rid, r.content AS answer
+        FROM inquiries i LEFT JOIN inquiry_replies r
+        on i.iid = r.iid LEFT JOIN product p
+        on i.pid = p.pid
+        WHERE i.pid = #{pid}
+        ORDER BY i.created_at DESC
+    </select>
+
+    <!-- 상품에서 답변 - 상태 변경 (어드민) -->
+    <update id="updateInquiryStatus">
+        UPDATE inquiries
+        SET status = #{status}
+        WHERE iid = #{iid}
+    </update>
+
+    <!-- 상품에서 답변 - 답변 추가 (어드민) -->
+    <insert id="insertInquiryReply">
+        INSERT INTO inquiry_replies (iid, admin_id, content)
+        VALUES (#{iid}, #{adminId}, #{content})
+    </insert>
+
+    <!-- 상품에서 답변 - 답변 수정 (어드민) -->
+    <update id="updateInquiryReply">
+        UPDATE inquiry_replies
+        SET content = #{content}
+        WHERE reply_id = #{rid}
+    </update>
+
+    <!-- 상품에서 답변 - 답변 삭제 (어드민) -->
+    <delete id ="deleteInquiryReply">
+        DELETE FROM inquiry_replies
+        WHERE reply_id = #{rid}
+    </delete>
+
+    <!-- 상품에서 답변 - 상태 변경할 iid 가져오기 -->
+    <select id="getIidByRid">
+        SELECT iid FROM inquiry_replies
+        WHERE reply_id = #{rid}
+    </select>
+
+    <!-- 고객 마이페이지 문의사항 가져오기 -->
+    <select id="getInquiryById" resultMap="inquiryWithImagesMap">
+        SELECT i.iid, i.pid, i.id, i.title, p.title as productName,
+            i.category, i.content, i.is_private as isPrivate,
+            i.status, i.created_at as createdAt,
+            r.reply_id as rid, r.content AS answer, r.created_at AS rcreatedAt,
+            ii.image_url as image_url
+        FROM inquiries i
+        LEFT JOIN inquiry_replies r ON i.iid = r.iid
+        LEFT JOIN product p ON i.pid = p.pid
+        LEFT JOIN inquiry_images ii ON i.iid = ii.iid
+        WHERE i.id = #{id}
+        ORDER BY i.created_at DESC
+    </select>
+
+    <resultMap id="inquiryWithImagesMap" type="com.diasec.diasec_backend.vo.InquiryVo">
+        <id property="iid" column="iid" />
+        <result property="pid" column="pid"/>
+        <result property="id" column="id"/>
+        <result property="title" column="title"/>
+        <result property="productName" column="productName"/>
+        <result property="category" column="category"/>
+        <result property="content" column="content"/>
+        <result property="isPrivate" column="isPrivate"/>
+        <result property="status" column="status"/>
+        <result property="createdAt" column="createdAt"/>
+        <result property="rid" column="rid"/>
+        <result property="answer" column="answer"/>
+        <result property="rcreatedAt" column="rcreatedAt"/>
+        <result property="productImg" column="productImg"/>
+
+        <!-- ✅ 확실한 타입 명시 -->
+        <collection property="imageUrls" javaType="java.util.ArrayList" ofType="java.lang.String">
+            <result column="image_url"/>
+        </collection>
+    </resultMap>
+
+    <!-- 관리자 전용 전체 문의 목록 가져오기 -->
+    <select id="getAllInquiries" resultMap="inquiryWithImagesMap">
+        SELECT i.iid, i.pid, i.id, i.title, p.title as productName,
+           i.category, i.content, i.is_private as isPrivate,
+           i.status, i.created_at as createdAt,
+           r.reply_id as rid, r.content AS answer,
+           ii.image_url as image_url,
+           pi.image_url as productImg
+        FROM inquiries i
+        LEFT JOIN inquiry_replies r ON i.iid = r.iid
+        LEFT JOIN product p ON i.pid = p.pid
+        LEFT JOIN product_images pi ON p.pid = pi.pid 
+        LEFT JOIN inquiry_images ii ON i.iid = ii.iid
+        ORDER BY i.created_at DESC;
+    </select>
+
+    <!-- 관리자 페이지 문의 삭제 -->
+    <delete id="deleteInquiry">
+        DELETE FROM inquiries WHERE iid = #{iid}
+    </delete>
+
+    <!-- 이미지 URL들 먼저 조회 -->
+    <select id="selectInquiryImageUrls" resultType="string">
+        SELECT image_url as imageUrl FROM inquiry_images WHERE iid = #{iid}
+    </select>
+
+    <!-- DB에서 이미지 레코드 삭제 -->
+    <delete id="deleteInquiryImages">
+        DELETE FROM inquiry_images WHERE iid = #{iid}
+    </delete>
+
+    <!-- 답변 먼저 삭제 (FK 제약 방지용) -->
+    <delete id="deleteReplyByIid">
+        DELETE FROM inquiry_replies WHERE iid = #{iid}
+    </delete>
+
+    <!-- 미답변 개수 가져오기 -->
+    <select id ="selectUnanswered">
+        select count(*) as unanswered from inquiries where status='답변대기'
+    </select>
+
+    <select id="selectInquiryOwnerAndStatus" resultType="com.diasec.diasec_backend.vo.InquiryVo">
+        SELECT iid, id, status
+        FROM inquiries
+        WHERE iid = #{iid}
+    </select>
+
+    <delete id="deleteInquiryImageByUrl">
+        DELETE FROM inquiry_images
+        WHERE iid = #{iid} AND image_url = #{url}
+    </delete>
+
+    <insert id="insertInquiryImageByParams">
+        INSERT INTO inquiry_images (iid, image_url)
+        VALUES (#{iid}, #{url})
+    </insert>
+
+    <update id="updateInquiryByCustomer">
+        UPDATE inquiries
+        SET title = #{title},
+            content = #{content},
+            category = #{category},
+            is_private = #{isPrivate}
+        WHERE iid = #{iid}
+    </update>
+</mapper>

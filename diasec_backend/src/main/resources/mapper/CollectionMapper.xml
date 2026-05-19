@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.diasec.diasec_backend.dao.CollectionMapper">
+
+    <!-- 전체 컬렉션 조회 -->
+    <select id="getAllCollections" resultType="com.diasec.diasec_backend.vo.CollectionVo">
+        SELECT id, name, display_name as displayName FROM collections ORDER BY id ASC;
+    </select>
+
+    <!-- 전체 아이템 목록 조회 -->
+    <select id="getAllItems" resultType="com.diasec.diasec_backend.vo.CollectionItemVo">
+        select c.name, ci.id, ci.collection_id as collectionId, ci.label, ci.image_url as imageUrl, ci.sort_order as sortOrder
+        from collections c join collection_items ci
+        on c.id = ci.collection_id
+        ORDER BY 
+        c.name,
+        (ci.sort_order IS NULL),
+        ci.sort_order ASC,
+        ci.label COLLATE utf8mb4_unicode_ci ASC
+    </select>
+
+    <!-- 헤더 드롭다운 무한스크롤 -->
+    <select id="getAllItemsPaged" resultType="com.diasec.diasec_backend.vo.CollectionItemVo">
+        select c.name, ci.id, ci.collection_id as collectionId, ci.label, ci.image_url as imageUrl, ci.sort_order as sortOrder
+        from collections c join collection_items ci
+        on c.id = ci.collection_id
+        <where>
+            <if test="type != null and type != ''">
+                c.name = #{type}
+            </if>
+        </where>
+        ORDER BY 
+            c.name,
+            (ci.sort_order IS NULL),
+            ci.sort_order ASC,
+            ci.label COLLATE utf8mb4_unicode_ci ASC
+        LIMIT #{size}
+        OFFSET #{offset}
+    </select>
+
+    <!-- 컬렉션 추가  -->
+    <insert id="insertCollection" parameterType="com.diasec.diasec_backend.vo.CollectionVo">
+        INSERT INTO collections (name, display_name)
+        VALUES (#{name}, #{displayName})
+    </insert>
+
+    <!-- 컬렉션 수정 -->
+    <update id="updateCollection" parameterType="com.diasec.diasec_backend.vo.CollectionVo">
+        UPDATE collections
+        <set> 
+            name = #{name}, 
+            display_name = #{displayName}
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <!-- 컬렉션 아이템 수정 (어드민) -->
+    <update id="updateCollectionItems" parameterType="com.diasec.diasec_backend.vo.CollectionItemVo">
+        UPDATE collection_items
+        <set> 
+            <if test="collectionId != null">
+                collection_id = #{collectionId},
+            </if>
+            <if test="label != null and label != ''">
+                label = #{label}, 
+            </if>
+            <if test="imageUrl != null and imageUrl != ''">
+                image_url = #{imageUrl}, 
+            </if>
+            <if test="times != null and times != ''">
+                times = #{times},
+            </if>
+            <if test="sortOrder != null">
+                sort_order = #{sortOrder},
+            </if>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <!-- 작가 프로필 변경시 사진 변경 (어드민) -->
+    <update id="updateCollectionItemsByProfile" parameterType="com.diasec.diasec_backend.vo.CollectionItemVo">
+        UPDATE collection_items
+        <set> 
+            <if test="imageUrl != null and imageUrl != ''">
+                image_url = #{imageUrl}, 
+            </if>
+        </set>
+        WHERE member_id = #{member_id}
+    </update>
+
+    <!-- 작가 프로필 변경시 컬렉션명 수정 -->
+    <update id="updateCollectionItemsEditLabel" parameterType="com.diasec.diasec_backend.vo.CollectionItemVo">
+        UPDATE collection_items
+        <set>
+            label = #{nickname}
+        </set>
+        WHERE label = #{author_name} and member_id = #{member_id}
+    </update>
+
+    <!-- 컬렉션 삭제 -->
+    <delete id ="deleteCollection" parameterType="int">
+        DELETE FROM collections WHERE id = #{id}
+    </delete>
+
+    <delete id="deleteItemsByCollectionId">
+        DELETE FROM collection_items WHERE collection_id = #{collectionId}
+    </delete>
+
+    <!-- 특정 컬렉션의 아이템 목록 조회 -->
+    <select id="getItemsByCollectionId" parameterType="int" resultType="com.diasec.diasec_backend.vo.CollectionItemVo">
+        SELECT id, collection_id as collectionId, label, times, image_url as imageUrl, sort_order AS sortOrder FROM collection_items
+        WHERE collection_id = #{collectionId}
+        ORDER BY label COLLATE utf8mb4_unicode_ci ASC
+    </select>
+
+    <!-- 아이템 추가 -->
+    <insert id="insertItem" parameterType="com.diasec.diasec_backend.vo.CollectionItemVo">
+        INSERT INTO collection_items (collection_id, label, image_url, member_id, times)
+        VALUES (#{collectionId}, #{label}, #{imageUrl}, #{member_id}, #{times})
+    </insert>
+
+    <!-- 아이템 삭제 -->
+    <delete id="deleteItem">
+        DELETE FROM collection_items WHERE id = #{id}
+    </delete>
+
+    <select id="selectItemById" parameterType="int" resultType="com.diasec.diasec_backend.vo.CollectionItemVo">
+        SELECT id, collection_id as collectionId, label, image_url as imageUrl, times FROM collection_items WHERE id = #{id}
+    </select>
+
+    <!-- 메인 상단 미니 컬렉션 -->
+    <select id="selectLabelWithCount" resultType="com.diasec.diasec_backend.vo.CollectionItemVo">
+        SELECT ci.label, ci.times, ci.sort_order AS sortOrder, ci.image_url AS imageUrl,
+        COALESCE(pcnt.cnt, 0) AS count
+        FROM collection_items ci
+        JOIN collections c
+        ON c.id = ci.collection_id
+        LEFT JOIN (
+            SELECT author, COUNT(*) AS cnt
+            FROM product
+            WHERE category = #{type}
+            GROUP BY author
+        ) pcnt
+        ON pcnt.author = ci.label COLLATE utf8mb4_general_ci
+        WHERE c.name = #{type}
+        ORDER BY
+            CASE WHEN ci.sort_order IS NULL OR ci.sort_order = 0 THEN 1 ELSE 0 END,
+            ci.sort_order ASC,
+            ci.label ASC
+        LIMIT #{size}
+        OFFSET #{offset}
+    </select>
+
+    <select id="selectCollectionById" resultType="com.diasec.diasec_backend.vo.CollectionVo">
+        SELECT id, name, display_name AS displayName
+        FROM collections
+        WHERE id = #{id}
+    </select>
+</mapper>

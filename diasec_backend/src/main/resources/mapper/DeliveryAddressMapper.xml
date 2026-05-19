@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.diasec.diasec_backend.dao.DeliveryAddressMapper">
+    
+    <select id="selectAddressList" parameterType="string" resultType="com.diasec.diasec_backend.vo.DeliveryAddressVo">
+        SELECT d.cno, d.id, d.label, d.recipient, d.phone, d.postcode, d.address, d.detail_address AS detailAddress,
+        d.is_default AS isDefault, d.created_at AS createdAt, d.updated_at AS updatedAt, m.credit AS credit
+        FROM delivery_address d LEFT JOIN member m
+        ON d.id = m.id
+        WHERE d.id = #{id}
+        ORDER BY d.is_default DESC, d.label ASC
+    </select>
+
+    <select id="selectDefaultAddressList" parameterType="string" resultType="com.diasec.diasec_backend.vo.DeliveryAddressVo">
+        SELECT cno, id, label, recipient, phone, postcode, address, detail_address AS detailAddress,
+        is_default AS isDefault, created_at AS createdAt, updated_at AS updatedAt
+        FROM delivery_address WHERE id = #{id} AND is_default = TRUE
+    </select>
+
+    <select id="selectOneAddress" parameterType="long" resultType="com.diasec.diasec_backend.vo.DeliveryAddressVo">
+        SELECT cno, id, label, recipient, phone, postcode, address, detail_address AS detailAddress,
+        is_default AS isDefault, created_at AS createdAt, updated_at AS updatedAt
+        FROM delivery_address WHERE cno = #{cno}
+    </select>
+
+    <insert id="insertAddress" parameterType="com.diasec.diasec_backend.vo.DeliveryAddressVo">
+        INSERT INTO delivery_address (id, label, recipient, phone, postcode, address, detail_address, is_default)
+        VALUES (#{id} ,#{label}, #{recipient}, #{phone}, #{postcode}, #{address}, #{detailAddress}, #{isDefault})
+    </insert>
+
+    <update id="updateAddress" parameterType="com.diasec.diasec_backend.vo.DeliveryAddressVo">
+        UPDATE delivery_address
+        SET label = #{label},
+            recipient = #{recipient},
+            phone = #{phone},
+            postcode = #{postcode},
+            address = #{address},
+            detail_address = #{detailAddress},
+            is_default = #{isDefault},
+            updated_at = CURRENT_TIMESTAMP
+        WHERE cno = #{cno}
+    </update>
+
+    <delete id="deleteAddress" parameterType="long">
+        DELETE FROM delivery_address WHERE cno = #{cno}
+    </delete>
+
+    <delete id="deleteAddressByMemberId" parameterType="string">
+        DELETE FROM delivery_address WHERE id = #{id}
+    </delete>
+
+    <update id="resetDefaultAddress" parameterType="string">
+        UPDATE delivery_address SET is_default = FALSE WHERE id = #{id}
+    </update>
+
+    <update id="setDefaultAddresss" parameterType="long">
+        UPDATE delivery_address SET is_default = TRUE WHERE cno = #{cno}
+    </update>
+
+</mapper>

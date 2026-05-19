@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+  <mapper namespace="com.diasec.diasec_backend.dao.VisitMapper">
+    <!-- 리뷰 작성 부분 목록 가져오기 -->
+    <insert id="insertTodayVisit">
+        INSERT IGNORE INTO visit_log (visit_date, visitor_key, ip, user_agent)
+        VALUES (#{visitDate}, #{visitorKey}, #{ip}, #{userAgent})
+    </insert>
+
+    <select id="countToday" resultType="int">
+        SELECT COUNT(*) FROM visit_log WHERE visit_date = #{visitDate}
+    </select>
+
+    <select id="countTotal" resultType="int">
+        SELECT COUNT(*) FROM visit_log
+    </select>
+  </mapper>
