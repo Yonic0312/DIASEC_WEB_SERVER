@@ -242,7 +242,7 @@ function SeoMetaManager() {
 
         const promoTitle = SEO_PROMO_TITLE;
         const seoDefaults = {
-            title: `디아섹 액자·맞춤액자 전문 디아섹코리아 | 20% 오픈할인`,
+            title: `디아섹액자 전문 맞춤액자 디아섹코리아 | 20% 오픈할인`,
             description:
                 '디아섹코리아에서 디아섹 액자와 맞춤 액자를 만나보세요. 작품과 사진에 맞춘 고급 액자 제작 서비스를 제공합니다.',
             canonical: currentUrl,

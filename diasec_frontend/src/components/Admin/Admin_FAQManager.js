@@ -110,6 +110,37 @@ const Admin_FAQManager = () => {
     const [newAnswer, setNewAnswer] = useState('');
     const [newCategory, setNewCategory] = useState('');
 
+    // 등록 모달 열림 시 배경 스크롤 잠금
+    useEffect(() => {
+        if (!showModal) return;
+
+        const scrollY = window.scrollY;
+        const prevOverflow = document.body.style.overflow;
+
+        document.body.style.position = 'fixed';
+        document.body.style.top = `-${scrollY}px`;
+        document.body.style.left = '0';
+        document.body.style.right = '0';
+        document.body.style.width = '100%';
+        document.body.style.overflow = 'hidden';
+
+        const onKey = (e) => {
+            if (e.key === 'Escape') setShowModal(false);
+        };
+        window.addEventListener('keydown', onKey);
+
+        return () => {
+            window.removeEventListener('keydown', onKey);
+            document.body.style.position = '';
+            document.body.style.top = '';
+            document.body.style.left = '';
+            document.body.style.right = '';
+            document.body.style.width = '';
+            document.body.style.overflow = prevOverflow;
+            window.scrollTo(0, scrollY);
+        };
+    }, [showModal]);
+
     const handleAddFaq = async () => {
         try {
             await axios.post(`${API}/faq/add`, {
@@ -301,9 +332,16 @@ const Admin_FAQManager = () => {
             
             {/* 글 등록창 모달 */}
             {showModal && (
-                <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex justify-center items-center"
-                    onClick={() => setShowModal(false)}>
-                    <div className="bg-white p-6 rounded w-full max-w-lg" onClick={e => e.stopPropagation()}>
+                <div
+                    className="fixed inset-0 z-[10000] bg-black bg-opacity-50 flex justify-center items-center overscroll-none"
+                    onTouchMove={(e) => {
+                        if (e.target === e.currentTarget) e.preventDefault();
+                    }}
+                >
+                    <div
+                        className="bg-white p-6 rounded w-full max-w-lg max-h-[90vh] overflow-y-auto"
+                        onClick={e => e.stopPropagation()}
+                    >
                         <h3 className='text-xl font-bold mb-4'>FAQ 등록</h3>
 
                         <select value={newCategory} onChange={e => setNewCategory(e.target.value)} className='border w-full p-2 mb-2' >

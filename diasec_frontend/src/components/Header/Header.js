@@ -18,15 +18,6 @@ const Header = () => {
     const [supportOpen, setSupportOpen] = useState(false);
     const supportRef = useRef(null);
 
-    // const supportMenus = useMemo(() => ([
-    //     { label: "자주 묻는 질문", link: "/supportMain?tab=faq" },
-    //     { label: "공지사항", link: "/supportMain?tab=notice" },
-    //     { label: "후기게시판", link: "/supportMain?tab=" },
-    //     { label: "1:1문의", link: "/supportMain?tab=faq" },
-    //     { label: "기업컨설팅", link: "/" },
-    //     { label: "업무제휴", link: "/" },
-    // ]), []);
-
     const toggleSection = (key) => {
         setOpenSections(prev => (prev === key ? null : key));
     };
@@ -117,7 +108,6 @@ const Header = () => {
                 }
             }));
         } catch (e) {
-            console.error('드롭다운 로드 실패', key, e);
             setPage(prev => ({
                 ...prev,
                 [key]: { ...prev[key], loading: false, hasMore: false}
@@ -148,7 +138,6 @@ const Header = () => {
                     navigate('/');
                 })
                 .catch((err) => {
-                    console.error("로그아웃 실패", err);
                     toast.error('로그아웃에 실패했습니다. 잠시 후 다시 시도해 주세요.');
             });
         }
@@ -207,10 +196,6 @@ const Header = () => {
                         className="h-full font-bold text-lg"
                     >
                         <img className="w-auto h-[75%] md:h-full" src={logo} />
-
-                        {/* <span className="font-bold lg:text-lg md:text-[clamp(14px,1.564vw,16px)] text-[14px]" translate="no">DIASEC</span>
-                        
-                        <span className="ml-[2px] lg:text-[13px] md:text-[clamp(10px,1.026vw,10.5px)] text-[clamp(9px,1.303vw,10px)] font-semibold" translate="no">KOREA</span> */}
                     </button>
 
                     <span className='ml-[1%] lg:text-[14.5px] md:text-[clamp(11px,1.4173vw,14.5px)] text-[11px]'>
@@ -358,7 +343,7 @@ const Header = () => {
             />
             <aside
                 className={`
-                    fixed inset-y-0 left-0 z-50 w-[70%] max-w-[360px] bg-white md:hidden
+                    flex flex-col justify-between fixed inset-y-0 left-0 z-50 w-[70%] max-w-[360px] bg-white md:hidden
                     shadow-2xl overflow-y-auto transform transition-transform duration-300 ease-in-out
                     ${drawerOpen ? 'translate-x-0' : '-translate-x-full'}`}
                 style={{ 
@@ -367,96 +352,87 @@ const Header = () => {
                 }}
                 role="dialog" aria-modal="true"
             >
-                <div className="flex items-center justify-between px-4 py-3 border-b">
-                    <span className="font-semibold">메뉴</span>
-                    <button onClick={() => setDrawerOpen(false)} aria-label="메뉴 닫기" >
-                        <X />
-                    </button>
-                </div>
+                <div>
+                    <div className="flex items-center justify-between px-4 py-3 border-b">
+                        <span className="font-semibold">메뉴</span>
+                        <button onClick={() => setDrawerOpen(false)} aria-label="메뉴 닫기" >
+                            <X />
+                        </button>
+                    </div>
 
-                <ul className="px-2 py-2">
-                    {mainMenus.map(m => {
-                        const hasChildren = categories.includes(m.key) || !! dropdown[m.key]?.length;
-                        const open = openSections === m.key;
-                        return (
-                            <li key={m.key} className="border-b last:border-none">
-                                <button
-                                    className="w-full flex items-center gap-3 px-2 py-4"
-                                    onClick={() => {
-                                        if (categories.includes(m.key)) {
-                                            // 처음 여는 순간 데이터 없으면 1페이지 로드
-                                            if ((dropdown[m.key] || []).length === 0) fetchMore(m.key);
-                                            toggleSection(m.key);
-                                        } else if (hasChildren) {
-                                            toggleSection(m.key);
-                                        } else if (m.link) {
-                                            navigate(m.link);
-                                            setDrawerOpen(false);
-                                        }
-                                    }}
-                                >
-                                    <span className="text-[15px]">{m.label.replace(' / ', ' ')}</span>
-                                    {hasChildren && (
-                                        <ChevronDown className={`ml-auto transition-transform ${open ? 'rotate-180' : ''}`} />
-                                    )}
-                                </button>
-
-                                {/* 서브 카테고리 */}
-                                {hasChildren && (
-                                    <div className={`overflow-y-auto transition-[max-height] duration-300
-                                        ${open ? 'max-h-[50vh]' : 'max-h-0 overflow-hidden'}`}
-                                        onScroll={(e) => {
-                                            if (!open) return; // 닫혀있으면 무시
-                                            if (!categories.includes(m.key)) return;
-
-                                            const el = e.currentTarget;
-
-                                            const nearBottom =
-                                                el.scrollTop + el.clientHeight >= el.scrollHeight - 60;
-
-                                            if (nearBottom) fetchMore(m.key);
+                    <ul className="px-2 py-2">
+                        {mainMenus.map(m => {
+                            const hasChildren = categories.includes(m.key) || !! dropdown[m.key]?.length;
+                            const open = openSections === m.key;
+                            return (
+                                <li key={m.key} className="border-b last:border-none">
+                                    <button
+                                        className="w-full flex items-center gap-3 px-2 py-4"
+                                        onClick={() => {
+                                            if (categories.includes(m.key)) {
+                                                // 처음 여는 순간 데이터 없으면 1페이지 로드
+                                                if ((dropdown[m.key] || []).length === 0) fetchMore(m.key);
+                                                toggleSection(m.key);
+                                            } else if (hasChildren) {
+                                                toggleSection(m.key);
+                                            } else if (m.link) {
+                                                navigate(m.link);
+                                                setDrawerOpen(false);
+                                            }
                                         }}
                                     >
-                                        <div className="grid grid-cols-1 gap-2 pb-3 pl-1 pr-2">
-                                            {dropdown[m.key].map(item => (
-                                                <button
-                                                    key={item.label}
-                                                    className="flex items-center gap-3 rounded-lg p-2 hover:bg-gray-50 text-left"
-                                                    onClick={() => {
-                                                        navigate(item.link);
-                                                        setDrawerOpen(false);
-                                                    }}
-                                                >
-                                                    <img src={item.img} alt="" className="w-9 h-9 rounded-full object-cover"/>
-                                                    <span className="text-[14px]">{item.label}</span>
-                                                </button>
-                                            ))}
-                                        </div>
-
-                                        {categories.includes(m.key) && page[m.key]?.loading && (
-                                            <div className="text-center py-3 text-[12px] text-gray-500">불러오는 중...</div>
+                                        <span className="text-[15px]">{m.label.replace(' / ', ' ')}</span>
+                                        {hasChildren && (
+                                            <ChevronDown className={`ml-auto transition-transform ${open ? 'rotate-180' : ''}`} />
                                         )}
-                                    </div>
-                                )}
-                            </li>
-                        )
-                    })}
-                </ul>
-                {/* ── [모바일] 회원 패널 (하단 고정 + 디자인 강화) ───────────────── */}
-                <div className="mt-6 px-3 pb-4">
-                    <div className="rounded-2xl bg-gray-50 border border-gray-200 shadow-sm">
-                        {/* 상단 회원 정보 */}
-                        <div className="flex items-center gap-3 px-4 py-3 border-b border-gray-200">
-                            <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center font-semibold text-gray-600">
-                                {(member?.name?.[0] ?? 'G').toUpperCase()}
-                            </div>
-                            <div className="min-w-0">
-                                <p className="text-[15px] font-medium text-gray-800 truncate">
-                                {member ? (member.name || member.email || member.id) : '게스트'}
-                                </p>
-                            </div>
-                        </div>
+                                    </button>
 
+                                    {/* 서브 카테고리 */}
+                                    {hasChildren && (
+                                        <div className={`overflow-y-auto transition-[max-height] duration-300
+                                            ${open ? 'max-h-[50vh]' : 'max-h-0 overflow-hidden'}`}
+                                            onScroll={(e) => {
+                                                if (!open) return; // 닫혀있으면 무시
+                                                if (!categories.includes(m.key)) return;
+
+                                                const el = e.currentTarget; 
+                                                
+                                                const nearBottom =
+                                                    el.scrollTop + el.clientHeight >= el.scrollHeight - 60;
+
+                                                if (nearBottom) fetchMore(m.key);
+                                            }}
+                                        >
+                                            <div className="grid grid-cols-1 gap-2 pb-3 pl-1 pr-2">
+                                                {dropdown[m.key].map(item => (
+                                                    <button
+                                                        key={item.label}
+                                                        className="flex items-center gap-3 rounded-lg p-2 hover:bg-gray-50 text-left"
+                                                        onClick={() => {
+                                                            navigate(item.link);
+                                                            setDrawerOpen(false);
+                                                        }}
+                                                    >
+                                                        <img src={item.img} alt="" className="w-9 h-9 rounded-full object-cover"/>
+                                                        <span className="text-[14px]">{item.label}</span>
+                                                    </button>
+                                                ))}
+                                            </div>
+
+                                            {categories.includes(m.key) && page[m.key]?.loading && (
+                                                <div className="text-center py-3 text-[12px] text-gray-500">불러오는 중...</div>
+                                            )}
+                                        </div>
+                                    )}
+                                </li>
+                            )
+                        })}
+                    </ul>
+                </div>
+                {/* ── [모바일] 회원 패널 (하단 고정 + 디자인 강화) ───────────────── */}
+                <div className="px-3 pb-4">
+                    <div className="rounded-2xl bg-gray-50 border border-gray-200 shadow-sm">
+            
                         {/* 메뉴 버튼들 */}
                         <ul className="divide-y divide-gray-200">
                         {member ? (

@@ -340,6 +340,39 @@ const Main = () => {
     // 리뷰 상세 페이지 이미지 슬라이드
     const [selectedImageIndex, setSelectedImageIndex] = useState(0);
 
+    useEffect(() => {
+        if (!selectedReview) return;
+
+        const scrollY = window.scrollY;
+        const prevOverflow = document.body.style.overflow;
+
+        document.body.style.position = 'fixed';
+        document.body.style.top = `-${scrollY}px`;
+        document.body.style.left = '0';
+        document.body.style.right = '0';
+        document.body.style.width = '100%';
+        document.body.style.overflow = 'hidden';
+
+        const onKey = (e) => {
+            if (e.key === 'Escape') {
+                setSelectedReview(null);
+                setSelectedImageIndex(0);
+            }
+        };
+        window.addEventListener('keydown', onKey);
+
+        return () => {
+            window.removeEventListener('keydown', onKey);
+            document.body.style.position = '';
+            document.body.style.top = '';
+            document.body.style.left = '';
+            document.body.style.right = '';
+            document.body.style.width = '';
+            document.body.style.overflow = prevOverflow;
+            window.scrollTo(0, scrollY);
+        };
+    }, [selectedReview]);
+
     // 최근 리뷰 가져오기
     useEffect(() => {
         const controller = new AbortController();
@@ -717,10 +750,6 @@ const Main = () => {
             {selectedReview && (
                 <div
                     className="fixed inset-0 bg-black/55 backdrop-blur-[2px] flex items-center justify-center px-4 py-6 z-[10000]"
-                    onClick={() => {
-                        setSelectedReview(null);
-                        setSelectedImageIndex(0);
-                    }}
                 >
                     <div
                         role="dialog"

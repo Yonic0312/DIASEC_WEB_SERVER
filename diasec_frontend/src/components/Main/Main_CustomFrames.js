@@ -243,7 +243,7 @@ const Main_CustomFrames = () => {
     const [maxHeight, setMaxHeight] = useState(101.6);
 
     const MAX_SIZE = 50 * 1024 * 1024; // 이미지 업로드 50MB
-    const MAX_CUSTOM_ORDER_ITEMS = 10;
+    const MAX_CUSTOM_ORDER_ITEMS = 30;
     const PREVIEW_MAX_SIDE_PX = 800;
     const ORDER_THUMB_MAX_SIDE_PX = 150;
 
@@ -375,6 +375,17 @@ const Main_CustomFrames = () => {
                     // 2) temp -> 완성 아이템 치환
                     setCustomItems(prev => prev.map(it => (it.id === tempId ? newItem : it)));
                     setSelectedItemId(tempId);
+                    activateSizeAdjustHint();
+                    toast.success(
+                        <>
+                            이미지가 등록되었습니다.
+                            <br />
+                            원하는 크기로 조정해 보세요.
+                            <br />
+                            사이즈에 따라 상품 가격이 자동으로 계산됩니다.
+                        </>,
+                        { autoClose: 9000 }
+                    );
                 } finally {
                     URL.revokeObjectURL(objectUrl);
                 }
@@ -390,7 +401,19 @@ const Main_CustomFrames = () => {
 
     // 입력 완료 후 반영(딜레이 입력)
     const [widthInput, setWidthInput] = useState(String(Math.floor(width)));
+    const sizeHintConsumedRef = useRef(false);
+    const [showSizeAdjustHint, setShowSizedAdjustHint] = useState(false);
     const [toastCooldown, setToastCooldown] = useState(false);
+
+    const activateSizeAdjustHint = () => {
+        if (sizeHintConsumedRef.current) return;
+        sizeHintConsumedRef.current = true;
+        setShowSizedAdjustHint(true);
+    };
+
+    const dismissSizeAdjustHint = () => {
+        setShowSizedAdjustHint(false);
+    }
 
     const showToastOnce = (message) => {
         if (!toastCooldown) {
@@ -556,30 +579,31 @@ const Main_CustomFrames = () => {
     // 최종 비용 계산(배송비)
     const SHIPPING_FEE = 3000; // 기본 배송비
     const FREE_SHIPPING_THRESHOLD = 50000; // - 이상 무료
-    
-    // 가격 계산 로직 추가
-    // const totalPriceWithoutShipping = customItems.reduce((acc, item) => {
-    //     const area = item.width * item.height;
-    //     return acc + calculateCumulativePrice(area);
-    // }, 0);
-    const totalPriceWithoutShipping = customItems.reduce((acc, item) => {
-        if (item.isUploading) return acc;
-        const area = item.width * item.height;
-        return acc + calculateCumulativePrice(area);
-    }, 0);
+
+    const examplePreviewPrice =
+        customItems.length === 0 && aspectRatio && width > 0 && height > 0
+            ? calculateCumulativePrice(width * height)
+            : 0;
+    const totalPriceWithoutShipping = 
+        customItems.length > 0
+            ? customItems.reduce((acc, item) => {
+                if (item.isUploading) return acc;
+                const area = item.width * item.height;
+                return acc + calculateCumulativePrice(area);
+            }, 0)
+            : examplePreviewPrice;
 
     const totalPrice = totalPriceWithoutShipping >= FREE_SHIPPING_THRESHOLD
         ? totalPriceWithoutShipping
         : totalPriceWithoutShipping + SHIPPING_FEE;
     
-    // const totalPriceWithoutShippingDiscounted = customItems.reduce(
-    //     (acc, item) => acc + getDiscountedUnitPrice(item.price),
-    //     0
-    // );
-    const totalPriceWithoutShippingDiscounted = customItems.reduce(
-        (acc, item) => (item.isUploading ? acc : acc + getDiscountedUnitPrice(item.price)),
-        0
-    );
+    const totalPriceWithoutShippingDiscounted = 
+        customItems.length > 0
+            ? customItems.reduce(
+                (acc, item) => (item.isUploading ? acc : acc + getDiscountedUnitPrice(item.price)),
+                0
+            )
+            : getDiscountedUnitPrice(examplePreviewPrice);
     
     // 바로구매 (결제)
     const handleBuyNow = () => {
@@ -669,6 +693,49 @@ const Main_CustomFrames = () => {
         setRetouchModalOpen(false);
         setRetouchTargetId(null);
     };
+
+    const isAnyModalOpen =
+        showGuestChoice || retouchModalOpen || (isAdmin && adminQuoteModalOpen);
+
+    // 모달 열림 시 배경 스크롤 잠금
+    useEffect(() => {
+        if (!isAnyModalOpen) return;
+
+        const scrollY = window.scrollY;
+        const prevOverflow = document.body.style.overflow;
+
+        document.body.style.position = 'fixed';
+        document.body.style.top = `-${scrollY}px`;
+        document.body.style.left = '0';
+        document.body.style.right = '0';
+        document.body.style.width = '100%';
+        document.body.style.overflow = 'hidden';
+
+        const onKey = (e) => {
+            if (e.key !== 'Escape') return;
+            if (isAdmin && adminQuoteModalOpen) setAdminQuoteModalOpen(false);
+            else if (retouchModalOpen) closeRetouchModal();
+            else if (showGuestChoice) setShowGuestChoice(false);
+        };
+        window.addEventListener('keydown', onKey);
+
+        return () => {
+            window.removeEventListener('keydown', onKey);
+            document.body.style.position = '';
+            document.body.style.top = '';
+            document.body.style.left = '';
+            document.body.style.right = '';
+            document.body.style.width = '';
+            document.body.style.overflow = prevOverflow;
+            window.scrollTo(0, scrollY);
+        };
+    }, [
+        isAnyModalOpen,
+        isAdmin,
+        adminQuoteModalOpen,
+        retouchModalOpen,
+        showGuestChoice,
+    ]);
 
     const clearRetouch = (itemId) => {
         setCustomItems(prev =>
@@ -878,7 +945,7 @@ const Main_CustomFrames = () => {
                             style={{ 
                                 width: `${paperWidthPct}%`,
                                 height: `${paperHeightPct}%`,
-                                top: '30%',
+                                top: '34%',
                                 left: '50%',
                                 transform: 'translate(-50%, -50%)',
                                 background: 'rgba(255,255,255)',
@@ -1049,6 +1116,7 @@ const Main_CustomFrames = () => {
                                     type="text"
                                     value={widthInput}
                                     onChange={(e) => {
+                                        dismissSizeAdjustHint();
                                         const onlyNumber = e.target.value.replace(/\D/g, '');
                                         setWidthInput(onlyNumber);
                                     }}
@@ -1081,7 +1149,11 @@ const Main_CustomFrames = () => {
                                     }}
                                     onWheel={(e) => e.preventDefault()}
                                     inputMode="numeric"
-                                    className="w-full border border-gray-500 rounded-md px-3 py-2 text-base focus:outline-none focus:ring-2 focus:ring-[#D0AC88]"
+                                    className={`w-full border rounded-md px-3 py-2 text-base focus:outline-none focus:ring-2 focus:ring-[#D0AC88] ${
+                                        showSizeAdjustHint
+                                            ? 'size-adjust-hint-input border-2'
+                                            : 'border border-gray-500'
+                                    }`}
                                 />
                             </div>
                             
@@ -1106,6 +1178,7 @@ const Main_CustomFrames = () => {
                                 step="0.1"
                                 value={width}
                                 onChange={(e) => {
+                                    dismissSizeAdjustHint();
                                     const value = parseFloat(e.target.value);
                                     if (!isNaN(value)) handleWidthChange(e);
                                 }}
@@ -1115,7 +1188,15 @@ const Main_CustomFrames = () => {
                                     (약 { Math.floor(width / 2.54) } x { Math.floor(height / 2.54) } inch)
                             </span>
                         </div>
-                        <span className="mt-1 text-[13.5px] text-gray-500">바를 움직이거나 직접 입력해 사이즈를 조정하세요</span>
+                        <span 
+                            className={`mt-1 text-[13.5px] ${
+                                showSizeAdjustHint
+                                    ? 'size-adjust-hint-text'
+                                    : 'text-black'
+                            }`}
+                        >
+                            바를 움직이거나 직접 입력해 사이즈를 조정하세요
+                        </span>
 
                         <div className="w-full flex justify-between mt-2 gap-2">
                             {['A4', 'A3', 'A2', 'A1'].map(k => (
@@ -1398,7 +1479,12 @@ const Main_CustomFrames = () => {
             
             {/* 여기부터 모달창 */}
             {showGuestChoice && (
-                <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+                <div 
+                    className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-[10000] overscroll-none"
+                    onTouchMove={(e) => {
+                        if (e.target === e.currentTarget) e.preventDefault();
+                    }}
+                >
                     <div className="
                         bg-white p-8 rounded-lg shadow-lg 
                         w-[90%] max-w-md sm:max-w-lg text-center
@@ -1498,8 +1584,10 @@ const Main_CustomFrames = () => {
             {/* 보정 요청 모달 */}
             {retouchModalOpen && (
                 <div
-                    className="fixed inset-0 bg-black/50 z-[10000] flex items-center justify-center md:mt-[74px]"
-                    onClick={closeRetouchModal}
+                    className="fixed inset-0 bg-black/50 z-[10000] flex items-center justify-center overscroll-none"
+                    onTouchMove={(e) => {
+                        if (e.target === e.currentTarget) e.preventDefault();
+                    }}
                 >
                     <div
                         className="w-full h-[90%] overflow-y-scroll max-w-lg bg-white shadow-xl py-3 px-4 md:px-4 mx-4"
@@ -1687,9 +1775,11 @@ const Main_CustomFrames = () => {
 
             {isAdmin && adminQuoteModalOpen && (
                 <div
-                    className="fixed inset-0 z-[200] flex items-center justify-center bg-black/45 p-4"
+                    className="fixed inset-0 z-[200] flex items-center justify-center bg-black/45 p-4 overscroll-none"
                     role="presentation"
-                    // onClick={() => setAdminQuoteModalOpen(false)}
+                    onTouchMove={(e) => {
+                        if (e.target === e.currentTarget) e.preventDefault();
+                    }}
                 >
                     <div
                         role="dialog"

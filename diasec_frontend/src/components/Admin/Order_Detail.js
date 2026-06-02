@@ -212,6 +212,41 @@ const Order_Detail = () => {
 
     const [showModal, setShowModal] = useState(false);
 
+    const isAnyModalOpen = showModal || showGuestPwModal;
+
+    // 모달 열림 시 배경 스크롤 잠금
+    useEffect(() => {
+        if (!isAnyModalOpen) return;
+
+        const scrollY = window.scrollY;
+        const prevOverflow = document.body.style.overflow;
+
+        document.body.style.position = 'fixed';
+        document.body.style.top = `-${scrollY}px`;
+        document.body.style.left = '0';
+        document.body.style.right = '0';
+        document.body.style.width = '100%';
+        document.body.style.overflow = 'hidden';
+
+        const onKey = (e) => {
+            if (e.key !== 'Escape') return;
+            if (showModal) setShowModal(false);
+            else if (showGuestPwModal) setShowGuestPwModal(false);
+        };
+        window.addEventListener('keydown', onKey);
+
+        return () => {
+            window.removeEventListener('keydown', onKey);
+            document.body.style.position = '';
+            document.body.style.top = '';
+            document.body.style.left = '';
+            document.body.style.right = '';
+            document.body.style.width = '';
+            document.body.style.overflow = prevOverflow;
+            window.scrollTo(0, scrollY);
+        };
+    }, [isAnyModalOpen, showModal, showGuestPwModal]);
+
     const reload = () => {
         axios.get(`${API}/order/detail/${itemId}`)
             .then(res => setOrder(res.data))
@@ -740,7 +775,7 @@ const Order_Detail = () => {
     }
 
     return (
-        <div className="print-wrap w-full bg-white px-8 py-6 border border-gray-200 space-y-4"
+        <div className="print-wrap w-full bg-white px-8 py-6 border border-gray-200"
             ref={printRef}
         >
             {/* Title */}
@@ -1386,9 +1421,14 @@ const Order_Detail = () => {
 
             {/* 배송 페이지 모달창 */}
             {showModal && (
-                <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+                <div
+                    className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-[10000] overscroll-none"
+                    onTouchMove={(e) => {
+                        if (e.target === e.currentTarget) e.preventDefault();
+                    }}
+                >
                     <div className='bg-white p-6 rounded-lg w-[420px] shadow-lg relative'>
-                        <h3 className='"text-lg font-bold mb-4'>운송장 정보</h3>
+                        <h3 className='text-lg font-bold mb-4'>운송장 정보</h3>
                        
                         {/* 송장 정보 */}
                         <div className="mb-6 border p-4 rounded bg-gray-50">
@@ -1451,7 +1491,12 @@ const Order_Detail = () => {
 
             {/* 비회원 비밀번호 수정 */}
             {showGuestPwModal && (
-                <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+                <div
+                    className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50 overscroll-none"
+                    onTouchMove={(e) => {
+                        if (e.target === e.currentTarget) e.preventDefault();
+                    }}
+                >
                     <div className="bg-white p-6 rounded-lg w-[420px] shadow-lg relative">
                         <h3 className="text-lg font-bold mb-4">비회원 비밀번호 수정</h3>
 

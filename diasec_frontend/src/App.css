@@ -78,6 +78,34 @@
 
 /* 회원가입 적립금 **/
 
+/* 맞춤 액자: 사이즈 조정 안내 (최초 1회) */
+@keyframes sizeAdjustHintBorderBlink {
+  0%, 100% {
+    border-color: #fff;
+  }
+  50% {
+    border-color: #000;
+  }
+}
+
+@keyframes sizeAdjustHintTextBlink {
+  0%, 100% {
+    color: #fff;
+  }
+  50% {
+    color: #000;
+  }
+}
+
+.size-adjust-hint-input {
+  color: #111827;
+  animation: sizeAdjustHintBorderBlink 0.8s ease-in-out infinite;
+}
+
+.size-adjust-hint-text {
+  animation: sizeAdjustHintTextBlink 0.8s ease-in-out infinite;
+}
+
 
 @font-face {
     font-family: 'Paperozi';

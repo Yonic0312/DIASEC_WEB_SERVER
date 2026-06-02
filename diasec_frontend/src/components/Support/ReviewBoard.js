@@ -43,6 +43,42 @@ const ReviewBoard = () => {
     // 리뷰상세 페이지 이미지 슬라이드
     const [selectedImageIndex, setSelectedImageIndex] = useState(0);
 
+    const closeReviewModal = () => {
+        setSelectedReview(null);
+        setSelectedImageIndex(0);
+    };
+
+    // 리뷰 모달 열림 시 배경 스크롤 잠금
+    useEffect(() => {
+        if (!selectedReview) return;
+
+        const scrollY = window.scrollY;
+        const prevOverflow = document.body.style.overflow;
+
+        document.body.style.position = 'fixed';
+        document.body.style.top = `-${scrollY}px`;
+        document.body.style.left = '0';
+        document.body.style.right = '0';
+        document.body.style.width = '100%';
+        document.body.style.overflow = 'hidden';
+
+        const onKey = (e) => {
+            if (e.key === 'Escape') closeReviewModal();
+        };
+        window.addEventListener('keydown', onKey);
+
+        return () => {
+            window.removeEventListener('keydown', onKey);
+            document.body.style.position = '';
+            document.body.style.top = '';
+            document.body.style.left = '';
+            document.body.style.right = '';
+            document.body.style.width = '';
+            document.body.style.overflow = prevOverflow;
+            window.scrollTo(0, scrollY);
+        };
+    }, [selectedReview]);
+
     // 페이징
     const totalPages = Math.max(1, Math.ceil(reviews.length / reviewsPerPage));
 
@@ -173,7 +209,7 @@ const ReviewBoard = () => {
             {/* 리뷰 선택 모달창 */}
             {selectedReview && (
                 <div
-                    className="fixed inset-0 bg-black/55 backdrop-blur-[2px] flex items-center justify-center px-4 py-6 z-[10000]"
+                    className="fixed inset-0 bg-black/55 backdrop-blur-[2px] flex items-center justify-center px-4 py-6 z-[10000] overscroll-none"
                     onClick={() => {
                         setSelectedReview(null);
                         setSelectedImageIndex(0);
@@ -198,10 +234,7 @@ const ReviewBoard = () => {
                             <button
                                 aria-label="모달 닫기"
                                 className="w-8 h-8 rounded-full text-gray-500 hover:text-gray-900 hover:bg-gray-100 transition"
-                                onClick={() => {
-                                    setSelectedReview(null);
-                                    setSelectedImageIndex(0);
-                                }}
+                                onClick={closeReviewModal}
                             >
                                 ✕
                             </button>

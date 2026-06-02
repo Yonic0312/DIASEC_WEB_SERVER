@@ -40,7 +40,7 @@ export default function MainEventPopup({ events = [] }) {
             5500
         );
         return () => clearInterval(t);
-    }, [open, events.length])
+    }, [open, events.length, idx]);
 
     const close = useCallback(() => setOpen(false), []);
 
@@ -80,8 +80,8 @@ export default function MainEventPopup({ events = [] }) {
         <div
             className="
                 fixed z-[60] pointer-events-none
-                left-3 sm:left-4 bottom-3 sm:bottom-4
-                w-[min(380px,calc(100vw_-_1.5rem))]
+                left-1 sm:left-4 bottom-1 sm:bottom-4
+                w-[min(380px,calc(100vw_-_5.5rem))]
                 [padding-bottom:env(safe-area-inset-bottom,0px)]
             "
             aria-live="polite"
@@ -99,16 +99,38 @@ export default function MainEventPopup({ events = [] }) {
                 "
                 onClick={(e) => e.stopPropagation()}
             >
-                <div className="px-3.5 md:px-4 pt-1.5 pb-1">
+                <div className="flex justify-between items-center px-3.5 md:px-4 pt-1 sm:pt-1.5 pb-0.5 sm:pb-1">
                     <p
                         id="main-event-popup-title"
                         className="text-[12px] md:text-[13px] font-bold tracking-wide text-gray-800"
                     >
                         진행 중 이벤트
                     </p>
+
+                    <div className="flex flex-col items-center px-0.5">
+                        {events.length > 1 && (
+                            <div className="flex justify-cetner gap-1.5">
+                                {events.map((_, i) => (
+                                    <button
+                                        key={i}
+                                        type="button"
+                                        aria-label={`이벤트 ${i + 1}번`}
+                                        className={`
+                                            h-1.5 rounded-full transition-all duration-300
+                                            ${i === idx
+                                                ? 'w-5 bg-[#1a1a1a]'
+                                                : 'w-1.5 bg-gray-300 hover:bg-gray-400'
+                                            }
+                                        `}
+                                        onClick={() => setIdx(i)}
+                                    />
+                                ))}
+                            </div>
+                        )}
+                    </div>
                 </div>
 
-                <div className="px-2.5 pb-2">
+                <div className="px-1 sm:px-2.5 sm:pb-2">
                     <div
                         className="
                             relative w-full aspect-[2/1] rounded-xl overflow-hidden
@@ -158,7 +180,7 @@ export default function MainEventPopup({ events = [] }) {
                                         hover:bg-black/50 backdrop-blur-[2px] transition"
                                     onClick={(e) => {
                                         e.stopPropagation();
-                                        prev();
+                                        next();
                                     }}
                                 >
                                     <ChevronRight className="w-4 h-4" />
@@ -166,35 +188,12 @@ export default function MainEventPopup({ events = [] }) {
                             </>
                         )}
                     </div>
-
-                    <div className="flex flex-col items-center mt-1 px-0.5">
-                        {events.length > 1 && (
-                            <div className="flex justify-cetner gap-1.5 mt-2">
-                                {events.map((_, i) => (
-                                    <button
-                                        key={i}
-                                        type="button"
-                                        aria-label={`이벤트 ${i + 1}번`}
-                                        className={`
-                                            h-1.5 rounded-full transition-all duration-300
-                                            ${i === idx
-                                                ? 'w-5 bg-[#1a1a1a]'
-                                                : 'w-1.5 bg-gray-300 hover:bg-gray-400'
-                                            }
-                                        `}
-                                        onClick={() => setIdx(i)}
-                                    />
-                                ))}
-                            </div>
-                        )}
-                        
-                    </div>
                 </div>
 
                 <div
                     className="
-                        flex flex-col-reverse sm:flex-row sm:items-center sm:justify-between gap-2
-                        px-3.5 py-1.5 md:px-4 border-t border-gray-200
+                        flex flex-row sm:items-center justify-between gap-2
+                        px-3.5 py-1 sm:py-1.5 md:px-4 sm:border-t border-gray-200
                         bg-[#fff]
                     "
                 >
@@ -212,7 +211,7 @@ export default function MainEventPopup({ events = [] }) {
                     <button
                         type="button"
                         className="
-                            w-full sm:w-auto shrink-0
+                            w-auto shrink-0
                             px-4 py-1 rounded-lg
                             text-[12px] font-semibold
                             bg-[#fff] border text-black

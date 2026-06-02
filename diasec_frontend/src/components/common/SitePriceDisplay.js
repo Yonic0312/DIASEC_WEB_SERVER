@@ -15,7 +15,7 @@ export function SitePriceRow({
     className = '',
     neutralClassName = `${SITE_PRICE_TEXT} font-semibold text-[#a67a3e]`,
     strikeClassName = `${SITE_PRICE_STRIKE_TEXT} text-gray-500 line-through`,
-    saleClassName = `${SITE_PRICE_TEXT} font-bold text-[#D0AC88]`,
+    saleClassName = `${SITE_PRICE_TEXT} font-bold text-[#45b035]`,
 }) {
     const originalU = Math.round(Number(unitPrice) || 0);
     const qty = Math.max(0, Number(quantity) || 0);
@@ -49,7 +49,7 @@ export function SitePriceTotal({
     discounted,
     className = '',
     strikeClassName = `${SITE_PRICE_STRIKE_TEXT} text-gray-500 line-through`,
-    saleClassName = `${SITE_PRICE_TEXT} font-bold text-[#D0AC88]`,
+    saleClassName = `${SITE_PRICE_TEXT} font-bold text-[#45b035]`,
 }) {
     const o = Math.round(Number(original) || 0);
     const pct = getSiteDiscountPercent();

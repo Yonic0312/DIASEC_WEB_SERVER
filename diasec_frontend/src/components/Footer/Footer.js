@@ -92,6 +92,15 @@ const Footer = () => {
                     >
                         제휴문의
                     </button> */}
+                     |
+                    <a
+                        href="https://blog.naver.com/diasec_korea"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="hover:underline"
+                    >
+                        블로그
+                    </a>
                 </div>
 
                 <div className="flex md:text-[15px] text-[12px]  mt-[6px]">

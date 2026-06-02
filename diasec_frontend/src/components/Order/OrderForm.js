@@ -1559,9 +1559,9 @@ const OrderForm = () => {
             <RetouchModal
                 open={retouchModalOpen}
                 onClose={closeRetouchModal}
-                onSave={saveRetouch}
                 draft={retouchDraft}
                 setDraft={setRetouchDraft}
+                onSave={saveRetouch}
                 secondaryFooter={{
                     label: '보정 취소',
                     onClick: cancelRetouchFromModal,

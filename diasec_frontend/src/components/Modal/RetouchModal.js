@@ -51,14 +51,51 @@ const RetouchModal = ({
         setShowAfter(false);
     }, [open]);
 
+    // 모달 열림 시 배경 스크롤 잠금 (iOS 포함)
+    useEffect(() => {
+        if (!open) return;
+
+        const scrollY = window.scrollY;
+        const prevOverflow = document.body.style.overflow;
+
+        document.body.style.position = 'fixed';
+        document.body.style.top = `-${scrollY}px`;
+        document.body.style.left = '0';
+        document.body.style.right = '0';
+        document.body.style.width = '100%';
+        document.body.style.overflow = 'hidden';
+
+        const onKey = (e) => {
+            if (e.key === 'Escape' && onClose) onClose();
+        };
+        window.addEventListener('keydown', onKey);
+
+        return () => {
+            window.removeEventListener('keydown', onKey);
+            document.body.style.position = '';
+            document.body.style.top = '';
+            document.body.style.left = '';
+            document.body.style.right = '';
+            document.body.style.width = '';
+            document.body.style.overflow = prevOverflow;
+            window.scrollTo(0, scrollY);
+        };
+    }, [open, onClose]);
+
     if (!open) return null;
-    const overlayClass = 'fixed inset-0 bg-black/50 z-[60] flex items-center justify-center md:mt-[74px]'
+    const overlayClass = 
+        'fixed inset-0 bg-black/50 z-[10000] flex items-center justify-center overscroll-none'
     const panelClass = 
         'w-full h-[81%] overflow-y-scroll max-w-lg bg-white shadow-xl py-3 px-4 md:px-4 mx-4'
     const selectionBlocked = showEnabledCheckbox && !draft.enabled;
     return (
-        <div className={overlayClass} onClick={onClose}>
-            <div className={panelClass} onClick={(e) => e.stopPropagation()}>
+        <div 
+            className={overlayClass} 
+            onTouchMove={(e) => {
+                if (e.target === e.currentTarget) e.preventDefault();
+            }}
+        >
+            <div className={panelClass}>
                 <div className="relative flex items-start justify-between border-b-[1px]">
                     <div className="absolute left-1/2 -translate-x-1/2">
                         <h3 className="text-lg font-bold text-gray-800">보정 요청</h3>

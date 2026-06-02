@@ -124,7 +124,12 @@ const SupportMain = () => {
                         text-[15px]">
                     {[
                         { icon: <BsTelephone className="text-[24px] text-gray-600" />, title: '전화 상담', desc: '02-389-5879' },
-                        { icon: <BsChatDots className="text-[24px] text-gray-600" />, title: '채팅 상담', desc: '(구현 예정)' },
+                        { 
+                            icon: <BsChatDots className="text-[24px] text-gray-600" />, 
+                            title: '카카오 채팅 상담', 
+                            desc: '디아섹코리아',
+                            linkUrl: 'http://pf.kakao.com/_RWqbX',
+                        },
                         { 
                             icon: <BsEnvelope className="text-[24px] text-gray-600" />, 
                             title: '1:1 문의', 
@@ -141,7 +146,23 @@ const SupportMain = () => {
                             {item.icon}
                             <div className="text-left md:text-center">
                                 <div className="font-semibold">{item.title}</div>
-                                <div className="text-gray-600">{item.desc}</div>
+                                <div className="text-gray-600">
+                                    {item.linkUrl ? (
+                                        <>
+                                            <span className="text-gray-500">검색 : </span>
+                                            <a
+                                                href={item.linkUrl}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="text-blue-500 hover:underline"
+                                            >
+                                                {item.desc}
+                                            </a>
+                                        </>
+                                    ) : (
+                                        item.desc
+                                    )}
+                                </div>
                                 {item.action && (
                                     <button onClick={item.action} className="text-blue-500 text-[13px] mt-1 hover:underline">바로가기 →</button>
                                 )}

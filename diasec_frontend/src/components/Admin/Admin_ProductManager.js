@@ -97,6 +97,37 @@ const Admin_ProductManager = () => {
         }
     }, [selectedCollection]);
 
+    // 상품 수정 모달 열림 시 배경 스크롤 잠금
+    useEffect(() => {
+        if (!selectedProduct) return;
+
+        const scrollY = window.scrollY;
+        const prevOverflow = document.body.style.overflow;
+
+        document.body.style.position = 'fixed';
+        document.body.style.top = `-${scrollY}px`;
+        document.body.style.left = '0';
+        document.body.style.right = '0';
+        document.body.style.width = '100%';
+        document.body.style.overflow = 'hidden';
+
+        const onKey = (e) => {
+            if (e.key === 'Escape') setSelectedProduct(null);
+        };
+        window.addEventListener('keydown', onKey);
+
+        return () => {
+            window.removeEventListener('keydown', onKey);
+            document.body.style.position = '';
+            document.body.style.top = '';
+            document.body.style.left = '';
+            document.body.style.right = '';
+            document.body.style.width = '';
+            document.body.style.overflow = prevOverflow;
+            window.scrollTo(0, scrollY);
+        };
+    }, [selectedProduct]);
+
     // 페이징
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 10;
@@ -576,7 +607,12 @@ const Admin_ProductManager = () => {
             </div>
 
             {selectedProduct && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-[10000]" onClick={() => setSelectedProduct(null)}>
+                <div
+                    className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-[10000] overscroll-none"
+                    onTouchMove={(e) => {
+                        if (e.target === e.currentTarget) e.preventDefault();
+                    }}
+                >
                     <div className="bg-white p-6 rounded w-full max-w-2xl max-h-[95vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
                         <h3 className="text-xl font-bold mb-4">상품 정보 수정</h3>
                         <div className="flex flex-col gap-2 text-sm">

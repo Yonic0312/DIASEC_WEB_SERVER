@@ -434,7 +434,7 @@ const Join = () => {
                     <hr/>
 
                     <div className="w-full flex flex-row items-center mt-3 px-3 mb-3">
-                        <div className="shrink-0 flex sm:w-[150px] w-[90px] sm:text-sm text-[12px">
+                        <div className="shrink-0 flex sm:w-[150px] w-[90px] text-base">
                             아이디 <span className="font-bold text-red-500">*</span>
                         </div>
                         <div className="flex flex-col w-full">
@@ -474,7 +474,7 @@ const Join = () => {
                     <hr/>
 
                     <div className="w-full flex flex-row items-center mt-3 px-3 mb-3">
-                        <div className="shrink-0 flex sm:w-[150px] w-[90px] sm:text-sm text-[12px">
+                        <div className="shrink-0 flex sm:w-[150px] w-[90px] text-base">
                             비밀번호 <span className="font-bold text-red-500">*</span>
                         </div>
                        <div className="flex flex-col w-full">
@@ -493,7 +493,7 @@ const Join = () => {
                     <hr/>
 
                     <div className="w-full flex flex-row items-center mt-3 px-3 mb-3">
-                        <div className="shrink-0 flex sm:w-[150px] w-[90px] sm:text-sm text-[12px">
+                        <div className="shrink-0 flex sm:w-[150px] w-[90px] text-base">
                             비밀번호 확인 <span className="font-bold text-red-500">*</span>
                         </div>
                         <div className="flex flex-col w-full">
@@ -516,7 +516,7 @@ const Join = () => {
                     <hr/>
 
                     <div className="w-full flex flex-row items-center mt-3 px-3 mb-3">
-                        <div className="shrink-0 flex sm:w-[150px] w-[90px] sm:text-sm text-[12px">
+                        <div className="shrink-0 flex sm:w-[150px] w-[90px] text-base">
                             이름 <span className="font-bold text-red-500">*</span>
                                                     </div>
                         <input type="text" id="name" ref={nameRef} className="px-2 border-[1px] h-7 sm:text-base text-[14px]" 
@@ -528,7 +528,7 @@ const Join = () => {
                     <hr/>
 
                     <div className="w-full flex flex-row items-center mt-3 px-3 mb-3">
-                        <div className="shrink-0 flex sm:w-[150px] w-[90px] sm:text-sm text-[12px">
+                        <div className="shrink-0 flex sm:w-[150px] w-[90px] text-base">
                             휴대전화 <span className="font-bold text-red-500">*</span>
                         </div>
                         <div>
@@ -564,13 +564,13 @@ const Join = () => {
                                     value={phone3} 
                                     onChange={(e) => setPhone3(e.target.value.replace(/[^0-9]/g, ''))} 
                                     inputMode="numeric" 
-                                    className="w-[58px] border border-gray-300 pl-1 sm:text-base text-[14px]"
+                                    className="w-[58px] border border-gray-300 pl-1 sm:text-base text-[14px] mr-1"
                                 />
                                 <button
                                     type="button"
                                     onClick={handleSendSms}
                                     disabled={smsVerified}
-                                    className="ml-1 px-2 py-1 border bg-black text-white text-[12px]"
+                                    className="px-2 py-1 border bg-black text-white text-[12px]"
                                 >
                                     {smsSent ? "재전송" : "인증번호 받기"}
                                 </button>
@@ -629,7 +629,7 @@ const Join = () => {
                     <hr/>
 
                     <div className="w-full flex flex-row items-center mt-3 px-3 mb-3">
-                        <div className="shrink-0 flex sm:w-[150px] w-[90px] sm:text-sm text-[12px]">
+                        <div className="shrink-0 flex sm:w-[150px] w-[90px] text-base">
                             이메일 <span className="font-bold text-red-500">*</span>
                         </div>
 

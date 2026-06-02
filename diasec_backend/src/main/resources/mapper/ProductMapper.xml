@@ -4,9 +4,16 @@
 
   <mapper namespace="com.diasec.diasec_backend.dao.ProductMapper">
 
-    <!-- MySQL 5.7: REGEXP_REPLACE/SUBSTR 없음. 8.0+ 또는 MariaDB 쓰면 끝자리 숫자 자연정렬 쿼리 복구 가능. -->
+    <!-- MySQL 5.7: ROW_NUMBER/REGEXP_* 미지원 → 서브쿼리·단순 정렬 -->
+    <sql id="productListSelectColumns">
+        p.pid, p.title, p.price, p.category, p.author,
+        p.created_at AS createdAt, p.sort_order AS sortOrder, p.sales,
+        (SELECT image_url FROM product_images WHERE pid = p.pid ORDER BY img_order ASC, created_at ASC LIMIT 1) AS imageUrl,
+        (SELECT image_url FROM product_images WHERE pid = p.pid ORDER BY img_order ASC, created_at ASC LIMIT 1 OFFSET 1) AS hoverImageUrl
+    </sql>
+
     <sql id="productListOrderBy">
-        ORDER BY (p.sort_order = 0) ASC, p.sort_order ASC, p.sales DESC, p.title ASC
+      ORDER BY (p.sort_order = 0) ASC, p.sort_order ASC, p.sales DESC, p.title ASC
     </sql>
 
     <insert id="insertProduct" parameterType="com.diasec.diasec_backend.vo.ProductVo" useGeneratedKeys="true" keyProperty="pid">
@@ -20,9 +27,8 @@
 
     <!-- 메인 상품 리스트에 이미지 가져오기 -->
     <select id="selectProductsWithThumbnailByCategory" resultType="com.diasec.diasec_backend.vo.ProductVo">
-      SELECT p.pid, p.title, p.price, p.category, p.author, p.created_at as createdAt, p.sort_order as sortOrder, p.sales,
-        (SELECT image_url FROM product_images WHERE pid = p.pid ORDER BY img_order ASC, created_at ASC LIMIT 1) AS imageUrl,
-        (SELECT image_url FROM product_images WHERE pid = p.pid ORDER BY img_order ASC, created_at ASC LIMIT 1 OFFSET 1) AS hoverImageUrl
+      SELECT 
+        <include refid="productListSelectColumns"/>
       FROM product p
       <where>
         <if test="category != null and category != '' and category != 'null'">
@@ -34,25 +40,22 @@
 
     <!-- 메인 상품 리스트에 이미지 가져오기 -->
     <select id="selectProductsWithThumbnailByCategoryPaged" resultType="com.diasec.diasec_backend.vo.ProductVo">
-      SELECT p.pid, p.title, p.price, p.category, p.author, p.created_at as createdAt, p.sort_order as sortOrder, p.sales,
-        (SELECT image_url FROM product_images WHERE pid = p.pid ORDER BY img_order ASC, created_at ASC LIMIT 1) AS imageUrl,
-        (SELECT image_url FROM product_images WHERE pid = p.pid ORDER BY img_order ASC, created_at ASC LIMIT 1 OFFSET 1) AS hoverImageUrl
-      FROM product p
-      <where>
-        <if test="category != null and category != '' and category != 'null'">
-          category = #{category}
-        </if>
-      </where>
-      <include refid="productListOrderBy"/>
-        LIMIT #{size}
-        OFFSET #{offset}
+        SELECT 
+            <include refid="productListSelectColumns"/>
+        FROM product p
+        <where>
+            <if test="category != null and category != '' and category != 'null'">
+                category = #{category}
+            </if>
+        </where>
+        <include refid="productListOrderBy"/>
+        LIMIT #{size} OFFSET #{offset}
     </select>
 
     <!-- 메인 상품 리스트 라벨 필터용 -->
     <select id="selectProductsByCategoryAndAuthor" resultType="com.diasec.diasec_backend.vo.ProductVo">
-      SELECT p.pid, p.title, p.price, p.category, p.author, p.created_at as createdAt, p.sort_order as sortOrder, p.sales,
-        (SELECT image_url FROM product_images WHERE pid = p.pid ORDER BY img_order ASC, created_at ASC LIMIT 1) AS imageUrl,
-        (SELECT image_url FROM product_images WHERE pid = p.pid ORDER BY img_order ASC, created_at ASC LIMIT 1 OFFSET 1) AS hoverImageUrl
+      SELECT 
+        <include refid="productListSelectColumns"/>
       FROM product p
       <where>
             <if test="category != null and category != ''">
@@ -67,9 +70,8 @@
 
     <!-- 메인 상품 리스트 라벨 필터용 -->
     <select id="selectProductsByCategoryAndAuthorPaged" resultType="com.diasec.diasec_backend.vo.ProductVo">
-      SELECT p.pid, p.title, p.price, p.category, p.author, p.created_at as createdAt, p.sort_order as sortOrder, p.sales,
-        (SELECT image_url FROM product_images WHERE pid = p.pid ORDER BY img_order ASC, created_at ASC LIMIT 1) AS imageUrl,
-        (SELECT image_url FROM product_images WHERE pid = p.pid ORDER BY img_order ASC, created_at ASC LIMIT 1 OFFSET 1) AS hoverImageUrl
+      SELECT 
+        <include refid="productListSelectColumns"/>
       FROM product p
       <where>
             <if test="category != null and category != ''">
@@ -80,26 +82,27 @@
             </if>
         </where>
         <include refid="productListOrderBy"/>
-          LIMIT #{size}
-          OFFSET #{offset}
+          LIMIT #{size} OFFSET #{offset}
     </select> 
 
     <!-- 메인 BEST 상품 4개 가져오기 -->
     <select id="getBestProducts" resultType="com.diasec.diasec_backend.vo.ProductVo">
-       SELECT p.pid, p.title, p.price, p.category, p.author, p.created_at as createdAt, p.sales,
-        (SELECT image_url FROM product_images WHERE pid = p.pid ORDER BY img_order ASC, created_at ASC LIMIT 1) AS imageUrl,
-        (SELECT image_url FROM product_images WHERE pid = p.pid ORDER BY img_order ASC, created_at ASC LIMIT 1 OFFSET 1) AS hoverImageUrl
+       SELECT 
+        <include refid="productListSelectColumns"/>
       FROM product p
-      where p.category=#{category} order by p.sales DESC, p.created_at ASC limit 8;
+      where p.category=#{category} 
+      order by p.sales DESC, p.created_at 
+      ASC limit 8;
     </select>
 
     <!-- 신규 상품 4개 가져오기 -->
     <select id="getNewProducts" resultType="com.diasec.diasec_backend.vo.ProductVo">
-       SELECT p.pid, p.title, p.price, p.category, p.author, p.created_at as createdAt, p.sales,
-        (SELECT image_url FROM product_images WHERE pid = p.pid ORDER BY img_order ASC, created_at ASC LIMIT 1) AS imageUrl,
-        (SELECT image_url FROM product_images WHERE pid = p.pid ORDER BY img_order ASC, created_at ASC LIMIT 1 OFFSET 1) AS hoverImageUrl
-      FROM product p 
-      where p.category=#{category} order by p.created_at DESC limit 4;
+        SELECT 
+            <include refid="productListSelectColumns"/>
+        FROM product p 
+        where p.category=#{category} 
+        order by p.created_at DESC 
+        limit 4
     </select>
 
     <!-- 상품 상세 페이지 상단 이미지들 가져오기 -->
@@ -241,9 +244,7 @@
 
     <select id="searchByCategoryAndTitle" resultType="com.diasec.diasec_backend.vo.ProductVo">
         SELECT
-            p.pid, p.title, p.price, p.category, p.author, p.created_at as createdAt, p.sort_order as sortOrder, p.sales,
-            (SELECT image_url FROM product_images WHERE pid = p.pid ORDER BY img_order ASC LIMIT 1) AS imageUrl,
-            (SELECT image_url FROM product_images WHERE pid = p.pid ORDER BY img_order ASC LIMIT 1 OFFSET 1) AS hoverImageUrl
+            <include refid="productListSelectColumns"/>
         FROM product p
         WHERE p.category = #{category}
             AND p.title LIKE CONCAT('%', #{q}, '%')
