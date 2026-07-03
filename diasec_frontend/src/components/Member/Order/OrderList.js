@@ -13,6 +13,34 @@ const OrderList = () => {
 
     // 주문 목록
     const [orderList, setOrderList] = useState([]);
+    const [refundModalOpen, setRefundModalOpen] = useState(false);
+    const [cancelTarget, setCancelTarget] = useState(null);
+    const [refundBank, setRefundBank] = useState({ bankName: '', accountNumber: '', accountHolder: '' });
+
+    const needsVbankRefundForCancel = (order) =>
+        order.paymentMethod === '가상계좌'
+        && order.items.every(item => item.orderStatus === '결제완료');
+
+    const submitCancelRequest = (order, account = {}) => {
+        const body = { oid: order.oid, id: member.id };
+        if (account.bankName) Object.assign(body, account);
+        fetch(`${API}/order/cancelRequest`, {
+            method: 'POST',
+            credentials: 'include',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body),
+        })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    toast.success('취소 요청이 접수되었습니다.');
+                    handleSearch();
+                } else {
+                    toast.error('취소 요청 실패: ' + (data.message || ''));
+                }
+            })
+            .catch(() => toast.error('요청 실패'));
+    };
 
     // 오늘 날짜 설정하기
     useEffect(() => {
@@ -108,50 +136,25 @@ const OrderList = () => {
 
     // 주문 취소 함수
     const handleCancelOrder = (order) => {
-        if (order.items.every(item => item.orderStatus === '입금대기')) {
-            if (!window.confirm(`주문번호 ${order.oid}의 전체 상품을 취소하시겠습니까?`)) return;
-            // 즉시 취소 처리
-            fetch(`${API}/order/cancel`, {
-            method: 'POST',
-            credentials:'include',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ 
-                id: member.id, 
-                oid: order.oid,
-                usedCredit: order.usedCredit 
-                }) 
-            })
-            .then(res => res.json())
-            .then(data => {
-                if (data.success) {
-                toast.success('주문이 취소되었습니다.');
-                handleSearch();
-            } else {
-                toast.error('취소 실패 : ' + data.message);
-            }
-        })
-        .catch(err => toast.error('요청 실패'));    
-        } else if (order.items.every(item => item.orderStatus === '결제완료')) {
-            if (!window.confirm(`결제된 주문입니다. 취소 요청만 가능합니다. 취소 요청을 보내시겠습니까?`)) return;
-            // 취소 요청 API 호출
-            fetch(`${API}/order/cancelRequest`, {
-                method: 'POST',
-                headers: {'Content-Type' : 'application/json' },
-                body: JSON.stringify({ oid: order.oid, id: member.id })
-            })
-            .then(res => res.json())
-            .then(data => {
-                if (data.success) {
-                    toast.success('취소 요청이 접수되었습니다.');
-                    handleSearch();
-                } else {
-                    toast.error('취소 요청 실패: ' + data.message);
-                }
-            })
-            .catch(err => toast.error('요청 실패'));
-        } else {
+        const canCancel = order.items.every(item => ['입금대기', '결제완료'].includes(item.orderStatus));
+        if (!canCancel) {
             toast.warn('해당 주문은 현재 취소할 수 없습니다.');
-        }     
+            return;
+        }
+        if (!window.confirm(`주문번호 ${order.oid}에 대해 취소 요청을 보내시겠습니까?`)) return;
+
+        if (needsVbankRefundForCancel(order)) {
+            const first = order.items[0];
+            setCancelTarget(order);
+            setRefundBank({
+                bankName: first?.bankName || '',
+                accountNumber: first?.accountNumber || '',
+                accountHolder: first?.accountHolder || '',
+            });
+            setRefundModalOpen(true);
+            return;
+        }
+        submitCancelRequest(order);
     };
 
     // 페이징
@@ -514,6 +517,31 @@ const OrderList = () => {
                     )
                 })()}
             </div>
+
+            {refundModalOpen && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+                    <div className="w-full max-w-md rounded-lg bg-white p-5 shadow-lg">
+                        <h3 className="font-semibold">환불 계좌 입력</h3>
+                        <p className="mt-1 text-sm text-gray-600">입금 완료된 가상계좌 주문입니다. 환불받을 계좌를 입력해 주세요.</p>
+                        <div className="mt-3 space-y-2">
+                            <input className="w-full border px-3 py-2 rounded text-sm" placeholder="은행명" value={refundBank.bankName} onChange={e => setRefundBank(p => ({ ...p, bankName: e.target.value }))} />
+                            <input className="w-full border px-3 py-2 rounded text-sm" placeholder="계좌번호" value={refundBank.accountNumber} onChange={e => setRefundBank(p => ({ ...p, accountNumber: e.target.value }))} />
+                            <input className="w-full border px-3 py-2 rounded text-sm" placeholder="예금주" value={refundBank.accountHolder} onChange={e => setRefundBank(p => ({ ...p, accountHolder: e.target.value }))} />
+                        </div>
+                        <div className="mt-4 flex justify-end gap-2">
+                            <button type="button" className="border px-4 py-2 rounded text-sm" onClick={() => setRefundModalOpen(false)}>닫기</button>
+                            <button type="button" className="bg-blue-600 text-white px-4 py-2 rounded text-sm" onClick={() => {
+                                if (!refundBank.bankName || !refundBank.accountNumber || !refundBank.accountHolder) {
+                                    toast.warn('환불 계좌를 모두 입력해 주세요.');
+                                    return;
+                                }
+                                submitCancelRequest(cancelTarget, refundBank);
+                                setRefundModalOpen(false);
+                            }}>취소 요청</button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

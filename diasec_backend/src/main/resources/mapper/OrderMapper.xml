@@ -207,6 +207,14 @@
         WHERE oid = #{oid}
     </update>
 
+    <update id="updateRefundAccountByOid">
+        UPDATE order_items
+        SET bank_name = #{bankName},
+            account_number = #{accountNumber},
+            account_holder = #{accountHolder}
+        WHERE oid = #{oid}
+    </update>
+
     <!-- 주문 반품 처리 -->
     <update id="updateClaimInfo" parameterType="OrderItemsVo">
         UPDATE order_items

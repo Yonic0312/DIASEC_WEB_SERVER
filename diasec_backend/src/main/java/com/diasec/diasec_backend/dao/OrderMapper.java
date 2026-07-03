@@ -58,6 +58,12 @@ public interface OrderMapper {
     // 주문 취소 요청 ( 결제 후 )
     void updateOrderItemsStatus(Long oid, String status);
 
+    void updateRefundAccountByOid(
+        @Param("oid") Long oid,
+        @Param("bankName") String bankName,
+        @Param("accountNumber") String accountNumber,
+        @Param("accountHolder") String accountHolder);
+
     // 주문 반품 신청
     boolean updateClaimInfo(OrderItemsVo vo);
 

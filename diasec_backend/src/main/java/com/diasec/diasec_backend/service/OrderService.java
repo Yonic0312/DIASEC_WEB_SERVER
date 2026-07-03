@@ -100,6 +100,15 @@ public class OrderService {
     public void insertOrder(OrderVo orderVo) {
         normalizeCustomFrameThumbnails(orderVo);
 
+        if ("적립금".equals(orderVo.getPaymentMethod())) {
+            if (orderVo.getFinalPrice() != 0) {
+                throw new IllegalArgumentException("적립금 결제는 최종 결제금액이 0원이어야 합니다.");
+            }
+            if (orderVo.getUsedCredit() <= 0 || orderVo.getId() == null || orderVo.getId().isBlank()) {
+                throw new IllegalArgumentException("적립금 결제 정보가 올바르지 않습니다.");
+            }
+        }
+
         // 1. orders 테이블에 주문 저장 (oid 생성)
         orderMapper.insertOrder(orderVo);
 
@@ -236,9 +245,37 @@ public class OrderService {
         orderMapper.cancelAllOrderItems(oid);
     }
 
-    // 주문 취소 요청 ( 결제 후 )
-    public void requestCancelOrder(Long oid) {
+    // 주문 취소 요청 — 가상계좌 입금완료 시 환불계좌 저장 후 취소요청
+    public Map<String, Object> requestCancelOrder(
+            Long oid, String bankName, String accountNumber, String accountHolder) {
+        OrderVo order = selectOrderByOid(oid);
+        if (order == null || order.getItems() == null || order.getItems().isEmpty()) {
+            return Map.of("success", false, "message", "주문 정보를 찾을 수 없습니다.");
+        }
+        OrderItemsVo line = order.getItems().get(0);
+        boolean paidVbank = "가상계좌".equals(order.getPaymentMethod())
+                && "결제완료".equals(line.getOrderStatus());
+
+        if (paidVbank) {
+            boolean hasInput = bankName != null && !bankName.isBlank()
+                    && accountNumber != null && !accountNumber.isBlank()
+                    && accountHolder != null && !accountHolder.isBlank();
+            boolean hasSaved = line.getBankName() != null && !line.getBankName().isBlank()
+                    && line.getAccountNumber() != null && !line.getAccountNumber().isBlank()
+                    && line.getAccountHolder() != null && !line.getAccountHolder().isBlank();
+            if (!hasInput && !hasSaved) {
+                return Map.of("success", false, "message", "가상계좌 취소 요청에는 환불 계좌가 필요합니다.");
+            }
+            if (hasInput) {
+                orderMapper.updateRefundAccountByOid(oid,
+                        bankName.trim(),
+                        accountNumber.replaceAll("\\D", "").trim(),
+                        accountHolder.trim());
+            }
+        }
+
         orderMapper.updateOrderItemsStatus(oid, "취소요청");
+        return null;
     }
 
     // 주문 반품 신청

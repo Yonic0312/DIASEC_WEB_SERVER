@@ -175,17 +175,17 @@ public class OrderController {
             int usedCredit = body.get("usedCredit") == null ? 0
                     : Integer.parseInt(String.valueOf(body.get("usedCredit")));
 
-            orderService.cancelAllOrderItems(oid);
+            orderService.requestCancelOrder(oid, null, null, null);
 
-            if (usedCredit > 0 && id != null && !"null".equals(id) && !id.isBlank()) {
-                CreditVo creditVo = new CreditVo();
-                creditVo.setId(id);
-                creditVo.setAmount(usedCredit);
-                creditVo.setType("적립");
-                creditVo.setDescription("주문 취소");
-                creditVo.setOid(oid);
-                creditService.insertCreditHistory(creditVo);
-            }
+            // if (usedCredit > 0 && id != null && !"null".equals(id) && !id.isBlank()) {
+            //     CreditVo creditVo = new CreditVo();
+            //     creditVo.setId(id);
+            //     creditVo.setAmount(usedCredit);
+            //     creditVo.setType("적립");
+            //     creditVo.setDescription("주문 취소");
+            //     creditVo.setOid(oid);
+            //     creditService.insertCreditHistory(creditVo);
+            // }
 
             return ResponseEntity.ok(Map.of("success", true));
         } catch (Exception e) {
@@ -198,7 +198,13 @@ public class OrderController {
     public ResponseEntity<?> requestCancelOrder(@RequestBody Map<String, Object> body) {
         Long oid = Long.parseLong(body.get("oid").toString());
         try {
-            orderService.requestCancelOrder(oid);
+            Map<String, Object> error = orderService.requestCancelOrder(oid,
+                    optionalStr(body, "bankName"),
+                    optionalStr(body, "accountNumber"),
+                    optionalStr(body, "accountHolder"));
+            if (error != null) {
+                return ResponseEntity.badRequest().body(error);
+            }
             return ResponseEntity.ok(Map.of("success", true));
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body(Map.of("success", false, "message", e.getMessage()));
@@ -471,6 +477,13 @@ public class OrderController {
             order.setGuestPassword(null);
         }
         return order;
+    }
+
+    private String optionalStr(Map<String, Object> body, String key) {
+        Object v = body.get(key);
+        if (v == null) return null;
+        String s = String.valueOf(v).trim();
+        return s.isEmpty() ? null : s;
     }
 
     private String resolveLoginMemberId() {

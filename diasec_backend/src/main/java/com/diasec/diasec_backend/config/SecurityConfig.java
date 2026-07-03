@@ -103,7 +103,7 @@ public class SecurityConfig {
                  // 4. 비회원 주문 관련
                  .requestMatchers(
                     "/api/order/insert", "/api/order/guest-search", "/api/order/detail/**",
-                    "/api/order/cancel", "/api/order/guest-reset-password", "/api/order/update-retouch",
+                    "/api/order/cancel", "/api/order/cancelRequest", "/api/order/guest-reset-password", "api/order/update-retouch",
                     "/api/order/retouch/*/approve", "/api/order/retouch/*/reject"
                 ).permitAll()
 

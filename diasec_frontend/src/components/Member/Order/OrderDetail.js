@@ -236,6 +236,29 @@ const OrderDetail = () => {
 
     const [claimImages, setClaimImages] = useState([]);
     const [isDraggingClaim, setIsDraggingClaim] = useState(false);
+    const [refundModalOpen, setRefundModalOpen] = useState(false);
+
+    const submitCancelRequest = (item, account = {}) => {
+        const body = { oid: item.oid, id: member?.id };
+        if (account.bankName) Object.assign(body, account);
+        fetch(`${API}/order/cancelRequest`, {
+            credentials: 'include',
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body),
+        })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    toast.success('취소 요청이 접수되었습니다.');
+                    if (member) navigate('/orderList');
+                    else navigate('/guestOrderSearch');
+                } else {
+                    toast.error('취소 요청 실패: ' + (data.message || ''));
+                }
+            })
+            .catch(() => toast.error('요청 실패'));
+    };
 
     const handleSubmitReturn = async () => {
 
@@ -321,33 +344,26 @@ const OrderDetail = () => {
 
     // 주문 취소 함수
     const handleCancel = (item) => {
-        if (!window.confirm(`"${item.title}"을(를) 취소하시겠습니까?`)) return;
+        if (!window.confirm(`"${item.title}" 주문에 대해 취소 요청을 보내시겠습니까?`)) return;
 
-        fetch(`${API}/order/cancel`, {
-            credentials:'include',
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ 
-                oid: item.oid, 
-                pid: item.pid,
-                usedCredit: order.usedCredit || 0,
-                id: member?.id
-            }) 
-        })
-            .then(res => res.json())
-            .then(data => {
-                if (data.success) {
-                toast.success('주문이 취소되었습니다.');
-                if (member) {
-                    navigate('/orderList');
-                } else {
-                    navigate('/guestOrderSearch');
-                }   
-            } else {
-                toast.error('취소 실패 : ' + data.message);
-            }
-        })
-        .catch(err => toast.error('요청 실패'));
+        const needsRefund = order.paymentMethod === '가상계좌' && item.orderStatus === '결제완료';
+        if (needsRefund) {
+            setBankName(item.bankName || '');
+            setAccountNumber(item.accountNumber || '');
+            setAccountHolder(item.accountHolder || '');
+            setRefundModalOpen(true);
+            return;
+        }
+        submitCancelRequest(item);
+    };
+
+    const handleRefundModalSubmit = () => {
+        if (!bankName || !accountNumber || !accountHolder) {
+            toast.warn('환불 계좌를 모두 입력해 주세요.');
+            return;
+        }
+        submitCancelRequest(order.items[0], { bankName, accountNumber, accountHolder });
+        setRefundModalOpen(false);
     };
 
     const addClaimFiles = (files) => {
@@ -838,12 +854,20 @@ const OrderDetail = () => {
                                 className="
                                     text-black mb-2">결제 수단: <span className="font-normal">{order.paymentMethod}</span></span>
                         </div>
-                        {/* { order.paymentMethod === '무통장입금' && (
-                            <>
-                                <div><span className="text-black mb-2">입금자명:</span> {order.depositor}</div>
-                                <div><span className="text-black mb-2">입금 계좌:</span> {order.bankAccount}</div>
-                            </>
-                        )} */}
+                        {order.paymentMethod === '가상계좌' && (order.vbankAccount || order.vbankName) && (
+                            <div className="rounded border border-[#D0AC88] bg-[#fffaf3] p-3 space-y-1">
+                                {order.vbankName && (
+                                    <div><span className="text-black">입금 은행:</span> {order.vbankName}</div>
+                                )}
+                                {order.vbankAccount && (
+                                    <div><span className="text-black">입금계좌:</span> <span className="font-semibold">{order.vbankAccount}</span></div>
+                                )}
+                                {order.vbankDueDate && (
+                                    <div><span className="text-xs text-gray-600">입금기한: {order.vbankDueDate}</span></div>
+                                )}
+
+                            </div>
+                        )}
                         <div><span className="text-black mb-2">총 상품금액:</span> {order.totalPrice.toLocaleString()}원</div>
                         <div><span className="text-black mb-2">적립금 사용:</span> {order.usedCredit.toLocaleString()}원</div>
                         <div><span className="text-black mb-2">배송비:</span> {order.deliveryFee.toLocaleString()}원</div>
@@ -1198,6 +1222,24 @@ const OrderDetail = () => {
                             <button className="text-gray-500 hover:text-black" onClick={() => setPreviewOpen(false)}>✕</button>
                         </div>
                         <img src={previewImg} alt="preview-large" className="max-w-[70vw] max-h-[80vh] object-contain rounded" />
+                    </div>
+                </div>
+            )}
+
+            {refundModalOpen && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+                    <div className="w-full max-w-md rounded-lg bg-white p-5 shadow-lg">
+                        <h3 className="font-semibold">환불 계좌 입력</h3>
+                        <p className="mt-1 text-sm text-gray-600">입금 완료된 가상계좌 주문입니다. 환불받을 계좌를 입력해 주세요.</p>
+                        <div className="mt-3 space-y-2">
+                            <input className="w-full border px-3 py-2 rounded" placeholder="은행명" value={bankName} onChange={e => setBankName(e.target.value)} />
+                            <input className="w-full border px-3 py-2 rounded" placeholder="계좌번호" value={accountNumber} onChange={e => setAccountNumber(e.target.value)} />
+                            <input className="w-full border px-3 py-2 rounded" placeholder="예금주" value={accountHolder} onChange={e => setAccountHolder(e.target.value)} />
+                        </div>
+                        <div className="mt-4 flex justify-end gap-2">
+                            <button type="button" className="border px-4 py-2 rounded text-sm" onClick={() => setRefundModalOpen(false)}>닫기</button>
+                            <button type="button" className="bg-blue-600 text-white px-4 py-2 rounded text-sm" onClick={handleRefundModalSubmit}>취소 요청</button>
+                        </div>
                     </div>
                 </div>
             )}
