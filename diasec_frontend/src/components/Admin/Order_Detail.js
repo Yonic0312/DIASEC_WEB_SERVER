@@ -5,6 +5,120 @@ import axios from 'axios';
 import { resolveTrackingLookupUrl } from '../../utils/deliveryTrackingUrls';
 import thumbCustom from '../../assets/CustomFrames/customFrames.png';
 
+const PRINT_ORDER_STYLES = `
+    .print-wrap {
+        display: flex;
+        flex-direction: column;
+    }
+    .print-wrap .print-sheet-main {
+        flex: 0 0 auto;
+    }
+    .print-wrap .print-bottom-image {
+        display: none;
+        flex-shrink: 0;
+    }
+    .print-wrap .print-bottom-image .print-thumb {
+        width: 105px;
+        height: 105px;
+    }
+    .print-wrap .print-section {
+        margin-top: 14px;
+        border: 1px solid #d9d9d9;
+        padding: 12px;
+        border-radius: 8px;
+        page-break-inside: avoid;
+    }
+    .print-wrap .print-grid-2 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px 20px;
+    }
+    .print-wrap .print-label {
+        font-weight: 700;
+        margin-right: 6px;
+    }
+    .print-wrap .print-product-box {
+        display: flex;
+        gap: 16px;
+        align-items: flex-start;
+        width: 100%;
+    }
+    .print-wrap .print-product-info {
+        flex: 1;
+        min-width: 0;
+    }
+    .print-wrap .print-product-thumb-right {
+        margin-left: auto;
+        flex-shrink: 0;
+    }
+    .print-wrap .print-thumb {
+        width: 105px;
+        height: 105px;
+        object-fit: cover;
+        border: 1px solid #ddd;
+        flex-shrink: 0;
+    }
+    .print-wrap .print-badge-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-bottom: 10px;
+    }
+    .print-wrap .print-badge {
+        display: inline-block;
+        padding: 2px 10px;
+        border: 1px solid #999;
+        border-radius: 999px;
+        font-size: 11px;
+        line-height: 1.4;
+    }
+    .print-wrap .print-badge-dark {
+        background: #000 !important;
+        color: #fff !important;
+        border-color: #000 !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+    .print-wrap .print-note-box {
+        min-height: 70px;
+        border: 1px dashed #bbb;
+        padding: 10px;
+        margin-top: 8px;
+        width: 100%;
+        max-width: 100%;
+        box-sizing: border-box;
+        overflow-wrap: anywhere;
+        word-break: break-all;
+    }
+    @media print {
+        @page {
+            size: A4;
+            margin: 10mm;
+        }
+        .print-wrap {
+            break-inside: avoid;
+            padding-bottom: 20px;
+        }
+        .print-wrap .print-bottom-image {
+            display: block;
+            position: fixed;
+            bottom: 0.5mm;
+            left: 0.5mm;
+            margin-top: 0;
+            padding-top: 0;
+        }
+        .print-wrap .print-section {
+            break-inside: avoid;
+        }
+        .print-wrap .print-badge-dark {
+            background: #000 !important;
+            color: #fff !important;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+    }
+`;
+
 const Order_Detail = () => {
     const API = process.env.REACT_APP_API_BASE;
     const FILE_BASE = API.replace('/api', '');
@@ -402,6 +516,15 @@ const Order_Detail = () => {
 
                 .print-wrap {
                     width: 100%;
+                    position: relative;
+                    min-height: 277mm;
+                }
+
+                .print-bottom-image {
+                    display: block !important;
+                    position: absolute;
+                    bottom: 0;
+                    left: 0;
                 }
 
                 .print-title {
@@ -416,82 +539,11 @@ const Order_Detail = () => {
                     margin-bottom: 20px;
                 }
 
-                .print-section {
-                    margin-top:12px;
-                    border: 1px solid #d9d9d9;
-                    padding: 0px 12px 10px;
-                    border-radius:8px;
-                    page-break-inside: avoid;
-                }
-
-                .print-section-title {
-                    font-size: 16px;
-                    font-weight: 700;
-                    margin-bottom: 10px;
-                }
-
-                .print-grid-2 {
-                    display: grid;
-                    grid-template-columns: 1fr 1fr;
-                    gap: 8px 20px;
-                }
-
-                .print-row {
-                    margin-bottom: 4px;
-                }
-
-                .print-label {
-                    font-weight: 700;
-                    margin-right: 6px;
-                }
-
-                .print-product-box {
-                    display: flex;
-                    gap: 16px;
-                    align-items: flex-start;
-                }
-
-                .print-thumb { 
-                    width: 110px;
-                    height: 110px;
-                    object-fit: cover;
-                    border: 1px solid #ddd;
-                }
-
-                .print-badge {
-                    display: inline-block;
-                    padding: 2px 8px;
-                    border: 1px solid #999;
-                    border-radius: 999px;
-                    font-size: 11px;
-                    margin-right: 6px;
-                }
-
-                .print-note-box {
-                    min-height: 70px;
-                    border: 1px dashed #bbb;
-                    padding: 10px;
-                    margin-top: 8px;
-                }
-
-                .print-check-row {
-                    display: flex; 
-                    gap: 18px;
-                    flex-wrap: wrap;
-                    margin-top: 8px;
-                }
-
-                .print-check-item {
-                    min-width: 120px;
-                }
+                ${PRINT_ORDER_STYLES.replace(/\.print-wrap /g, '')}
 
                 @media print {
                     body {
                         padding: 0;
-                    }
-
-                    .print-section {
-                        break-inside: avoid;
                     }
                 }
                 </style>
@@ -558,7 +610,7 @@ const Order_Detail = () => {
         const cW = Math.max(0, wCm + 3);
         const cH = Math.max(0, hCm + 3);
 
-        return `${wCm} x ${hCm} cm | P: ${pW} x ${pH} | C: ${cW} x ${cH}`;
+        return `${wCm} x ${hCm} cm | C: ${cW} x ${cH} | P: ${pW} x ${pH}`;
     }
 
     const convertCategoryName = (category) => {
@@ -778,6 +830,8 @@ const Order_Detail = () => {
         <div className="print-wrap w-full bg-white px-8 py-6 border border-gray-200"
             ref={printRef}
         >
+            <style>{PRINT_ORDER_STYLES}</style>
+            <div className="print-sheet-main">
             {/* Title */}
             <div>
                 <div className='flex items-center justify-between'>
@@ -889,7 +943,6 @@ const Order_Detail = () => {
 
             {/* 주문 기본 정보 */}
             <div className="print-section">
-                <h3 className="print-section-title font-semibold text-lg">주문 기본 정보</h3>
                 <div className="print-grid-2 text-sm text-gray-700">
                     <div><span className="print-label font-medium">주문번호:</span> {order.oid}</div>
                     <div><span className="print-label font-medium">주문상태:</span> {order.items[0].orderStatus}</div>
@@ -902,21 +955,21 @@ const Order_Detail = () => {
 
             {/* 상단 상품 정보 */}
             <div className="print-section">
-                <h3 className="print-section-title font-semibold text-lg">상품 / 제작 정보</h3>
+                {/* <h3 className="print-section-title font-semibold text-lg">상품 / 제작 정보</h3> */}
 
-                <div className="print-product-box flex gap-6 items-start">
+                <div className="print-product-box">
                     <img 
                         src={displayThumb} 
                         alt={order.items[0].title} 
-                        className="print-thumb w-28 h-28 object-cover rounded border" 
+                        className="print-thumb h-40 w-40 object-cover rounded border" 
                     />
                     
-                    <div className="flex-1">
-                        <div className="flex flex-wrap gap-2 mb-3">
+                    <div className="print-product-info flex-1">
+                        <div className="print-badge-row font-bold text-lg">
                             <span className="print-badge">
                                 {convertCategoryName(order.items[0].category)}
                             </span>
-                            <span className="print-badge">
+                            <span className="print-badge print-badge-dark">
                                  {item.finishType === 'matte' ? '무광' : '유광'}
                             </span>
                             <span className="print-badge">
@@ -924,7 +977,7 @@ const Order_Detail = () => {
                             </span>
                         </div>
  
-                        <div className="text-sm text-gray-700 leading-6">
+                        <div className="">
                             <div className="print-label text-black font-bold">
                                 {order.items[0].title}
                             </div>
@@ -975,35 +1028,31 @@ const Order_Detail = () => {
                     .filter(Boolean);
 
                 return (
-                    <div className="print-section"> 
-                        <h3 className="print-section-title font-semibold text-lg">사진 보정 정보</h3>
+                    <div className="print-section">
+                        {/* <h3 className="print-section-title font-semibold text-lg">사진 보정 정보</h3> */}
 
                         <div className="text-sm leading-6">
                             <div>
                                 <span className='print-label'>보정 신청:</span>
-                                {retouchEnabled ? '신청' : '미신청'}
-                            </div>
+                                {retouchEnabled ? (
+                                    <span className="print-badge print-badge-dark">신청</span>
+                                ) : (
+                                    '미신청'
+                                )}
 
-                            <div>
-                                <span className="print-label">고객 원본 이미지:</span>
-                                {item.thumbnail ? '있음' : '없음'}
-                            </div>
-
-                            {retouchEnabled && (
-                                <>
-                                    <div className="mt-2">
-                                        <span className="print-label">보정 항목:</span>
-                                        {retouchTypes.length > 0 ? retouchTypes.join(', ') : '선택 없음'}
-                                    </div>
-
-                                    <div className="mt-2">    
-                                        <span className="print-label">요청사항:</span>
-                                        <div className="print-note-box whitespace-pre-line">
-                                            {item.retouchNote || '없음'}
+                                {retouchEnabled && (
+                                    <>
+                                        <div>
+                                            <span className="print-label">보정 항목:</span>
+                                            {retouchTypes.length > 0 ? retouchTypes.join(', ') : '선택 없음'}
                                         </div>
-                                    </div>
-                                </>
-                            )}
+                                    </>
+                                )}
+                            </div>
+
+                            <div className="print-note-box">
+                                {item.retouchNote || '없음'}
+                            </div>
                         </div>
                     </div>
                 );
@@ -1091,7 +1140,7 @@ const Order_Detail = () => {
                 {/* 주문상태에 따라 상태 메세지 */}
                 {order.items[0].orderStatus === '입금대기' && (
                     <>
-                        <h3 className="font-semibold mb-4 text-lg">주문 진행 상황</h3>
+                        {/* <h3 className="font-semibold mb-4 text-lg">주문 진행 상황</h3> */}
                         <div className="mt-6 p-4 border rounded bg-yellow-50 text-sm text-yellow-700 font-medium">
                                 주문이 정상적으로 접수되었으며, 고객의 입금을 기다리고 있습니다. <br />
                                 아래 계좌로 입금이 확인되면 배송 준비를 시작하겠습니다.
@@ -1102,7 +1151,7 @@ const Order_Detail = () => {
                 {/* 결제완료 */}
                 {order.items[0].orderStatus === '결제완료' && (
                     <>
-                        <h3 className="font-semibold mb-4 text-lg">주문 진행 상황</h3>
+                        {/* <h3 className="font-semibold mb-4 text-lg">주문 진행 상황</h3> */}
                         <div className="mt-6 p-4 border rounded bg-yellow-50 text-sm text-yellow-700 font-medium">
                             고객님의 입금이 확인되었습니다. <br />
                             주문은 정상적으로 접수되었으며, 확인 후 순차적으로 배송이 진행될 예정입니다.
@@ -1112,7 +1161,7 @@ const Order_Detail = () => {
 
                 {order.items[0].orderStatus === '취소' && (
                     <div>
-                        <h3 className="font-semibold mb-4 text-lg">주문 진행 상황</h3>
+                        {/* <h3 className="font-semibold mb-4 text-lg">주문 진행 상황</h3> */}
                         <div className="p-4 border rounded bg-yellow-50 text-sm text-yellow-700 font-medium">
                             주문이 취소되었습니다.
                         </div>
@@ -1121,7 +1170,7 @@ const Order_Detail = () => {
 
                 {['교환신청', '교환회수완료', '교환배송중', '교환완료'].includes(order.items[0].orderStatus) && (
                     <div className="no-print">
-                        <h3 className="font-semibold mb-4 text-lg">교환 진행 상황</h3>
+                        {/* <h3 className="font-semibold mb-4 text-lg">교환 진행 상황</h3> */}
                         {renderClaimInfo()}
                         <div className="p-4 mt-2 border rounded bg-yellow-50 text-sm text-yellow-700 font-medium">
                             
@@ -1150,7 +1199,7 @@ const Order_Detail = () => {
                 {/* 클레임 메세지 */}
                 {['반품신청', '반품회수완료', '환불처리중', '환불완료'].includes(order.items[0].orderStatus) && (
                     <div>
-                        <h3 className="font-semibold mb-4 text-lg">반품 진행 상황</h3>
+                        {/* <h3 className="font-semibold mb-4 text-lg">반품 진행 상황</h3> */}
                         {renderClaimInfo()}
                         <div className="p-4 mt-2 border rounded bg-yellow-50 text-sm text-yellow-700 font-medium">
                             {order.items[0].orderStatus === '반품신청' && (
@@ -1183,7 +1232,7 @@ const Order_Detail = () => {
                 {!['입금대기', '결제완료', '취소', '반품신청', '반품회수완료', '환불처리중', '환불완료', 
                     '교환신청', '교환회수완료', '교환배송중', '교환완료'].includes(order.items[0].orderStatus) && (
                     <div>
-                        <h3 className="font-semibold mb-4 text-lg">배송 진행 상황</h3>
+                        {/* <h3 className="font-semibold mb-4 text-lg">배송 진행 상황</h3> */}
                         <div className="flex justify-between items-center px-2 relative">
                             {steps.map((step, idx) => (
                                 <div key={step} className="flex-1 text-center px-2 relative">
@@ -1230,8 +1279,8 @@ const Order_Detail = () => {
 
             { /* 결제 정보 */}
             <div className="print-section">
-                <h3 className="print-section-title font-semibold text-lg">결제 정보</h3>
-                <div className="text-sm leading-6">
+                {/* <h3 className="print-section-title font-semibold text-lg">결제 정보</h3> */}
+                <div className="print-grid-2 text-sm leading-6">
                     <div>
                         <span className="print-label">결제 수단:</span> {order.paymentMethod}
                     </div>
@@ -1269,7 +1318,7 @@ const Order_Detail = () => {
 
             { /* 배송지 정보 */}
             <div className="print-section">
-                <h3 className="print-section-title font-semibold text-lg">배송지 정보</h3>
+                {/* <h3 className="print-section-title font-semibold text-lg">배송지 정보</h3> */}
                 <div className="print-grid-2 text-sm text-gray-700">
                     <div>
                         <span className="font-medium">주문자명:</span> {order.ordererName}
@@ -1298,20 +1347,15 @@ const Order_Detail = () => {
                             </>
                     </div>
 
-                    {(order.deliveryMessage || order.buyerRequest) && (
-                        <div className="sm:col-span-2 space-y-1">
-                            {order.deliveryMessage ? (
-                                <div>
-                                    <span className="font-medium">배송 메시지:</span> {order.deliveryMessage}
-                                </div>
-                            ) : null}
-                            {order.buyerRequest ? (
-                                <div>
-                                    <span className="font-medium">구매자 요청:</span> {order.buyerRequest}
-                                </div>
-                            ) : null}
-                        </div>
-                    )}
+                    <div>
+                        <span className="font-bold">구매자 요청:</span> {order.buyerRequest}
+                    </div>
+
+                    <div>
+                        <span className="font-bold">배송 메시지:</span> {order.deliveryMessage}
+                    </div>
+
+                    
                 </div>
 
                 <div className="no-print mt-4 border border-dashed border-gray-300 rounded-lg p-4 bg-gray-50">
@@ -1525,6 +1569,15 @@ const Order_Detail = () => {
                     </div>
                 </div>
             )}
+            </div>
+
+            <div className="print-bottom-image">
+                <img
+                    src={displayThumb}
+                    alt={order.items[0].title}
+                    className="print-thumb h-40 w-40 object-cover rounded border"
+                />
+            </div>
         </div>
     )
 }

@@ -19,6 +19,11 @@ public class MemberVo {
     private String role;
     private int credit;
     private String createdAt;
+    
+    // 업체 파트너 신청
+    private String partnerStatus;
+    private String partnerGrade;
+    private String partnerApprovedAt;
 
     // 카카오 로그인
     private String nickname;   // 카카오 닉네임 저장용

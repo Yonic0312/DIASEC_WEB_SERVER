@@ -9,7 +9,7 @@ services:
             redis:
                 condition: service_started
         environment:
-            TZ: Asiz/Seoul
+            TZ: Asia/Seoul
             SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/diasecDB
             SPRING_DATASOURCE_USERNAME: root
             SPRING_DATASOURCE_PASSWORD: diasec0504

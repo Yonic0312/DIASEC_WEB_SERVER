@@ -26,15 +26,12 @@ public class CartController {
 
     @PostMapping("/insert")
     public ResponseEntity<?> insertCartItems(@RequestBody List<CartVo> cartList) {
-        System.out.println("insert : " + cartList);
         cartService.insertCartItems(cartList);
         return ResponseEntity.ok().build();
     }
 
     @GetMapping("/list")
     public List<CartVo> getCart(@RequestParam String id) {
-        System.out.println("id : " + id);
-        System.out.println("list : " + cartService.getCartByUserId(id));
         return cartService.getCartByUserId(id);
     }
     

@@ -13,6 +13,7 @@ import requestKakaoPay from './PaymentMethods/KakaoPay'
 import requestRealTimeTransfer from './PaymentMethods/RealTimeTransfer'
 import requestVBankPayment from './PaymentMethods/VBankPayment';
 import { toast } from 'react-toastify';
+import { usePartner } from '../../context/PartnerContext';
 import RetouchModal, {
     CUSTOM_FRAME_RETOUCH_OPTION_LABELS,
 } from '../Modal/RetouchModal.js';
@@ -35,6 +36,7 @@ const OrderForm = () => {
     const location = useLocation();
     const [searchParams] = useSearchParams();
     const { member, setMember } = useContext(MemberContext);
+    const { partnerDiscount } = usePartner();
     const initialItems = location.state?.orderItems || [];
     
     const [orderItems, setOrderItems] = useState(() => 
@@ -205,7 +207,7 @@ const OrderForm = () => {
     );
     const totalPrice = items.reduce(
         (sum, item) =>
-            sum + getDiscountedUnitPrice(item.price) * Number(item.quantity),
+            sum + getDiscountedUnitPrice(item.price, partnerDiscount) * Number(item.quantity),
         0
     );
     const deliveryFee = 0;
@@ -653,7 +655,7 @@ const OrderForm = () => {
                 title: item.title,
                 author: item.author,
                 quantity: item.quantity,
-                price: getDiscountedUnitPrice(item.price),
+                price: getDiscountedUnitPrice(item.price, partnerDiscount),
                 period: item.period,
                 size: item.size,
                 // 맞춤액자는 주문 확정 시 multipart 파일로 업로드 후 서버에서 URL 세팅
@@ -1413,7 +1415,10 @@ const OrderForm = () => {
                                     <input type="text" inputMode="numeric" className="w-full md:w-[120px] border-[1px] h-8 pl-2 mr-1" value={usedCredit} 
                                         onChange={(e) => {
                                             const input = Number(e.target.value);
-                                            const maxCredit = Number(member?.credit || 0);
+                                            const maxCredit = Math.min(
+                                                Number(credit || 0),
+                                                totalPrice
+                                            );
 
                                             if (input > maxCredit) {
                                                 toast.error("보유 적립금보다 많이 입력할 수 없습니다.");

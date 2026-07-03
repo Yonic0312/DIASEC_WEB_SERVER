@@ -9,6 +9,7 @@ import axios from 'axios';
 import { toast } from 'react-toastify';
 
 const API = process.env.REACT_APP_API_BASE;
+const ORDER_RETRY_DRAFT_KEY = 'orderFormRetryDraft';
 
 // 비회원 주문은 member id가 비어 있음 (OrderForm: 회원만 member.id 설정)
 const isGuestOrderRow = (o) => {
@@ -36,7 +37,28 @@ const OrderComplete = () => {
 
     useEffect(() => {
         if (!oidFromQuery || fromState.oid) return;
-        axios.get(`${API}/order/detail/oid/${oidFromQuery}`)
+
+        // navigate state -> sessionStorage(결제 직전 OrderFrom이 저장) 순으로 비밀번호 확보
+        let guestPasswordParam = fromState.guestPassword || guestPassword || '';
+        if (!guestPasswordParam) {
+            try {
+                const raw = sessionStorage.getItem(ORDER_RETRY_DRAFT_KEY);
+                if (raw) {
+                    const draft = JSON.parse(raw);
+                    guestPasswordParam = draft.guestPassword || '';
+                }
+            } catch (_) {
+                // ignore
+            }
+        }
+
+        const params = {};
+        if (guestPasswordParam) {
+            params.guestPassword = guestPasswordParam;
+        }
+
+        axios
+            .get(`${API}/order/detail/oid/${oidFromQuery}`, { params })
             .then((res) => {
                 const o = res.data;
                 setOid(o.oid);
@@ -52,12 +74,13 @@ const OrderComplete = () => {
                         dueDate: o.vbankDueDate || '',
                     });
                 } else {
-                     setBankTransferInfo(null);
+                    setBankTransferInfo(null);
                 }
+                sessionStorage.removeItem(ORDER_RETRY_DRAFT_KEY);
             })
             .catch(() => setFetchError(true))
             .finally(() => setLoading(false));
-    }, [oidFromQuery, fromState.oid]);
+    }, [oidFromQuery, fromState.oid, fromState.guestPassword, guestPassword]);
 
     if (errorFromQuery === '1') {
         return (

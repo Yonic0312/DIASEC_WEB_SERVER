@@ -93,9 +93,6 @@ public class ImageUtil {
             File file = new File(fullPath);
             if (file.exists()) {
                 file.delete();
-                System.out.println("이미지 삭제됨: " + fullPath);
-            } else { 
-                System.out.println("파일 없음: " + fullPath);
             }
         } catch (Exception e) {
             e.printStackTrace();

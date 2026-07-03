@@ -19,6 +19,7 @@ export const Member_Nav_Sections = [
                 state: { returnTo: '/myInquiryList' },
             },
             { label: '문의 내역', path: '/myInquiryList' },
+            { label: '업무제휴 현황', path: '/mypage/partner', onlyPartner: true },
         ],
     },
     {

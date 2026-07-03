@@ -1,4 +1,5 @@
-import { getSiteDiscountPercent, getDiscountedUnitPrice } from '../../utils/siteDiscount';
+import { usePartner } from '../../context/PartnerContext';
+import { getSiteDiscountPercent, getDiscountedUnitPrice, getTotalDiscountPercent } from '../../utils/siteDiscount';
 
 /** 공통 가격 텍스트 크기 — import 해서 neutralClassName 등에 재사용 */
 export const SITE_PRICE_TEXT =
@@ -17,10 +18,11 @@ export function SitePriceRow({
     strikeClassName = `${SITE_PRICE_STRIKE_TEXT} text-gray-500 line-through`,
     saleClassName = `${SITE_PRICE_TEXT} font-bold text-[#45b035]`,
 }) {
+    const { partnerDiscount } = usePartner();
     const originalU = Math.round(Number(unitPrice) || 0);
     const qty = Math.max(0, Number(quantity) || 0);
     const originalTotal = originalU * qty;
-    const pct = getSiteDiscountPercent();
+    const pct = getTotalDiscountPercent(partnerDiscount);
 
     if (pct <= 0) {
         return (
@@ -30,7 +32,7 @@ export function SitePriceRow({
         );
     }
 
-    const saleTotal = getDiscountedUnitPrice(originalU) * qty;
+    const saleTotal = getDiscountedUnitPrice(originalU, partnerDiscount) * qty;
 
     return (
         <span className={`inline-flex items-baseline gap-1 flex-wrap ${className}`.trim()}>
@@ -51,8 +53,9 @@ export function SitePriceTotal({
     strikeClassName = `${SITE_PRICE_STRIKE_TEXT} text-gray-500 line-through`,
     saleClassName = `${SITE_PRICE_TEXT} font-bold text-[#45b035]`,
 }) {
+    const { partnerDiscount } = usePartner();
     const o = Math.round(Number(original) || 0);
-    const pct = getSiteDiscountPercent();
+    const pct = getTotalDiscountPercent(partnerDiscount);
     if (pct <= 0) {
         return <span className={className}>{o.toLocaleString()}원</span>;
     }

@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.diasec.diasec_backend.dao.BizConsultMapper">
+
+    <insert id="registerConsult" parameterType="BizConsultVo" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO biz_consult (
+            company_name, dept_manager_title, email, phone, quantity, budget,
+            sizes, artwork_types, themes, atmostpheres,
+            install_place, etc_inquiry, password, privacy_agreed, status, created_at
+        ) VALUES (
+            #{companyName}, #{deptManagerTitle}, #{email}, #{phone}, #{quantity}, #{budget},
+            #{sizes}, #{artworkTypes}, #{themes}, #{atmostpheres},
+            #{installPlace}, #{etcInquiry}, #{password}, #{privacyAgreed}, '미완료', NOW()
+        )
+    </insert>
+
+    <insert id="insertConsultFile">
+        INSERT INTO biz_consult_file (consult_id, file_path, original_name)
+        VALUES (#{consultId}, #{filePath}, #{originalName})
+    </insert>
+
+    <select id="getConsultList" resultType="BizConsultVo">
+        SELECT 
+            id, 
+            company_name AS companyName, 
+            dept_manager_title AS deptManagerTitle,
+            email,
+            status,
+            created_at AS createdAt
+        FROM biz_consult
+        ORDER BY created_at DESC
+    </select>
+
+    <select id="getConsultDetail" resultType="BizConsultVo">
+        SELECT
+            id, company_name AS companyName, dept_manager_title AS deptManagerTitle,
+            email, phone, quantity, budget, sizes, artwork_types AS artworkTypes,
+            themes, atmostpheres,
+            install_place AS installPlace, etc_inquiry AS etcInquiry,
+            status, created_at AS createdAt
+        FROM biz_consult WHERE id = #{id}
+    </select>
+
+    <select id="getConsultFiles" resultType="BizConsultFileVo">
+        SELECT oid, consult_id AS consultId, file_path AS filePath,
+               original_name AS originalName, created_at AS createdAt
+        FROM biz_consult_file WHERE consult_id = #{id}
+     </select>
+
+    <select id="getPostById" resultType="BizConsultVo">
+        SELECT id, password FROM biz_consult WHERE id = #{id}
+    </select>
+
+    <select id="countConsult" resultType="int">
+        SELECT COUNT(*) FROM biz_consult WHERE status = '미완료'
+    </select>
+
+    <delete id="deleteConsultFiles">
+        DELETE FROM biz_consult_file WHERE consult_id = #{consultId}
+    </delete>
+
+    <delete id="deleteConsult">
+        DELETE FROM biz_consult WHERE id = #{id}
+    </delete>
+
+    <select id="getConsultFileByOid" resultType="BizConsultFileVo"> 
+        SELECT oid, consult_id AS consultId, file_path AS filePath,
+            original_name AS originalName, created_at AS createdAt
+        FROM biz_consult_file WHERE oid = #{oid}
+    </select>
+
+    <update id="updateConsultStatus">
+        UPDATE biz_consult SET status = #{status} WHERE id = #{id}
+    </update>
+
+    <delete id="deleteConsultFileByOid">
+        DELETE FROM biz_consult_file WHERE oid = #{oid}
+    </delete>
+</mapper>

@@ -4,15 +4,17 @@ import axios from 'axios';
 import { toast } from 'react-toastify';
 import { MemberContext } from '../../context/MemberContext'
 import { Member_Nav_Sections } from './Member_Nav_Sections';
-
+import { usePartnerNavVisible } from '../../hooks/usePartnerNavVisible';
 
 const Member_Sidebar = () => {
     const API = process.env.REACT_APP_API_BASE;
     const { member, setMember } = useContext(MemberContext);
+    const showPartnerNav = usePartnerNavVisible(member);
     const navigate = useNavigate();
     const location = useLocation();
     const isActive = (path) => {
         if (path === '/mypage/retouch') return location.pathname.startsWith('/mypage/retouch');
+        if (path === '/mypage/partner') return location.pathname.startsWith('/mypage/partner');
         return location.pathname === path;
     };
 
@@ -58,6 +60,7 @@ const Member_Sidebar = () => {
                                 </span>
                                 {section.items.map((item) => {
                                     if (item.onlyWeb && member.provider !== 'web') return null;
+                                    if (item.onlyPartner && !showPartnerNav) return null;
                                     return (
                                         <button
                                             key={item.label}

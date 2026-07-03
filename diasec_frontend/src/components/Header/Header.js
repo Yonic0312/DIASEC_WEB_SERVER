@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState, useMemo, useRef, useCallback } from 'react';
+import { useContext, useEffect, useState, useMemo, useRef } from 'react';
 import { MemberContext } from '../../context/MemberContext';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
@@ -29,22 +29,21 @@ const Header = () => {
         { key:'koreanPainting',      label:'동양화',                        link:'/main_Items?type=koreanPainting' },
         { key:'photoIllustration',   label:'사진/일러스트',                  link:'/main_Items?type=photoIllustration' },
         { key:'fengShui',            label:'풍수',                         link:'/main_Items?type=fengShui' },
-        // { key:'Contemporary',        label:'현대작가',                      link:'/main_items?type=Contemporary' },
-        // { key:'authorCollection',    label:'작가',                         link:'/main_items?type=authorCollection' },
         { key:'customFrame',         label:'맞춤액자/사진보정',               link:'/customFrames' },
-        // { key:'companyOrder',        label:'기업주문',                      link:'/bizOrderBoard' },
-        // { key:'registerAuthor',      label:'작가등록',                      link:'/authorRegisterIntro' },
         { key:'event',               label:'이벤트',                        link:'/mainEvent' },
+        { key: 'bizConsult',         label:'기업컨설팅',                     link:'/bizConsult' },
+        { key: 'bizPartner',         label:'업무제휴',                       link:'bizPartner' },
     ]), []);
 
     // 무한 스크롤
     const PAGE_SIZE = 10;
 
     const [page, setPage] = useState({
-        masterPiece: { offset: 0, hasMore: true, loading: false},
-        fengShui: { offset: 0, hasMore: true, loading: false},
-        authorCollection: { offset: 0, hasMore: true, loading: false},
-        photoIllustration: { offset: 0, hasMore: true, loading: false},
+        masterPiece: { offset: 0, hasMore: true, loading: false },
+        koreanPainting: { offset: 0, hasMore: true, loading: false },
+        fengShui: { offset: 0, hasMore: true, loading: false },
+        authorCollection: { offset: 0, hasMore: true, loading: false },
+        photoIllustration: { offset: 0, hasMore: true, loading: false },
     });
 
 
@@ -90,8 +89,8 @@ const Header = () => {
                 img: x.imageUrl,
                 link:
                     key === 'masterPiece'
-                        ? `/main_items?type=${key}&author=${encodeURIComponent(x.label)}`
-                        : `/main_items?type=${key}&label=${encodeURIComponent(x.label)}`
+                        ? `/main_Items?type=${key}&author=${encodeURIComponent(x.label)}`
+                        : `/main_Items?type=${key}&label=${encodeURIComponent(x.label)}`
             }));
 
             setDropdown(prev => ({
@@ -119,7 +118,7 @@ const Header = () => {
     useEffect(() => {
             axios.get(`${API}/member/me`, { withCredentials: true })
                 .then((res) => {
-                    if(res.data.message == "로그인 안됨" || res.data.message == "알 수 없는 사용자" || res.data.message == "인증이 필요합니다." || res.data.message == "접근 권한이 없습니다."){
+                    if(res.data.message === "로그인 안됨" || res.data.message === "알 수 없는 사용자" || res.data.message === "인증이 필요합니다." || res.data.message === "접근 권한이 없습니다."){
                         return;
                     }
                     setMember(res.data);
@@ -304,22 +303,22 @@ const Header = () => {
                                     >
                                         후기게시판
                                     </button>
-                                        
-                                    {/* <button
+
+                                    <button
                                         type="button"
-                                        onClick={() => { navigate("/supportMyInquiryList"); setSupportOpen(false);}}
+                                        onClick={() => { navigate("/bizConsult"); setSupportOpen(false);}}
                                         className="w-full text-left px-4 py-2 text-[13px] text-gray-700 bg-white hover:bg-[#ecd2af]/35 transition"
                                     >
                                         기업컨설팅
                                     </button>
-
+                                        
                                     <button
                                         type="button"
-                                        onClick={() => { navigate("/supportMyInquiryList"); setSupportOpen(false);}}
+                                        onClick={() => { navigate("/bizPartner"); setSupportOpen(false);}}
                                         className="w-full text-left px-4 py-2 text-[13px] text-gray-700 bg-white hover:bg-[#ecd2af]/35 transition"
                                     >
                                         업무제휴
-                                    </button> */}
+                                    </button>
                                 </div>      
                             </div>
                         </div>
@@ -413,7 +412,7 @@ const Header = () => {
                                                             setDrawerOpen(false);
                                                         }}
                                                     >
-                                                        <img src={item.img} alt="" className="w-9 h-9 rounded-full object-cover"/>
+                                                        <img src={item.img} alt={item.label} className="w-9 h-9 rounded-full object-cover"/>
                                                         <span className="text-[14px]">{item.label}</span>
                                                     </button>
                                                 ))}

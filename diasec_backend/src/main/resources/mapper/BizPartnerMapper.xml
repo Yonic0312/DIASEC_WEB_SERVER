@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.diasec.diasec_backend.dao.BizPartnerMapper">
+    <insert id="insertApplication" parameterType="BizPartnerApplicationVo" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO biz_partner_application (
+            member_id, company_name, manager_name_title, phone, email,
+            industry, etc_request, contract_agreed, status, created_at
+        ) VALUES (
+            #{memberId}, #{companyName}, #{managerNameTitle}, #{phone}, #{email},
+            #{industry}, #{etcRequest}, #{contractAgreed}, '대기', NOW()
+        )
+    </insert>
+
+    <select id="countPendingByMember" resultType="int">
+        SELECT COUNT(*) FROM biz_partner_application
+        WHERE member_id COLLATE utf8mb4_unicode_ci = #{memberId} AND status = '대기'
+    </select>
+
+    <select id="getCumulativeAmount" resultType="long">
+        SELECT COALESCE(SUM(oi.price * oi.quantity), 0)
+        FROM order_items oi
+        JOIN orders o ON oi.oid = o.oid
+        WHERE o.id COLLATE utf8mb4_unicode_ci = #{memberId}
+            AND oi.order_status IN ('결제완료', '배송준비중', '배송중', '배송완료')
+    </select>
+
+    <select id="getApplicationList" resultType="BizPartnerApplicationVo">
+        SELECT
+            a.id, a.member_id AS memberId, a.company_name AS companyName,
+            a.manager_name_title AS managerNameTitle, a.phone, a.email,
+            a.industry, a.status, a.created_at AS createdAt,
+            m.name AS memberName
+        FROM biz_partner_application a
+        JOIN member m ON a.member_id COLLATE utf8mb4_unicode_ci = m.id
+        ORDER BY a.created_at DESC
+    </select>
+
+    <select id="getApplicationDetail" resultType="BizPartnerApplicationVo">
+        SELECT
+            a.id, a.member_id AS memberId, a.company_name AS companyName,
+            a.manager_name_title AS managerNameTitle, a.phone, a.email,
+            a.industry, a.etc_request AS etcRequest, a.contract_agreed AS contractAgreed,
+            a.status, a.admin_reply AS adminReply,
+            a.created_at AS createdAt, a.reviewed_at AS reviewedAt,
+            m.name AS memberName, m.partner_status AS partnerStatus,
+            m.partner_grade AS partnerGrade
+        FROM biz_partner_application a
+        JOIN member m ON a.member_id COLLATE utf8mb4_unicode_ci = m.id
+        WHERE a.id = #{id}
+    </select>
+
+    <update id="approveApplication">
+        UPDATE biz_partner_application
+        SET status = '승인', admin_reply = #{adminReply}, reviewed_at = NOW()
+        WHERE id = #{id}
+    </update>
+
+    <update id="rejectApplication">
+        UPDATE biz_partner_application
+        SET status = '미승인', admin_reply = #{adminReply}, reviewed_at = NOW()
+        where id = #{id}
+    </update>
+
+    <update id="updateMemberPartner">
+        UPDATE member
+        SET partner_status = #{status},
+            partner_grade = #{grade}
+            <choose>
+                <when test="status == '승인'">
+                    , partner_approved_at = NOW()
+                </when>
+                <when test="status == '미승인'">
+                    , partner_approved_at = NULL
+                </when>
+            </choose>
+        WHERE id COLLATE utf8mb4_unicode_ci = #{memberId}
+    </update>
+
+    <update id="updateMemberPartnerGrade">
+        UPDATE member
+        SET partner_grade = #{grade}
+        WHERE id COLLATE utf8mb4_unicode_ci = #{memberId}
+            AND partner_status = '승인'
+    </update>
+
+    <select id="countPending" resultType="int">
+        SELECT COUNT(*) FROM biz_partner_application WHERE status = '대기'
+    </select>
+
+    <select id="getMemberPartnerInfo" resultType="BizPartnerApplicationVo">
+        SELECT
+            partner_status AS status,
+            partner_grade AS partnerGrade
+        FROM member WHERE id COLLATE utf8mb4_unicode_ci = #{memberId}
+    </select>
+
+    <select id="getLatestApplicationByMember" resultType="BizPartnerApplicationVo">
+        SELECT
+            admin_reply AS adminReply,
+            reviewed_at AS reviewedAt,
+            status
+        FROM biz_partner_application
+        WHERE member_id COLLATE utf8mb4_unicode_ci = #{memberId}
+        ORDER BY created_at DESC
+        LIMIT 1
+    </select>
+</mapper>

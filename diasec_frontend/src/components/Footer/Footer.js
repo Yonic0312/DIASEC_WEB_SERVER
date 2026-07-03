@@ -4,7 +4,7 @@ const Footer = () => {
     const navigate = useNavigate();
 
     return (
-        <div className="w-full h-full flex flex-col items-center justify-center bg-[#b29476] mb:mt-20 mt-10">
+        <div className="w-full h-full flex flex-col items-center justify-center bg-[#b29476] md:mt-20 mt-10">
             <div className="
                 md:text-[15px] text-[clamp(12px,1.955vw,15px)]
                 flex flex-col items-center text-white">
@@ -16,15 +16,14 @@ const Footer = () => {
                     <span> 상호명 : 디아섹코리아</span> 
                     <span className="md:block hidden">|</span>
                     <span> 대표 : 임정원</span> 
-                    
                 </div> 
 
                 <div className="
                     flex flex-col md:flex-row md:gap-2 text-center
                 ">
-                    <span> 메일 : d2one@naver.com</span>
+                    <a href="mailto:d2one@naver.com"> 메일 : d2one@naver.com</a>
                     <span className="md:block hidden">|</span>
-                    <span> 고객센터 : 02-389-5879</span>
+                    <a href="tel:023895879"> 고객센터 : 02-389-5879</a>
                     <span className="md:block hidden">|</span>
                     <span> 사업자등록번호 : 357-78-00448</span>
                     
@@ -53,10 +52,31 @@ const Footer = () => {
                     <Link to="/customFrames" className="hover:underline px-1">맞춤액자</Link>
                 </nav>
 
-                <div className="
-                        flex md:gap-2 gap-[4px]
-                    "
-                >
+                <div className="flex md:gap-2 gap-[4px]">
+                    <button
+                            onClick={() => navigate('/bizConsult')}
+                    >
+                        기업컨설팅
+                    </button>
+                    
+                    |
+                    <button
+                        onClick={() => navigate('/bizPartner')}
+                    >
+                        업무제휴
+                    </button>
+                    |
+                    <a
+                        href="https://blog.naver.com/diasec_korea"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="hover:underline"
+                    >
+                        블로그
+                    </a>
+                </div>
+
+                <div className="flex md:gap-2 gap-[4px]">
                     <button
                         onClick={() => navigate('/')}
                     >
@@ -78,33 +98,12 @@ const Footer = () => {
                     <button
                         onClick={() => navigate('/policy/privacy')}
                     >
-                        개인정보 취급방침
+                        개인정보 처리방침
                     </button>
-                    {/* |
-                    <button
-                        onClick={() => navigate('')}
-                    >
-                        기업컨설팅
-                    </button>
-                    |
-                    <button
-                        onClick={() => navigate('')}
-                    >
-                        제휴문의
-                    </button> */}
-                     |
-                    <a
-                        href="https://blog.naver.com/diasec_korea"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="hover:underline"
-                    >
-                        블로그
-                    </a>
                 </div>
 
                 <div className="flex md:text-[15px] text-[12px]  mt-[6px]">
-                    <span>Copyright ⓒ2000 DIASEC KOREA All right reserved</span>
+                    <span>Copyright ⓒ2000 DIASEC KOREA All rights reserved</span>
                 </div>
             </div>
         </div>

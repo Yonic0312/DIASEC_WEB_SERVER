@@ -78,7 +78,7 @@
 
     <!-- 모든 회원 목록 가져오기 -->
     <select id="getAllMembers" resultType="com.diasec.diasec_backend.vo.MemberVo">
-        SELECT id, name, email, created_at AS createdAt, role
+        SELECT id, name, email, created_at AS createdAt, phone, role
         FROM member
         ORDER BY created_at DESC
     </select>

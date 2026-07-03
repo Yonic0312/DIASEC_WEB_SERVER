@@ -122,7 +122,6 @@ public class InquiryController {
     // 상품에서 답변 (어드민)
     @PatchMapping("/answer")
     public ResponseEntity<String> registerAnswer(@RequestBody Map<String, String> payload) {
-        System.out.println("answer@@@@@@");
         Long iid = Long.parseLong(payload.get("iid"));
         String content = payload.get("answer");
         String adminId = payload.get("adminId");
@@ -141,7 +140,6 @@ public class InquiryController {
     // 상품에서 답변 삭제
     @DeleteMapping("/answer/{rid}")
     public ResponseEntity<String> deleteReply(@PathVariable Long rid) {
-        System.out.println("@DeleteMapping(\"/answer/{rid}\")");
         inquiryService.deleteReply(rid);
         return ResponseEntity.ok("답변이 삭제되었습니다.");
     }
@@ -150,7 +148,6 @@ public class InquiryController {
     @GetMapping("/myList")
     public ResponseEntity<List<InquiryVo>> getInquiryById(@RequestParam String id) {
         List<InquiryVo> list = inquiryService.getInquiryById(id);
-        System.out.println(list);
         return ResponseEntity.ok(list);
     }
 
@@ -158,7 +155,6 @@ public class InquiryController {
     @GetMapping("/admin/list")
     public ResponseEntity<List<InquiryVo>> getAllInquiries() {
         List<InquiryVo> list = inquiryService.getAllInquiries();
-        System.out.println("list : " + list);
         return ResponseEntity.ok(list);
     }
 
@@ -172,7 +168,6 @@ public class InquiryController {
     // 관리자 페이지 미답변 개수 가져오기
     @GetMapping("/unanswered")
     public ResponseEntity<Long> selectUnanswered () {
-        System.out.println("selectUnanswered : " + inquiryService.selectUnanswered());
         return ResponseEntity.ok(inquiryService.selectUnanswered());
     }
 

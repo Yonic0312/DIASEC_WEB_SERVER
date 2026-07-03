@@ -40,8 +40,6 @@ public class CustomAuthorizationRequestResolver implements OAuth2AuthorizationRe
             extraParams.put("auth_type", "reprompt"); // ✅ 네이버용 추가!
         }
 
-        System.out.println("✅ 요청 플랫폼: " + registrationId + ", 파라미터: " + extraParams);
-
         return OAuth2AuthorizationRequest.from(original)
                 .additionalParameters(extraParams)
                 .build();
@@ -61,9 +59,6 @@ public class CustomAuthorizationRequestResolver implements OAuth2AuthorizationRe
         } else if (uri.contains("naver")) {
             extraParams.put("auth_type", "reprompt"); // 🔥 네이버용
         }
-
-        System.out.println("✅ 커스터마이징 URL: " + uri);
-        System.out.println("✅ 파라미터 설정됨: " + extraParams);
 
         return OAuth2AuthorizationRequest.from(original)
                 .additionalParameters(extraParams)

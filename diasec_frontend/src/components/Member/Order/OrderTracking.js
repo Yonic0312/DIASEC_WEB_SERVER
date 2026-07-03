@@ -11,10 +11,16 @@ const OrderTracking = () => {
     const [item, setItem] = useState(null);
 
     useEffect(() => {
-        axios.get(`${API}/order/detail/${itemId}`)
+        axios.get(`${API}/order/detail/${itemId}`, { withCredentials: true })
             .then(res => setItem(res.data))
-            .catch(err => console.error('배송 정보 불러오기 실패', err));
-    }, [itemId]);
+            .catch(err => {
+                if (err.response?.status === 403 || err.response?.status === 401) {
+                    navigate('/orderList', { replace: true });
+                    return;
+                }
+                console.error('배송 정보 불러오기 실패', err);
+            });
+    }, [itemId, API, navigate]);
 
     if (!item) return <div className="text-center py-20 text-gray-500">로딩 중...</div>;
 

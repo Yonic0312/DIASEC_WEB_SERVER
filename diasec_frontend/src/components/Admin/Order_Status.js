@@ -21,23 +21,18 @@ const Order_Status = () => {
     const [startDate, setStartDate] = useState('');
     const [endDate, setEndDate] = useState('');
 
-    useEffect(() => {
-        const today = new Date();
-        const start = today.toISOString().split('T')[0];
-
-        const oneMonthEarly = new Date(today);
-        oneMonthEarly.setMonth(oneMonthEarly.getMonth() - 1);
-        const earlyOneMonth = oneMonthEarly.toISOString().split('T')[0];
-
-        setStartDate(earlyOneMonth);
-        setEndDate(start);
-    }, []);
+    const handleAllPeriod = () => {
+        setStartDate('');
+        setEndDate('');
+    };
 
     const handleRangeClick = (months) => {
-        const end = new Date(endDate);
+        const end = endDate ? new Date(endDate) : new Date();
         const newStart = new Date(end);
         newStart.setMonth(end.getMonth() - months);
+        const endStr = end.toISOString().split('T')[0];
         setStartDate(newStart.toISOString().split('T')[0]);
+        setEndDate(endStr);
     };
 
     const handleToday = () => {
@@ -196,14 +191,8 @@ const Order_Status = () => {
             setStartDate(spStart);
             setEndDate(spEnd);
         } else {
-            // 없으면 기존처럼 기본 1개월 세팅
-            const today = new Date();
-            const end = today.toISOString().split('T')[0];
-            const oneMonthEarly = new Date(today);
-            oneMonthEarly.setMonth(oneMonthEarly.getMonth() - 1);
-            const start = oneMonthEarly.toISOString().split('T')[0];
-            setStartDate(start);
-            setEndDate(end);
+            setStartDate('');
+            setEndDate('');
         }
 
         setStatusFilter(spStatus);
@@ -214,17 +203,17 @@ const Order_Status = () => {
 
     // 상태가 바뀌면 URL도 수정
     useEffect(() => {
-        // 날짜가 아직 설정되기 전이면 저장X
-        if (!startDate || !endDate) return;
-
-        setSearchParams({
+        const params = {
             status: statusFilter,
             category: categoryFilter,
             keyword,
-            startDate,
-            endDate,
             page: String(currentPage),
-        }, {replace: true});
+        };
+        if (startDate && endDate) {
+            params.startDate = startDate;
+            params.endDate = endDate;
+        }
+        setSearchParams(params, { replace: true });
     }, [statusFilter, categoryFilter, keyword, startDate, endDate, currentPage]);
 
     // 검색조건 바뀌면 페이지 1로 리셋
@@ -362,6 +351,7 @@ const Order_Status = () => {
                         <option value="authorCollection">작가별</option>
                         <option value="customFrames">맞춤액자</option>
                     </select>
+                    <button className="w-[65px] h-[40px] border bg-white" onClick={handleAllPeriod}>전체</button>
                     <button className="w-[65px] h-[40px] border bg-white" onClick={handleToday}>오늘</button>
                     <button className="w-[65px] h-[40px] border bg-white" onClick={() => handleRangeClick(1)}>1개월</button>
                     <button className="w-[65px] h-[40px] border bg-white" onClick={() => handleRangeClick(3)}>3개월</button>

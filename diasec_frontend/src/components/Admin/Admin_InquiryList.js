@@ -205,7 +205,7 @@ const Admin_InquiryList = () => {
                                         {inq.productImg ? (
                                         <p><img src={inq.productImg} className="w-24 h-24"/></p>
                                         ) : ('')}
-                                        <p><span className="font-semibold">작성일:</span> {inq.createdAt?.slice(0, 10)}</p>
+                                        <p><span className="font-semibold">작성일:</span> {inq.createdAt?.slice(0, 16)}</p>
                                     </div>
                                 </div>
                                 

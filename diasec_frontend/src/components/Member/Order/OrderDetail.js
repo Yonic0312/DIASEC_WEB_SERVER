@@ -39,6 +39,34 @@ const OrderDetail = () => {
         return String(v).split(',').map(s => s.trim()).filter(Boolean);
     };
 
+    const buildDetailRequestConfig = () => {
+        const config = { withCredentials: true };
+        if (!member && guestPasswordFromSearch) {
+            config.params = { guestPassword: guestPasswordFromSearch };
+        }
+        return config;
+    };
+
+    const handleDetailAccessDenied = (err) => {
+        const message = err.response?.data?.error || '접근 권한이 없습니다.';
+        toast.error(message);
+        navigate(member ? '/orderList' : '/guestOrderSearch', { replace: true });
+    };
+
+    const fetchOrderDetail = async () => {
+        try {
+            const res = await axios.get(`${API}/order/detail/oid/${oid}`, buildDetailRequestConfig());
+            setOrder(res.data);
+        } catch (err) {
+            if (err.response?.status === 403 || err.response?.status === 401) {
+                handleDetailAccessDenied(err);
+                return;
+            }
+            console.error('주문 상세 불러오기 실패', err);
+            toast.error('주문 정보를 불러오지 못했습니다.');
+        }
+    };
+
     const statusBadge = (s) => {
         const base = "inline-flex px-2 py-0.5 rounded-full text-xs border";
         if (!s) return <span className={`${base} bg-gray-50 text-gray-600`}>미업로드</span>
@@ -70,12 +98,16 @@ const OrderDetail = () => {
                 throw new Error("잘못된 decision");
             }
 
+            // 비회원 주문조회에서 넘어온 경우 비밀번호 함께 전송
+            if (!member && guestPasswordFromSearch) {
+                body.guestPassword = guestPasswordFromSearch;
+            }
+
             const res = await axios.post(url, body, { withCredentials: true });
             if (!res.data?.success) throw new Error(res.data?.message || "처리 실패");
 
             toast.success(decision === "APPROVED" ? "승인 처리 완료" : "반려 처리 완료");
-            const fresh = await axios.get(`${API}/order/detail/oid/${oid}`, { withCredentials: true});
-            setOrder(fresh.data);
+            await fetchOrderDetail();
         } catch (e) {
             console.error(e);
             toast.error(e.message || "처리 중 오류");
@@ -163,6 +195,10 @@ const OrderDetail = () => {
                 retouchNote: retouchDraft.note || null,
             };
 
+            if (!member && guestPasswordFromSearch) {
+                payload.guestPassword = guestPasswordFromSearch;
+            }
+
             const res = await fetch(`${API}/order/update-retouch`, {
                 method: 'POST',
                 headers: { 'Content-Type' : 'application/json' },
@@ -177,9 +213,7 @@ const OrderDetail = () => {
                 setRetouchModalOpen(false);
                 setRetouchTargetItemId(null);
 
-                // 재조회
-                const fresh = await axios.get(`${API}/order/detail/oid/${oid}`, { withCredentials: true });
-                setOrder(fresh.data);
+                await fetchOrderDetail();
             } else {
                 toast.error("저장 실패: " + (data.message || ""));
             }
@@ -204,8 +238,6 @@ const OrderDetail = () => {
     const [isDraggingClaim, setIsDraggingClaim] = useState(false);
 
     const handleSubmitReturn = async () => {
-        const needsRefundBankInfo = 
-            claimType === '반품' && order?.paymentMethod === '가상계좌';
 
         if (!returnReason) {
             toast.error('사유를 선택해주세요.');
@@ -279,12 +311,8 @@ const OrderDetail = () => {
 
     // 아이템 불러오기
     useEffect(() => {
-        axios.get(`${API}/order/detail/oid/${oid}`, {
-            withCredentials : true
-        })
-            .then(res => setOrder(res.data))
-            .catch(err => console.error("주문 상세 불러오기 실패", err));
-    }, [oid]);
+        fetchOrderDetail();
+    }, [oid, member, guestPasswordFromSearch]);
 
     if (!order) return <div className="text-center py-20 text-gray-500">로딩 중...</div>;
 
@@ -636,8 +664,9 @@ const OrderDetail = () => {
                             value={returnDetail}
                             onChange={(e) => setReturnDetail(e.target.value)}
                         />
-                        {claimType === '반품' && (
+                        {claimType === '반품' && order.paymentMethod === '가상계좌' &&(
                         <>
+                            <p className="text-xs text-gray-500">가상계좌 결제 반품 시 환불받을 계좌를 입력해 주세요.</p>
                             <input 
                                 type="text"
                                 placeholder="은행명"

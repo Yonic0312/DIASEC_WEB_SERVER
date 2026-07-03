@@ -3,6 +3,7 @@ import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { useMember } from '../../context/MemberContext';
 import axios from 'axios';
 import { toast } from 'react-toastify';
+import { AiFillEye, AiFillEyeInvisible } from 'react-icons/ai';
 
 import btn_kakao from '../../assets/btn_kakao.png';
 import btn_naver from '../../assets/btn_naver.png';
@@ -23,6 +24,7 @@ const Login = () => {
 
     const [id, setId] = useState('');
     const [password, setPassword] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
 
     // focus
     const idRef = useRef(null);
@@ -62,11 +64,6 @@ const Login = () => {
     }, [member?.id, member, redirectAfterLogin]);
 
     const [loading, setLoading] = useState(false);
-
-    const oauthPopupOrigin = useMemo(
-        () => (API || '').replace(/\/api\/?$/, ''),
-        [API]
-    );
 
     const handleLogin = async (e) => {
         e.preventDefault();
@@ -116,43 +113,47 @@ const Login = () => {
         const left = window.screenX + (window.outerWidth - width) / 2;
         const top = window.screenY + (window.outerHeight - height) / 2;
 
-        const url = `${oauthPopupOrigin}/oauth2/authorization/${provider}`;
-        window.open(url, "_blank", `width=500,height=600,top=${top},left=${left}`);
+        const url = `${API.replace('/api', '')}/oauth2/authorization/${provider}`;
+        const popup = window.open(url, "_blank", `width=500,height=600,top=${top},left=${left}`);
+        if (!popup) {
+            toast.warn('팝업이 차단되었습니다. 브라우저에서 팝업을 허용해 주세요.');
+        }
     }
 
-    useEffect(() => {
-        const handler = async (e) => {
-            if (!oauthPopupOrigin || e.origin !== oauthPopupOrigin) return;
+    // useEffect(() => {
+    //     const handler = async (e) => {
+    //         if (e.origin !== window.location.origin) return;
 
-            const { type, message } = e.data || {};
+    //         const { type, message } = e.data || {};
 
-            if (type === "LINK_REQUIRED") {
-                navigate("/link-social");
-                return;
-            }
+    //         if (type === "LINK_REQUIRED") {
+    //             // 연결 화면으로 이동
+    //             navigate("/link-social");
+    //             return;
+    //         }
 
-            if (type === "OAUTH_FAIL") {
-                toast.error("소셜 로그인에 실패했습니다. 다시 시도해주세요.");
-                console.error("OAUTH_FAIL:", message);
-                return;
-            }
+    //         if (type === "OAUTH_FAIL") {
+    //             toast.error("소셜 로그인에 실패했습니다. 다시 시도해주세요.");
+    //             console.error("OAUTH_FAIL:", message);
+    //             return;
+    //         }
 
-            if (type === "OAUTH_SUCCESS") {
-                try {
-                    const profile = await api.get(`/member/me`);
-                    setMember(profile.data);
-                    toast.success('로그인되었습니다.');
-                    navigate("/");
-                } catch (err) {
-                    toast.error("로그인 정보를 불러오지 못했습니다.");
-                    console.error(err);
-                }
-            }
-        };
+    //         if (type === "OAUTH_SUCCESS") {
+    //             try {
+    //                 const profile = await api.get(`/member/me`);
+    //                 setMember(profile.data);
+    //                 toast.success('로그인되었습니다.');
+    //                 navigate("/");
+    //             } catch (err) {
+    //                 toast.error("로그인 정보를 불러오지 못했습니다.");
+    //                 console.error(err);
+    //             }
+    //         }
+    //     };
 
-        window.addEventListener("message", handler);
-        return () => window.removeEventListener("message", handler);
-    }, [api, navigate, setMember, oauthPopupOrigin]);
+    //     window.addEventListener("message", handler);
+    //     return () => window.removeEventListener("message", handler);
+    // }, [api, navigate, setMember]);
 
     return (
         <div className="flex items-center justify-center">
@@ -166,44 +167,59 @@ const Login = () => {
                                 flex w-auto items-center justify-between gap-2
                                 sm:text-[17px] text-[15.5px]"
                             >
-                                <span> 아이디 </span> 
+                                <label htmlFor="id" className="cursor-pointer"> 아이디 </label> 
                                 <input 
                                     ref={idRef}
-                                    type="text" 
-                                    id="id" 
+                                    type="text"
+                                    id="id"
                                     autoFocus
                                     autoComplete="username"
-                                    value={id} 
-                                    onChange={(e) => setId(e.target.value)} 
+                                    value={id}
+                                    onChange={(e) => setId(e.target.value)}
                                     className="
                                         sm:w-[226px] w-[156px]
-                                        px-2 border-gray-300 border-[1px] h-10" 
+                                        px-2 border-gray-300 border-[1px] h-10
+                                        focus:outline-none focus:ring-2 focus:ring-[#D0AC88]"
                                 />
                             </div>
                             <div className="
                                 flex w-auto items-center justify-between gap-2 
                                 sm:text-[17px] text-[15.5px]">
-                                <span> 비밀번호 </span> 
-                                <input 
-                                    ref={pwRef}
-                                    type="password" 
-                                    id="password" 
-                                    autoComplete="current-password"
-                                    value={password} 
-                                    onChange={(e) => setPassword(e.target.value)} 
-                                    className="
-                                        sm:w-[226px] w-[156px]
-                                        px-2 border-gray-300 border-[1px] h-10"
-                                />
+                                <label htmlFor="password" className="cursor-pointer"> 비밀번호 </label>
+                                <div className="relative">
+                                    <input 
+                                        ref={pwRef}
+                                        type={showPassword ? "text" : "password"}
+                                        id="password" 
+                                        autoComplete="current-password"
+                                        value={password} 
+                                        onChange={(e) => setPassword(e.target.value)}
+                                        className="
+                                            sm:w-[226px] w-[156px]
+                                            px-2 pr-9 border-gray-300 border-[1px] h-10
+                                            focus:outline-none focus:ring-2 focus:ring-[#D0AC88]"
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowPassword((prev) => !prev)}
+                                        className="
+                                            absolute right-2 top-1/2 -translate-y-1/2
+                                            text-[11px] text-gray-500 hover:text-[#D0AC88]
+                                            sm:text-xs"
+                                        aria-label={showPassword ? '비밀번호 숨기기' : '비밀번호 보기'}
+                                    >
+                                        {showPassword ? <AiFillEyeInvisible size={18} /> : <AiFillEye size={18} />}
+                                    </button>
+                                </div>
                             </div>
                             <div className="flex w-full justify-center">
-                                <button type="submit" 
-                                    className={`
-                                        w-full bg-black text-white  
-                                        h-[48px]
-                                        sm:text-sm text-[12px]`}
+                                <button 
+                                    type="submit" 
+                                    disabled={loading}
+                                    className={`w-full bg-black text-white h-[48px] sm:text-sm text-[12px]
+                                        ${loading ? 'opacity-60 cursor-not-allowed' : ''}`}
                                 > 
-                                    LOGIN 
+                                    {loading ? '로그인 중...' : '로그인'}
                                 </button>
                             </div>
                         </div>

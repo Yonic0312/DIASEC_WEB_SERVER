@@ -99,11 +99,11 @@
 
 .size-adjust-hint-input {
   color: #111827;
-  animation: sizeAdjustHintBorderBlink 0.8s ease-in-out infinite;
+  animation: sizeAdjustHintBorderBlink 1s ease-in-out infinite;
 }
 
 .size-adjust-hint-text {
-  animation: sizeAdjustHintTextBlink 0.8s ease-in-out infinite;
+  animation: sizeAdjustHintTextBlink 1s ease-in-out infinite;
 }
 
 

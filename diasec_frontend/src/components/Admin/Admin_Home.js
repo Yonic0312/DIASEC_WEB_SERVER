@@ -42,6 +42,8 @@ const Admin_Home = () => {
 
     const [visitStats, setVisitStats] = useState({ today: 0, total: 0 });
     const [inquiryUnanswered, setInquiryUnanswered] = useState(0);
+    const [bizConsultCount, setBizConsultCount] = useState(0);
+    const [bizPartnerCount, setBizPartnerCount] = useState(0);
     const [orderCounts, setOrderCounts] = useState({});
     const [loading, setLoading] = useState(true);
 
@@ -50,14 +52,18 @@ const Admin_Home = () => {
         const run = async () => {
             setLoading(true);
             try {
-                const [vis, inq, ord] = await Promise.all([
+                const [vis, inq, ord, bizConsult, bizPartner] = await Promise.all([
                     axios.get(`${API}/admin/visit/stats`, { withCredentials: true }).then((r) => r.data),
                     axios.get(`${API}/inquiry/unanswered`).then((r) => r.data),
                     axios.get(`${API}/order/admin/count-by-status`, { withCredentials: true }).then((r) => r.data),
+                    axios.get(`${API}/admin/biz-consult/count`, { withCredentials: true }).then((r) => r.data),
+                    axios.get(`${API}/admin/biz-partner/count`, { withCredentials: true }).then((r) => r.data),
                 ]);
                 if (cancelled) return;
                 setVisitStats(vis || { today: 0, total: 0 });
                 setInquiryUnanswered(Number(inq) || 0);
+                setBizConsultCount(Number(bizConsult) || 0);
+                setBizPartnerCount(Number(bizPartner) || 0);
                 const map = {};
                 (ord || []).forEach((row) => {
                     map[row.status] = Number(row.cnt || 0);
@@ -90,6 +96,8 @@ const Admin_Home = () => {
             { label: '상품 수정', path: '/admin_ProductManager' },
             { label: '회원 관리', path: '/admin_MemberManager' },
             { label: '고객 문의', path: '/admin_InquiryList' },
+            { label: '기업컨설팅', path: '/admin_BizConsultList' },
+            { label: '업무제휴', path: '/admin_BizPartnerList' },
             { label: '보정 요청', path: '/admin_AdminRetouchList' },
             { label: '공지사항', path: '/admin_NoticeManager' },
             { label: 'FAQ', path: '/admin_FAQManager' },
@@ -107,7 +115,7 @@ const Admin_Home = () => {
 
             {loading && <p className="text-gray-500 text-sm mb-6">불러오는 중…</p>}
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-10">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 mb-10">
                 <StatCard
                     title="방문자 (오늘 / 누적)"
                     value={`${Number(visitStats.today || 0).toLocaleString()} / ${Number(visitStats.total || 0).toLocaleString()}`}
@@ -129,6 +137,22 @@ const Admin_Home = () => {
                     hint={inquiryUnanswered > 0 ? '답변이 필요합니다.' : '모두 처리됨'}
                     accent={inquiryUnanswered > 0 ? 'text-amber-700' : undefined}
                     onClick={() => navigate('/admin_InquiryList')}
+                />
+                <StatCard
+                    title="기업컨설팅 신청"
+                    value={`${bizConsultCount.toLocaleString()}건`}
+                    subtitle="미완료 신청 건수"
+                    hint={bizConsultCount > 0 ? '처리가 필요합니다.' : '모두 처리됨'}
+                    accent={bizConsultCount > 0 ? 'text-amber-700' : undefined}
+                    onClick={() => navigate('/admin_BizConsultList')}
+                />
+                <StatCard 
+                    title="업무제휴 신청"
+                    value={`${bizPartnerCount.toLocaleString()}건`}
+                    subtitle="검토 대기 신청 건수"
+                    hint={bizPartnerCount > 0 ? '승인·반려 처리가 필요합니다.' : '모두 처리됨'}
+                    accent={bizPartnerCount > 0 ? 'text-amber-700' : undefined}
+                    onClick={() => navigate('/admin_BizPartnerList')}
                 />
             </div>
 

@@ -166,11 +166,6 @@ public class SolapiService {
             + ", salt=" + salt
             + ", signature=" + signature);
 
-            System.out.println("[SOLAPI] date=" + date);
-            System.out.println("[SOLAPI] salt=" + salt);
-            System.out.println("[SOLAPI] signature=" + signature);
-            System.out.println("[SOLAPI] body=" + body);
-
         // 호출
         HttpEntity<Map<String, Object>> entity = new HttpEntity<>(body, headers);
 

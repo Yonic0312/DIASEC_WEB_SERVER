@@ -6,6 +6,7 @@ import { useState, useEffect, useLayoutEffect, useContext, useRef } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom';
 import { MemberContext } from '../../context/MemberContext';
 import { toast } from 'react-toastify';
+import { usePartner } from '../../context/PartnerContext';
 import { v4 as uuidv4 } from 'uuid';
 
 import bg from '../../assets/CustomFrames/p.png'; // 전에 내가 만든 배경
@@ -70,6 +71,7 @@ const Main_CustomFrames = () => {
     const presetKey = searchParams.get('preset');
     const initialExampleImage = presetImageMap[presetKey] || ex;
     const CUSTOM_FRAME_TAB_PRODUCT = { pid: -3 };
+    const { partnerDiscount } = usePartner();
 
     const [width, setWidth] = useState(35.6);
     const [height, setHeight] = useState(27.9);
@@ -468,19 +470,33 @@ const Main_CustomFrames = () => {
     const previewHeight = height * CM_TO_PX;
 
     const priceTiers = [
-        { maxArea: 993.4, unitPrice: 45.3 },
-        { maxArea: 1327.9, unitPrice: 39.2 },
+        { maxArea: 993.4, unitPrice: 38.3 },
+        { maxArea: 1327.9, unitPrice: 37.2 },
         { maxArea: 2064.5, unitPrice: 33.6 },
-        { maxArea: 2477.4, unitPrice: 32.9 },
-        { maxArea: 3096.7, unitPrice: 32.2 },
-        { maxArea: 4967.2, unitPrice: 29.1 },
-        { maxArea: 6451.6, unitPrice: 28.9 },
-        { maxArea: 7741.9, unitPrice: 28.7 },
-        { maxArea: 8535.4, unitPrice: 28.1 },
-        { maxArea: 12133.0, unitPrice: 27.1 },
-        { maxArea: 18393.3, unitPrice: 26.4 },
+        { maxArea: 2477.4, unitPrice: 32.0 },
+        { maxArea: 3096.7, unitPrice: 30.2 },
+        { maxArea: 4967.2, unitPrice: 33.1 },
+        { maxArea: 6451.6, unitPrice: 25.9 },
+        { maxArea: 7741.9, unitPrice: 27.0 },
+        { maxArea: 8535.4, unitPrice: 22.1 },
+        { maxArea: 12133.0, unitPrice: 24.1 },
+        { maxArea: 18393.3, unitPrice: 28.4 },
         { maxArea: 20503.4, unitPrice: 24.5 },
-        { maxArea: Infinity, unitPrice: 25.4 }, // 최종 fallback
+        { maxArea: Infinity, unitPrice: 27.4 }, // 최종 fallback
+
+        // { maxArea: 993.4, unitPrice: 45.3 },
+        // { maxArea: 1327.9, unitPrice: 39.2 },
+        // { maxArea: 2064.5, unitPrice: 33.6 },
+        // { maxArea: 2477.4, unitPrice: 32.9 },
+        // { maxArea: 3096.7, unitPrice: 32.2 },
+        // { maxArea: 4967.2, unitPrice: 29.1 },
+        // { maxArea: 6451.6, unitPrice: 28.9 },
+        // { maxArea: 7741.9, unitPrice: 28.7 },
+        // { maxArea: 8535.4, unitPrice: 28.1 },
+        // { maxArea: 12133.0, unitPrice: 27.1 },
+        // { maxArea: 18393.3, unitPrice: 26.4 },
+        // { maxArea: 20503.4, unitPrice: 24.5 },
+        // { maxArea: Infinity, unitPrice: 25.4 },
     ];
 
     // 기준 배경 px (디자인 사이즈)
@@ -558,6 +574,7 @@ const Main_CustomFrames = () => {
 
     const actualMaxWidth = getActualMaxWidth();
     const isCustomOrderFull = customItems.length >= MAX_CUSTOM_ORDER_ITEMS;
+    const showImageUploadHint = customItems.length === 0;
     const UploadAreaTag = isCustomOrderFull ? 'div' : 'label';
 
     // 이미지 드래그 앤 드랍 이벤트 핸들러
@@ -600,10 +617,14 @@ const Main_CustomFrames = () => {
     const totalPriceWithoutShippingDiscounted = 
         customItems.length > 0
             ? customItems.reduce(
-                (acc, item) => (item.isUploading ? acc : acc + getDiscountedUnitPrice(item.price)),
+                (acc, item) => (
+                    item.isUploading
+                        ? acc 
+                        : acc + getDiscountedUnitPrice(item.price, partnerDiscount)
+                ),
                 0
             )
-            : getDiscountedUnitPrice(examplePreviewPrice);
+            : getDiscountedUnitPrice(examplePreviewPrice, partnerDiscount);
     
     // 바로구매 (결제)
     const handleBuyNow = () => {
@@ -658,7 +679,7 @@ const Main_CustomFrames = () => {
         { title: '라인 보정', before: custom5, after: custom6},
         { title: '색감 보정', before: custom7, after: custom8},
         { title: '배경 정리', before: custom9, after: custom10},
-        { title: '고해상도 업스케일', before: custom11, after: custom12},
+        { title: '사진 업스케일링', before: custom11, after: custom12},
     ];
 
     const retouchOptions = beforeAfterData.map(v => v.title);
@@ -1015,8 +1036,12 @@ const Main_CustomFrames = () => {
                                         transition-colors duration-200 
                                         ${ isDragging ? 'border-[#ccc26c] bg-[#fdebd4]' : 'border-dashed border-gray-400'}
                                         ${isCustomOrderFull
-                                            ? 'opacity-50 cursor-not-allowed'
-                                            : 'cursor-pointer hover:border-[#ccc26c] hover:bg-[#fdebd4]'
+                                            ? 'opacity-50 cursor-not-allowed border-dashed border-gray-400 text-gray-500'
+                                            : isDragging
+                                                ? 'border-dashed border-[#ccc26c] bg-[#fdebd4] text-gray-500 cursor-pointer'
+                                                : showImageUploadHint
+                                                    ? 'size-adjust-hint-input border-dashed cursor-pointer'
+                                                    : 'border-dashed border-gray-400 text-gray-500 cursor-pointer hover:border-[#ccc26c] hover:bg-[#fdebd4]'
                                         }
                                     `}
                                     onDragEnter={(e) => {
@@ -1420,11 +1445,11 @@ const Main_CustomFrames = () => {
                             </div>
                             <span className="text-base font-semibold text-gray-700">
                                 총 결제금액 :{' '}
-                                <span className=" text-[#a57647]">
+                                <span>
                                     <SitePriceTotal
                                         original={totalPriceWithoutShipping}
                                         discounted={totalPriceWithoutShippingDiscounted}
-                                        className={`${SITE_PRICE_TEXT} font-semibold text-[#a57647]`}
+                                        className={`${SITE_PRICE_TEXT} font-semibold`}
                                     />
                                 </span>
                             </span>
@@ -1828,7 +1853,7 @@ const Main_CustomFrames = () => {
                                 }
                                 const area = pw * ph;
                                 const original = calculateCumulativePrice(area);
-                                const discounted = getDiscountedUnitPrice(original);
+                                const discounted = getDiscountedUnitPrice(original, partnerDiscount);
                                 const pct = getSiteDiscountPercent();
                                 const hasDiscount = discounted < original;
                                 return (

@@ -90,7 +90,6 @@ public class InquiryService {
         
         // 2. 실제 이미지 파일 삭제
         for (String url : imageUrls) {
-            System.out.println("url: " + url);
             imageUtil.deleteImage(url);
         }
     }

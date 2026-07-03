@@ -17,7 +17,7 @@ const Admin_CollectionManager = () => {
     const [editingLabel, setEditingLabel] = useState(null); // 작가
 
     // 명화 시대 추가
-    const MASTERPIECE_PERIODS = [ "르네상스", "베네치아파", "바로크", "로코코", "신고전주의", "낭만주의", "사실주의", "인상주의", "신인상주의", "후기인상주의", "근대미술" ];
+    const MASTERPIECE_PERIODS = [ "르네상스", "바로크", "로코코", "신고전주의", "낭만주의", "사실주의", "인상주의", "신인상주의", "후기인상주의", "근대미술" ];
     const KOREANPAINTING = [ "조선 전기", "조선 후기", "기타작가", "민화", "불교" ];
     
 

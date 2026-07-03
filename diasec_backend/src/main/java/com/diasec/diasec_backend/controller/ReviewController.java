@@ -215,14 +215,12 @@ public class ReviewController {
     // 리뷰 리스트 가져오기
     @GetMapping("/list")
     public ResponseEntity<List<ReviewVo>> getReviews(@RequestParam int pid) {
-        System.out.println("/list!!" + ResponseEntity.ok(reviewService.getReviewsByPid(pid)));
         return ResponseEntity.ok(reviewService.getReviewsByPid(pid));
     }
 
     // 리뷰 리스트 전체 가져오기
     @GetMapping("/all")
     public ResponseEntity<List<ReviewVo>> getAllReviews() {
-        System.out.println("list : " + reviewService.getAllReviews());
         return ResponseEntity.ok(reviewService.getAllReviews());
     }
 

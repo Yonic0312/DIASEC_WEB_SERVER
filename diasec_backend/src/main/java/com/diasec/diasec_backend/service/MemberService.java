@@ -117,41 +117,31 @@ public class MemberService {
     @Transactional
     public void deleteMember(String id) {
         // [author_image 테이블 정보 삭제]
-        List<Map<String, Object>> authorImages = authorMapper.selectAuthorImages(id);// 이미지 삭제
+        List<Map<String, Object>> authorImages = authorMapper.selectAuthorImages(id);
         for (Map<String, Object> img : authorImages) {
             String imageUrl = (String) img.get("image_url");
             if (imageUrl != null && !imageUrl.isEmpty()) {
                 imageUtil.deleteImage(imageUrl);
             }
         }
-        System.out.println("이미지 삭제@@");
-
         authorMapper.deleteAuthorById(id); // 테이블 정보 삭제
-        System.out.println("작가 테이블 삭제@@");
-        
         // member 테이블 정보 삭제
         memberMapper.deleteMember(id); 
-        System.out.println("member 테이블 삭제@@");
         
         // delivery_address 테이블 정보 삭제
         deliveryAddressMapper.deleteAddressByMemberId(id);
-        System.out.println("주소 테이블 삭제@@");
         
         // wishlist 테이블 정보 삭제
         wishlistMapper.deleteByUserId(id);
-        System.out.println("위시리스트 테이블 삭제@@");
         
         // cart 테이블 정보 삭제
         cartMapper.deleteCartItemsById(id);
-        System.out.println("카트 테이블 삭제@@");
         
         // orders 테이블 정보 삭제 (order_items 테이블도)
         orderMapper.deleteOrdersById(id);
-        System.out.println("주문 테이블 삭제@@");
         
         // credit_history 테이블 정보 삭제
         creditMapper.deleteCreditById(id);
-        System.out.println("적립금 테이블 삭제@@");
     }   
 
     // 카카오 로그인
@@ -173,9 +163,6 @@ public class MemberService {
             newUser.setProvider(provider);
     
             memberMapper.insertMember(newUser);
-            System.out.println("[✅ 소셜 회원가입 완료] " + email);
-        } else {
-            System.out.println("[🔁 기존 소셜 사용자 로그인] " + email);
         }
     }
 

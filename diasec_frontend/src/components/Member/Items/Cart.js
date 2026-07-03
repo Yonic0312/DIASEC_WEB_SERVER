@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import { usePartner } from '../../../context/PartnerContext';
 import { toast } from "react-toastify";
 import { MemberContext } from "../../../context/MemberContext";
 import { getDiscountedUnitPrice } from "../../../utils/siteDiscount";
@@ -14,6 +15,7 @@ const Cart = () => {
     const API = process.env.REACT_APP_API_BASE;
     const navigate = useNavigate();
     const { member } = useContext(MemberContext);
+    const { partnerDiscount } = usePartner();
 
     const [items, setItems] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -207,10 +209,10 @@ const Cart = () => {
 
     const totalPrice = useMemo(() => {
         return items.reduce((sum, it) => {
-            const unit = getDiscountedUnitPrice(it.price);
+            const unit = getDiscountedUnitPrice(it.price, partnerDiscount);
             return sum + unit * (Number(it.quantity) || 1);
         }, 0);
-    }, [items]);
+    }, [items, partnerDiscount]);
 
     if (loading) return <div className="text-center py-20 text-gray-500">로딩 중...</div>;
 

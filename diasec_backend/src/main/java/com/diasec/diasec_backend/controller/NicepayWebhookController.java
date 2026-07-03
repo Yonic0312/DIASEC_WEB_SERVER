@@ -91,4 +91,16 @@ public class NicepayWebhookController {
             return ResponseEntity.ok().contentType(MediaType.TEXT_HTML).body("FAIL");
         }
     }
+
+    @GetMapping("/webhook")
+    public ResponseEntity<String> webhookGet() {
+        return ResponseEntity.ok("OK");
+    }
+
+    @PostMapping("/webhook")
+    public ResponseEntity<String> webhook(@RequestBody Map<String, Object> payload) {
+        // 카드 결제는 returnUrl에서 이미 처리됨 — 로그만 남기고 OK 반환
+        System.out.println("[CARD WEBHOOK] received (no-op): " + payload);
+        return ResponseEntity.ok().contentType(MediaType.TEXT_HTML).body("OK");
+    }
 }

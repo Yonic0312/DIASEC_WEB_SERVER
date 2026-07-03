@@ -23,7 +23,24 @@ const Join = () => {
     const [smsSent, setSmsSent] = useState(false);
     const [smsVerified, setSmsVerified] = useState(false);
     const [remainSec, setRemainSec] = useState(0);
+    const [resendCooldownSec, setResendCooldownSec] = useState(0);
     const timerRef = useRef(null);
+    const resendTimerRef = useRef(null);
+
+    const startResendCooldown = (sec) => {
+        if (resendTimerRef.current) clearInterval(resendTimerRef.current);
+        setResendCooldownSec(sec);
+        resendTimerRef.current = setInterval(() => {
+            setResendCooldownSec((prev) => {
+                if (prev <= 1) {
+                    clearInterval(resendTimerRef.current);
+                    resendTimerRef.current = null;
+                    return 0;
+                }
+                return prev -1;
+            });
+        }, 1000);
+    };
 
     const startTimer = (sec) => {
         // 기존 타이머 있으면 제거
@@ -47,11 +64,14 @@ const Join = () => {
     useEffect(() => {
         return () => {
             if (timerRef.current) clearInterval(timerRef.current);
+            if (resendTimerRef.current) clearInterval(resendTimerRef.current);
         }
     }, []);
 
     // 인증번호 발송 함수 추가
     const handleSendSms = async () => {
+        if (smsSent && resendCooldownSec > 0) return;
+        
         const phoneNumber = `${phone1}-${phone2}-${phone3}`;
 
         // 번호 기본 검증만
@@ -71,6 +91,7 @@ const Join = () => {
             setSmsVerified(false);
             setSmsCode("")
             startTimer(5 * 60);
+            startResendCooldown(60);
             toast.success("인증번호를 발송했습니다.");
         } catch (e) {
             if (e?.response?.status === 429) {
@@ -108,6 +129,25 @@ const Join = () => {
         }
     };
 
+    const handleResetPhone = () => {
+        if (timerRef.current) {
+            clearInterval(timerRef.current);
+            timerRef.current = null;
+        }
+        if (resendTimerRef.current) {
+            clearInterval(resendTimerRef.current);
+            resendTimerRef.current = null;
+        }
+        setResendCooldownSec(0);
+        setPhone1('010');
+        setPhone2('');
+        setPhone3('');
+        setSmsCode('');
+        setSmsSent(false);
+        setSmsVerified(false);
+        setRemainSec(0);
+    };
+
     const confirmPwdRef = useRef();
 
     // 아이디 중복확인 버튼 없애기
@@ -140,15 +180,15 @@ const Join = () => {
             all: newValue,
             terms: newValue,
             privacy: newValue,
-            marketing: newValue
+            marketing: agree.marketing
         });
     };
 
-    // 개별 동의 중 하나라도 해제되면 전체동의 false
+    // 필수 약관(terms, privacy)만 전체동의에 반영
     const handleIndividual = (key, value) => {
         const newAgree = { ...agree, [key]: value };
 
-        newAgree.all = newAgree.terms && newAgree.privacy && newAgree.marketing;
+        newAgree.all = newAgree.terms && newAgree.privacy;
         setAgree(newAgree);
     }
 
@@ -294,6 +334,7 @@ const Join = () => {
 
     // 비밀번호 중복 체크
     const [confirmPassword, setConfirmPassword] = useState('');
+    const [submitting, setSubmitting] = useState(false);
 
     useEffect(() => {
         setSmsAgree(agree.marketing);
@@ -304,10 +345,13 @@ const Join = () => {
     const handleRegister = async (e) => {
         e.preventDefault();
 
+        if (submitting) return;
+
+        try {
+            setSubmitting(true);
+
         const phoneNumber = `${phone1}-${phone2}-${phone3}`
 
-        
-        
         // 아이디 빈칸 체크
         const trimmedId = id.trim()
 
@@ -414,12 +458,14 @@ const Join = () => {
             emailAgree
         }
 
-        try {
             await axios.post(`${API}/member/register`, registrationData);
             toast.success('회원가입이 성공했습니다!');
             navigate('/join_success');
         } catch (error) {
-            toast.error('회원가입에 실패했습니다.');
+            const msg = error?.response?.data?.message || error?.response?.data?.msg;
+            toast.error(msg || '회원가입에 실패했습니다.');
+        } finally {
+            setSubmitting(false);
         }
     }
 
@@ -536,6 +582,7 @@ const Join = () => {
                                 <select 
                                     value={phone1} 
                                     onChange={(e) => setPhone1(e.target.value)}
+                                    disabled={smsVerified}
                                     className="px-1 sm:w-[65px] w-[65px] border border-gray-300 sm:text-base text-[14px]"
                                 >
                                     <option>010</option>
@@ -553,7 +600,8 @@ const Join = () => {
                                     maxLength="4" 
                                     value={phone2} 
                                     onChange={(e) => setPhone2(e.target.value.replace(/[^0-9]/g, ''))} 
-                                    inputMode="numeric" 
+                                    inputMode="numeric"
+                                    disabled={smsVerified}
                                     className="w-[58px] border border-gray-300 pl-1 sm:text-base text-[14px]"
                                 />
                                 <span className="mx-[3px]">-</span>
@@ -563,17 +611,36 @@ const Join = () => {
                                     maxLength="4" 
                                     value={phone3} 
                                     onChange={(e) => setPhone3(e.target.value.replace(/[^0-9]/g, ''))} 
-                                    inputMode="numeric" 
+                                    inputMode="numeric"
+                                    disabled={smsVerified}
                                     className="w-[58px] border border-gray-300 pl-1 sm:text-base text-[14px] mr-1"
                                 />
-                                <button
-                                    type="button"
-                                    onClick={handleSendSms}
-                                    disabled={smsVerified}
-                                    className="px-2 py-1 border bg-black text-white text-[12px]"
-                                >
-                                    {smsSent ? "재전송" : "인증번호 받기"}
-                                </button>
+                                {!smsVerified ? (
+                                    <button
+                                        type="button"
+                                        onClick={handleSendSms}
+                                        disabled={resendCooldownSec > 0}
+                                        className={`px-2 py-1 border text-[12px] ${
+                                            resendCooldownSec > 0
+                                                ? 'bg-gray-400 text-white cursor-not-allowed'
+                                                : 'bg-black text-white'
+                                        }`}
+                                    >
+                                        {smsSent 
+                                            ? resendCooldownSec > 0
+                                                ? `재전송 (${resendCooldownSec}초)`
+                                                : '재전송'
+                                            : '인증번호 받기'}
+                                    </button>
+                                ) : (
+                                    <button
+                                        type="button"
+                                        onClick={handleResetPhone}
+                                        className="px-2 py-1 border border-gray-300 text-[12px] bg-white hover:bg-black text-gray-700 hover:text-white"
+                                    >
+                                        번호 재설정
+                                    </button>
+                                )}
                             </div>
                             <div>
                                 {smsSent && !smsVerified && (
@@ -692,7 +759,7 @@ const Join = () => {
                                 sm:w-4 w-[12px]
                                 sm:h-4 h-[12px]
                                 mr-1"/>
-                        <label htmlFor="agree-terms1" className="ml-1 sm:text-base text-[11px] cursor-pointer">이용약관 및 개인정보수집 및 이용, 쇼핑정보 수신(선택)에 모두 동의합니다.</label>
+                        <label htmlFor="agree-terms1" className="ml-1 sm:text-base text-[11px] cursor-pointer">이용약관 및 개인정보수집 및 이용에 모두 동의합니다.</label>
                     </div>
                     <hr/>
 
@@ -969,10 +1036,12 @@ const Join = () => {
                 </div>
                 <hr/>
                 <button
-                    type="submit" 
-                    className="flex justify-center py-4 sm:text-base text-[12px] bg-black text-white rounded-sm mb-20"
-                > 
-                    회원가입
+                    type="submit"
+                    disabled={submitting}
+                    className={`flex justify-center py-4 sm:text-base text-[12px] bg-black text-white rounded-sm mb-20
+                        ${submitting ? 'opacity-60 cursor-not-allowed' : ''}`}
+                >
+                    {submitting ? '가입 처리 중...' : '회원가입'}
                 </button>
             </form>
         </div>

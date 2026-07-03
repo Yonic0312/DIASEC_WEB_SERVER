@@ -47,12 +47,10 @@ public class AuthorController {
             }
 
             // 이전 이미지가 있는지 확인
-            Map<String,Object> avo = authorService.selectById(vo.getMemberId()); // 유저의 id?
-            System.out.println("avo.id = " + String.valueOf(avo.get("id")));
+            Map<String,Object> avo = authorService.selectById(vo.getMemberId());
             String beforeImage = String.valueOf(avo.get("author_profile_image"));
 
             if (beforeImage.length() != 0) {
-                System.out.println("이전에 이미지가 있습니다. 삭제하겠습니다.");
                 imageUtil.deleteImage(beforeImage);
             }
 
@@ -83,7 +81,6 @@ public class AuthorController {
     // 심사중인 사람의 수
     @GetMapping("/pending-count")
     public int getPendingAuthorCount() {
-        System.out.println("authorService.countPendingAuthors() ::: " + authorService.countPendingAuthors());
         return authorService.countPendingAuthors();
     }
 
@@ -117,9 +114,6 @@ public class AuthorController {
     @PostMapping("/approve")
     public ResponseEntity<?> approve(@RequestBody Map<String, String> body) {
         try { 
-        
-            // 승인
-            System.out.println("승인 : " + body.get("author_profile_image"));
             authorService.approve(body.get("id"), body.get("author_name"), body.get("author_profile_image"));
 
             return ResponseEntity.ok(Map.of("success", true));
@@ -156,7 +150,6 @@ public class AuthorController {
     @GetMapping("/profile")
     public ResponseEntity<?> getAuthorProfile(@RequestParam String memberId) {
         Map<String, Object> row = authorService.getAuthorProfile(memberId);
-        System.out.println("row : "+row);
         if (row == null) return ResponseEntity.notFound().build();
         return ResponseEntity.ok(row);
     }

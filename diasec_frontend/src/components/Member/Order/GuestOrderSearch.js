@@ -2,9 +2,11 @@ import { useState } from 'react';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
+import thumbCustom from '../../../assets/CustomFrames/customFrames.png';
 
 const GuestOrderSearch = () => {
     const API = process.env.REACT_APP_API_BASE;
+    const FILE_BASE = API.replace('/api', '');
     const navigate = useNavigate();
     
     const [oid, setOid] = useState('');
@@ -68,6 +70,17 @@ const GuestOrderSearch = () => {
         const hCm = Math.round(hInch * 2.54);
 
         return `약 ${wCm} x ${hCm} cm (${wInch.toFixed(1)} x ${hInch.toFixed(1)} inch)`;
+    };
+
+    const resolveItemThumbnail = (item) => {
+        if (item.category === 'customFrames') {
+            const path = item.thumbnail || item.thumbnailPreview;
+            if (!path) return thumbCustom;
+            return path.startsWith('http') ? path : `${FILE_BASE}${path}`;
+        }
+
+        if (!item.thumbnail) return thumbCustom;
+        return item.thumbnail.startsWith('http') ? item.thumbnail : `${FILE_BASE}${item.thumbnail}`;
     };
 
     return (
@@ -172,7 +185,7 @@ const GuestOrderSearch = () => {
 
                                 <div className="flex flex-row gap-4 py-2">
                                     <img 
-                                        src={item.thumbnail} 
+                                        src={resolveItemThumbnail(item)}
                                         alt={item.title} 
                                         className="md:w-20 w-[clamp(4rem,10.43vw,5rem)] 
                                         md:h-20 h-[clamp(4rem,10.43vw,5rem)] 

@@ -368,6 +368,38 @@ public class OrderService {
         orderMapper.updateFileStatusLatest(itemId, "RETOUCH_PREVIEW", "REJECTED", feedback);
     }
 
+    // 관리자: 프리뷰 유무와 관계없이 보정 승인 처리
+    @Transactional
+    public void adminApproveRetouch(Long itemId) {
+        OrderItemFileVo latest = orderMapper.selectLatestFile(itemId, "RETOUCH_PREVIEW");
+
+        if (latest != null && "APPROVED".equals(latest.getStatus())) {
+            throw new IllegalStateException("이미 승인 완료된 보정입니다.");
+        }
+        
+        if (latest != null) {
+            orderMapper.updateFileStatusLatest(itemId, "RETOUCH_PREVIEW", "APPROVED", null);
+            if (latest.getFileUrl() != null && !latest.getFileUrl().isBlank()) {
+                orderMapper.scheduleRetouchPreviewDelete(itemId);
+            }
+            return;
+        }
+        OrderItemFileVo vo = new OrderItemFileVo();
+        vo.setItemId(itemId);
+        vo.setRole("RETOUCH_PREVIEW");
+        vo.setStatus("APPROVED");
+        vo.setUploadedBy("ADMIN");
+        vo.setFileUrl("");
+        orderMapper.upsertOrderItemFile(vo);
+    }
+
+    // 관리자: 보정 요청 글(유형·메모) 삭제
+    @Transactional
+    public void clearRetouchRequest(Long itemId) {
+        int updated = orderMapper.updateRetouchInfo(itemId, 0, null, null);
+        if (updated <= 0) throw new RuntimeException("보정 요청을 찾을 수 없습니다.");
+    }
+
 
     public OrderItemFileVo getLatestRetouchPreview(Long itemId) {
         return orderMapper.selectLatestFile(itemId, "RETOUCH_PREVIEW");
@@ -454,7 +486,7 @@ public class OrderService {
             try {
                 solapiService.send(to, msg);
             } catch (Exception e) {
-                System.err.println("{ADMIN_SMS_FAIL to " + to + ", oid=" + oid + ", err" + e.getMessage());
+                // SMS 발송 실패 시 주문 처리는 유지
             }
         }
     }

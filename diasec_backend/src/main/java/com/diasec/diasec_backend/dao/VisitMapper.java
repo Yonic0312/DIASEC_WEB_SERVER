@@ -3,7 +3,7 @@ package com.diasec.diasec_backend.dao;
 import java.time.LocalDate;
 
 import org.apache.ibatis.annotations.Mapper;
-import org.springframework.data.repository.query.Param;
+import org.apache.ibatis.annotations.Param;
 
 @Mapper
 public interface VisitMapper {

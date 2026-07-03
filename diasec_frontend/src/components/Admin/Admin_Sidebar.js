@@ -6,7 +6,16 @@ const Admin_Sidebar = () => {
     const API = process.env.REACT_APP_API_BASE;
     const navigate = useNavigate();
 
+    const [partnerCount, setPartnerCount] = useState(0);
+
+    useEffect(() => {
+        axios.get(`${API}/admin/biz-partner/count`, { withCredentials: true })
+            .then((res) => setPartnerCount(Number(res.data) || 0))
+            .catch(() => {});
+    }, [API]);
+
     const [inquiryUnanswered, setInquiryUnanswered] = useState(0);
+    const [bizConsultCount, setBizConsultCount] = useState(0);
     const [orderCounts, setOrderCounts] = useState({});
 
     // 토글 상태
@@ -33,7 +42,7 @@ const Admin_Sidebar = () => {
 
     // 처리 완료 상태는 사이드바 합계 숫자에서 제외
     const EXCLUDED_FROM_SIDEBAR_TOTAL = useMemo(
-        () => new Set(['배송완료', '교환완료', '환불완료']),
+        () => new Set(['배송완료', '교환완료', '환불완료', '취소']),
         []
     );
 
@@ -69,6 +78,12 @@ const Admin_Sidebar = () => {
             setInquiryUnanswered(res.data);
         })
         .catch(err => console.error('inquiry/unanswered 불러오기 실패 : ' + err));
+    }, [API]);
+
+    useEffect(() => {
+        axios.get(`${API}/admin/biz-consult/count`, { withCredentials: true })
+            .then((res) => setBizConsultCount(Number(res.data) || 0))
+            .catch((err) => console.error('기업컨설팅 건수 불러오기 실패', err));
     }, [API]);
 
     return (
@@ -130,7 +145,8 @@ const Admin_Sidebar = () => {
 
             <span className="text-lg font-bold mt-10">문의 관리</span>
             <button className="text-sm opacity-65" onClick={() => navigate('/admin_InquiryList')}>고객 문의 답변하기({inquiryUnanswered}건)</button>
-            {/* <button className="text-sm opacity-65" onClick={() => navigate('/admin_BizList')}>기업주문 답변하기({inquiries[0]?.unansweredCount || 0}건)</button> */}
+            <button className="text-sm opacity-65" onClick={() => navigate('/admin_BizConsultList')}>기업컨설팅 관리({bizConsultCount}건)</button>
+            <button className="text-sm opacity-65" onClick={() => navigate('/admin_BizPartnerList')}>업무제휴 관리({partnerCount}건)</button>
 
             <span className="text-lg font-bold mt-10">콘텐츠 관리</span>
             <button className="text-sm opacity-65" onClick={() => navigate('/admin_NoticeManager')}>공지사항 관리</button>

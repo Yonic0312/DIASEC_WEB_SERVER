@@ -1,19 +1,33 @@
 export const MIN_WIDTH = 35.6;
 
 export const priceTiers = [
-    { maxArea: 993.4, unitPrice: 45.3 },
-    { maxArea: 1327.9, unitPrice: 39.2 },
+    { maxArea: 993.4, unitPrice: 38.3 },
+    { maxArea: 1327.9, unitPrice: 37.2 },
     { maxArea: 2064.5, unitPrice: 33.6 },
-    { maxArea: 2477.4, unitPrice: 32.9 },
-    { maxArea: 3096.7, unitPrice: 32.2 },
-    { maxArea: 4967.2, unitPrice: 29.1 },
-    { maxArea: 6451.6, unitPrice: 28.9 },
-    { maxArea: 7741.9, unitPrice: 28.7 },
-    { maxArea: 8535.4, unitPrice: 28.1 },
-    { maxArea: 12133.0, unitPrice: 27.1 },
-    { maxArea: 18393.3, unitPrice: 26.4 },
+    { maxArea: 2477.4, unitPrice: 32.0 },
+    { maxArea: 3096.7, unitPrice: 30.2 },
+    { maxArea: 4967.2, unitPrice: 33.1 },
+    { maxArea: 6451.6, unitPrice: 25.9 },
+    { maxArea: 7741.9, unitPrice: 27.0 },
+    { maxArea: 8535.4, unitPrice: 22.1 },
+    { maxArea: 12133.0, unitPrice: 24.1 },
+    { maxArea: 18393.3, unitPrice: 28.4 },
     { maxArea: 20503.4, unitPrice: 24.5 },
-    { maxArea: Infinity, unitPrice: 25.4 },
+    { maxArea: Infinity, unitPrice: 27.4 }, // 최종 fallback
+
+    // { maxArea: 993.4, unitPrice: 45.3 },
+    // { maxArea: 1327.9, unitPrice: 39.2 },
+    // { maxArea: 2064.5, unitPrice: 33.6 },
+    // { maxArea: 2477.4, unitPrice: 32.9 },
+    // { maxArea: 3096.7, unitPrice: 32.2 },
+    // { maxArea: 4967.2, unitPrice: 29.1 },
+    // { maxArea: 6451.6, unitPrice: 28.9 },
+    // { maxArea: 7741.9, unitPrice: 28.7 },
+    // { maxArea: 8535.4, unitPrice: 28.1 },
+    // { maxArea: 12133.0, unitPrice: 27.1 },
+    // { maxArea: 18393.3, unitPrice: 26.4 },
+    // { maxArea: 20503.4, unitPrice: 24.5 },
+    // { maxArea: Infinity, unitPrice: 25.4 },
 ];
 
 export const getMidWidth = (minW, maxW, maxH, ratio) => {

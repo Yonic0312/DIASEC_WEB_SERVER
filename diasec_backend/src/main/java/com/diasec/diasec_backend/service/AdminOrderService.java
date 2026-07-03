@@ -118,6 +118,60 @@ public class AdminOrderService {
         }
     }
 
+    // 보정 프리뷰 업로드 완료 시 고객 안내 문자
+    public Map<String, Object> sendRetouchPreviewReadySms(Long itemId) {
+        Map<String, Object> target = adminOrderMapper.selectShippingNotificationTarget(itemId);
+        if (target == null || target.isEmpty()) {
+            return Map.of(
+                "smsTried", false,
+                "smsSent", false,
+                "smsMessage", "알림 대상 주문 정보를 찾지 못했습니다."
+            );
+        }
+
+        String to = firstNonBlank(valueOf(target.get("recipientPhone")), valueOf(target.get("ordererPhone")));
+        if (to.isBlank()) {
+            return Map.of(
+                "smsTried", true,
+                "smsSent", false,
+                "smsMessage", "수신자 연락처가 없어 안내 문자를 보내지 못했습니다."
+            );
+        }
+
+        String memberId = valueOf(target.get("memberId"));
+        boolean isMember = !memberId.isBlank();
+        String message = isMember ? RETOUCH_PREVIEW_SMS_MEMBER : RETOUCH_PREVIEW_SMS_GUEST;
+
+        try {
+            solapiService.send(to, message);
+            return Map.of(
+                "smsTried", true,
+                "smsSent", true,
+                "smsRecipientType", isMember ? "MEMBER" : "GUEST"
+            );
+        } catch (Exception e) {
+            return Map.of(
+                "smsTried", true,
+                "smsSent", false,
+                "smsMessage", e.getMessage() != null ? e.getMessage() : "문자 발송 실패"
+            );
+        }
+    }
+
+    private static final String RETOUCH_PREVIEW_SMS_MEMBER =
+        "[DIASEC KOREA]\n\n"
+        + "요청하신 이미지 보정이 완료되었습니다.\n\n"
+        + "마이페이지 > 보정내역 조회에서 보정 결과를 확인해 주시고,\n"
+        + "승인해 주시면 제작을 진행하겠습니다.\n\n"
+        + "감사합니다.";
+
+    private static final String RETOUCH_PREVIEW_SMS_GUEST =
+        "[DIASEC KOREA]\n\n"
+        + "요청하신 이미지 보정이 완료되었습니다.\n\n"
+        + "로그인 > 비회원 주문조회에서 보정 결과를 확인해 주시고,\n"
+        + "승인해 주시면 제작을 진행하겠습니다.\n\n"
+        + "감사합니다.";
+
     private String valueOf(Object value) {
         return value == null ? "" : String.valueOf(value).trim();
     }
@@ -141,7 +195,6 @@ public class AdminOrderService {
     public boolean deleteCustomImage(Long itemId) {
         // itemId로 thumbnail 조회
         String thumbnail = adminOrderMapper.selectThumbnailByItemId(itemId);
-        System.out.println("썸네일 : " + thumbnail);
 
         // thumbnail이 없으면 이미 삭제된 상태로 처리
         if (thumbnail == null || thumbnail.isBlank()) {
@@ -199,8 +252,9 @@ public class AdminOrderService {
             deletedClaimFiles = orderService.deleteClaimFiles(itemId);
         }
 
-        // 환불완료일때 적립금 반환
-        if ("환불완료".equals(newStatus) && usedCredit > 0 && id != null && oid != null) {
+        // 취소/환불완료일때 사용 적립금 반환 (중복 반환 방지)
+        if (("환불완료".equals(newStatus) || "취소".equals(newStatus)) 
+            && usedCredit > 0 && id != null && oid != null) {
             int updated = adminOrderMapper.markCreditRefundedIfNotYet(itemId);
 
             if (updated == 1) {

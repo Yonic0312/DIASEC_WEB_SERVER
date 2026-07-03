@@ -48,7 +48,6 @@ public class NoticeController {
     @PostMapping("/insert")
     public ResponseEntity<Void> addNotice(@ModelAttribute NoticeVo notice) {
         try {
-            System.out.println("notice : "+notice);
             handleImages(notice);
             noticeService.insertNotice(notice);
             return ResponseEntity.ok().build();
@@ -66,7 +65,6 @@ public class NoticeController {
     @PostMapping("/update/{id}")
     public ResponseEntity<Void> updateNotice(@PathVariable Long id, @ModelAttribute NoticeVo notice) {
         try {
-            System.out.println(notice);
             notice.setNoticeId(id);
             handleImages(notice);
             noticeService.updateNotice(notice);

@@ -67,7 +67,6 @@ public class ProductController {
                 int order = 1;
                 for (MultipartFile img : topImages) {
                     String url = imageUtil.saveImage(img, "MainImage");
-                    System.out.println("상단 이미지 저장: " + url);
                     productService.insertProductTopImage(pid, url, order++);
                 }
             }
@@ -151,7 +150,6 @@ public class ProductController {
     @GetMapping("/images")
     public ResponseEntity<List<String>> getProductImages(@RequestParam int pid) {
         List<String> imageUrls = productService.selectImageUrlsByPid(pid);
-        System.out.println("imageUrls : " + imageUrls);
         return ResponseEntity.ok(imageUrls);
     }
 

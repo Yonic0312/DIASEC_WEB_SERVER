@@ -18,6 +18,7 @@ const AdminRetouchList = () => {
 
     // 업로드 중 상태
     const [uploadingItemId, setUploadingItemId] = useState(null);
+    const [processingItemId, setProcessingItemId] = useState(null);
 
     // 미리보기 모달
     const [previewOpen, setPreviewOpen] = useState(false);
@@ -88,7 +89,7 @@ const AdminRetouchList = () => {
             e.target.value = "";
             return;
         }
-        const maxMB = 5;
+        const maxMB = 30;
         if (file.size > maxMB * 1024 * 1024) {
             toast.error(`파일 용량은 ${maxMB}MB 이하로 업로드해주세요.`);
             e.target.value = "";
@@ -97,8 +98,14 @@ const AdminRetouchList = () => {
 
         setUploadingItemId(itemId);
         try {
-            await uploadPreview(itemId, file);
-            toast.success("프리뷰 업로드 완료 -> 고객 승인대기로 전환");
+            const data = await uploadPreview(itemId, file);
+            if (data.smsSent) {
+                toast.success("프리뷰 업로드 완료 · 고객에게 안내 문자를 발송했습니다.");
+            } else if (data.smsTried && !data.smsSent) {
+                toast.warn(`프리뷰 업로드 완료 · 문자 발송 실패${data.smsMessage ? ` : ${data.smsMessage}` : ""}`);
+            } else {
+                toast.success("프리뷰 업로드 완료 → 고객 승인대기로 전환");
+            }
             await fetchList();
         } catch (err) {
             console.error(err);
@@ -120,6 +127,28 @@ const AdminRetouchList = () => {
         return res.data;
     };
 
+    const approveRetouch = async (itemId) => {
+        const res = await axios.post(
+            `${API}/admin/order/retouch/approve`,
+            { itemId },
+            { withCredentials: true }
+        );
+        if (!res.data?.success) throw new Error(res.data?.message || "승인 실패");
+        return res.data;
+    };
+
+    const clearRetouchRequest = async (itemId) => {
+        const res = await axios.post(
+            `${API}/admin/order/retouch/clear-request`,
+            { itemId },
+            { withCredentials: true }
+        );
+        if (!res.data?.success) throw new Error(res.data?.messgae || "삭제 실패");
+        return res.data;
+    };
+
+    const canAdminApprove = (row) => row.previewStatus !== "APPROVED";
+
     const canUpload = (row) => {
         const retouchEnabled = row.retouchEnabled === 1 || row.retouchEnabled === true;
         if (!retouchEnabled) return false;
@@ -131,6 +160,11 @@ const AdminRetouchList = () => {
         if (!types) return "-";
         if (Array.isArray(types)) return types.join(", ");
         return String(types);
+    };
+
+    const hasRetouchText = (row) => {
+        const types = formatRetouchTypes(row.retouchTypes);
+        return (types && types !== "-") || Boolean(row.retouchNote?.trim());
     };
 
     const formatDatetime = (dateStr) => {
@@ -198,10 +232,10 @@ const AdminRetouchList = () => {
                     <div className="col-span-1">주문번호</div>
                     <div className="col-span-1">날짜</div>
                     <div className="col-span-2">주문자</div>
-                    <div className="col-span-4">보정요청</div>
+                    <div className="col-span-3">보정요청</div>
                     <div className="col-span-2">프리뷰</div>
                     <div className="col-span-1">상태</div>
-                    <div className="col-span-1">처리</div>
+                    <div className="col-span-2">처리</div>
                 </div>
 
                 {loading ? (
@@ -217,7 +251,7 @@ const AdminRetouchList = () => {
                                 {row.orderDate && <div className="text-xs text-gray-500 mt-1">{row.orderDate}</div>}
                             </div>
 
-                            <div className="">
+                            <div className="col-span-1 text-center">
                                 <div>{formatDatetime(row.createdAt)}</div>
                             </div>
 
@@ -227,7 +261,7 @@ const AdminRetouchList = () => {
                             </div>
                             
                             {/* 상품/보정요청 */}
-                            <div className="col-span-4">
+                            <div className="col-span-3">
                                 {/* <div className="font-medium">{row.title}</div> */}
                                 {/* <div className="text-xs text-gray-500 mt-1">
                                     옵션: {row.optionText || '-'}
@@ -283,7 +317,32 @@ const AdminRetouchList = () => {
                             </div>
                             
                             {/* 처리 */}
-                            <div className="col-span-1 flex flex-col items-center gap-2 pt-1">
+                            <div className="col-span-2 flex flex-col items-stretch gap-1.5 pt-1">
+                                {canAdminApprove(row) && (
+                                    <button
+                                        type="button"
+                                        className="px-2 py-1 text-xs rounded border border-green-200 bg-green-50 text-green-800 hover:bg-green-100 disabled:opacity-50"
+                                        disabled={processingItemId === row.itemId || uploadingItemId === row.itemId || loading}
+                                        onClick={async () => {
+                                            const ok = window.confirm("보정을 승인 처리할까요?");
+                                            if (!ok) return;
+                                            setProcessingItemId(row.itemId);
+                                            try {
+                                                await approveRetouch(row.itemId);
+                                                toast.success("승인 처리 완료");
+                                                await fetchList();
+                                            } catch (e) {
+                                                console.error(e);
+                                                toast.error(e.message || "승인 오류");
+                                            } finally {
+                                                setProcessingItemId(null);
+                                            }
+                                        }}
+                                    >
+                                        {processingItemId === row.itemId ? "처리중..." : "승인 처리"}
+                                    </button>
+                                )}
+                                 
                                 {canUpload(row) ? (
                                     <label className="inline-flex items-center justify-center px-2 py-1 text-xs border rounded cursor-pointer hover:bg-gray-50">
                                         {uploadingItemId === row.itemId ? "업로드중..." : "프리뷰 업로드"}
@@ -291,22 +350,21 @@ const AdminRetouchList = () => {
                                             type="file"
                                             accept="image/*"
                                             className="hidden"
-                                            disabled={uploadingItemId === row.itemId}
+                                            disabled={uploadingItemId === row.itemId || processingItemId === row.itemId}
                                             onChange={(e) => onPickFile(row.itemId, e)}
                                         />
                                     </label>
-                                ) : (
-                                    <span className="text-xs text-gray-400">-</span>
-                                )}
+                                ) : null}
 
-                                {/* 삭제버튼 */}
                                 {row.previewUrl && (
                                     <button
+                                        type="button"
                                         className="px-2 py-1 text-xs rounded border bg-white hover:bg-gray-50 disabled:opacity-50"
-                                        disabled={uploadingItemId === row.itemId || loading}
+                                        disabled={uploadingItemId === row.itemId || processingItemId === row.itemId || loading}
                                         onClick={async () => {
-                                            const ok = window.confirm("현재 프리뷰를 삭제할까요?");
+                                            const ok = window.confirm("현재 프리뷰 이미지를 삭제할까요?");
                                             if (!ok) return;
+                                            setProcessingItemId(row.itemId);
                                             try {
                                                 await deletePreview(row.itemId);
                                                 toast.success("프리뷰 삭제 완료");
@@ -314,12 +372,47 @@ const AdminRetouchList = () => {
                                             } catch (e) {
                                                 console.error(e);
                                                 toast.error(e.message || "삭제 오류");
+                                            } finally {
+                                                setProcessingItemId(null);
                                             }
                                         }}
                                     >
-                                        삭제
+                                        프리뷰 삭제
                                     </button>
                                 )}
+
+                                {hasRetouchText(row) && (
+                                    <button
+                                        type="button"
+                                        className="px-2 py-1 text-xs rounded border border-red-200 bg-red-50 text-red-700 hover:bg-red-100 disabled:opacity-50"
+                                        disabled={uploadingItemId === row.itemId || processingItemId === row.itemId || loading}
+                                        onClick={async () => {
+                                            const ok = window.confirm("보정 요청 글(유형·메모)을 삭제할까요?\n목록에서도 제거됩니다.");
+                                            if (!ok) return;
+                                            setProcessingItemId(row.itemId);
+                                            try {
+                                                await clearRetouchRequest(row.itemId);
+                                                toast.success("보정 요청 글 삭제 완료");
+                                                await fetchList();
+                                            } catch (e) {
+                                                console.error(e);
+                                                toast.error(e.message || "삭제 오류");
+                                            } finally {
+                                                setProcessingItemId(null);
+                                            }
+                                        }}
+                                    >
+                                        보정글 삭제
+                                    </button>
+                                )}
+
+                                {!canUpload(row)
+                                    && !row.previewUrl
+                                    && !canAdminApprove(row)
+                                    && !hasRetouchText(row) && (
+                                        <span className="text-xs text-gray-400 text-center">-</span>
+                                    )
+                                }
                             </div>
                         </div>
                     ))

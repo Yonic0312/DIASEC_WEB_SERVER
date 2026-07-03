@@ -4,8 +4,10 @@ import { useMember } from "./context/MemberContext";
 import { toast } from 'react-toastify';
 
 import './App.css';
-import { BrowserRouter as Router, Routes, Route, useLocation, Outlet } from 'react-router-dom';
+import { Routes, Route, useLocation, Outlet } from 'react-router-dom';
 import { MemberProvider } from './context/MemberContext';
+import { PartnerProvider } from './context/PartnerContext';
+import AdminRoute from './components/common/AdminRoute';
 
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css'
@@ -21,7 +23,7 @@ import Find_Id_success from './components/Login/Find_Id_success'
 import Find_Pwd from './components/Login/Find_Pwd'
 import Find_Pwd_success from './components/Login/Find_Pwd_success'
 import Main from './components/Main/Main'
-import Main_Itmes from './components/Main/Main_Items'
+import Main_Items from './components/Main/Main_Items'
 import Main_Introduce from './components/Main/Main_Introduce'
 import Main_Event from './components/Main/Main_Event'
 import Main_EventDetail from './components/Main/Main_EventDetail'
@@ -68,6 +70,13 @@ import LinkSocial from "./components/Member/Modify/LinkSocial"
 import SearchResults from './components/Main/Main_SearchResults';
 import Terms from './components/Policy/Terms';
 import Privacy from './components/Policy/Privacy';
+import Biz_ConsultWrite from './components/Biz/Biz_ConsultWrite';
+import Biz_ConsultList from './components/Biz/Biz_ConsultList';
+import Biz_PartnerMain from './components/Biz/Biz_PartnerMain';
+import Biz_PartnerApply from './components/Biz/Biz_PartnerApply';
+import Member_PartnerStatus from './components/Member/Member_PartnerStatus';
+import Admin_BizPartnerList from './components/Admin/Admin_BizPartnerList';
+import Admin_BizPartnerView from './components/Admin/Admin_BizPartnerView';
 
 import Admin_InquiryList from './components/Admin/Admin_InquiryList'
 import Admin_FAQManager from './components/Admin/Admin_FAQManager'
@@ -79,6 +88,8 @@ import Admin_CollectionManager from './components/Admin/Admin_CollectionManager'
 import Admin_Order_Detail from './components/Admin/Order_Detail'
 import Admin_EventManager from './components/Admin/Admin_EventManager'
 import Admin_BizList from './components/Admin/Admin_BizList'
+import Admin_BizConsultList from './components/Admin/Admin_BizConsultList'
+import Admin_BizConsultView from './components/Admin/Admin_BizConsultView'
 import Admin_BizView from './components/Admin/Admin_BizView'
 // import Admin_Lease_Status from './components/Admin/Lease_Status'
 import Admin_AuthorManager from './components/Admin/AuthorManager'
@@ -99,7 +110,7 @@ import {
 
 const SEO_SITE_ORIGIN = 'https://diasec.co.kr';
 const SEO_DEFAULT_OG_IMAGE = `${SEO_SITE_ORIGIN}/icon.png`;
-const SEO_PROMO_TITLE = ' · 20% 오픈할인';
+const SEO_PROMO_TITLE = ' · 20% 오픈할인 · 무료배송';
 
 function getMainItemsSeoByType(type) {
     switch (type) {
@@ -137,7 +148,7 @@ function getMainItemsSeoByType(type) {
             return {
                 title: `디아섹코리아${SEO_PROMO_TITLE}`,
                 description:
-                    '디아섹코리아에서 디아섹 액자와 맞춤 액자를 만나보세요. 작품과 사진에 맞춘 고급 액자 제작 서비스를 제공합니다.',
+                    '디아섹코리아에서 디아섹 액자와 맞춤 액자를 만나보세요. 작품과 사진에 맞춘 프리미엄급 액자 제작 서비스를 제공합니다.',
             };
     }
 }
@@ -242,9 +253,9 @@ function SeoMetaManager() {
 
         const promoTitle = SEO_PROMO_TITLE;
         const seoDefaults = {
-            title: `디아섹액자 전문 맞춤액자 디아섹코리아 | 20% 오픈할인`,
+            title: `디아섹 액자 전문 맞춤액자 디아섹코리아 | 20% 오픈할인 · 무료배송`,
             description:
-                '디아섹코리아에서 디아섹 액자와 맞춤 액자를 만나보세요. 작품과 사진에 맞춘 고급 액자 제작 서비스를 제공합니다.',
+                '디아섹코리아에서 디아섹 액자와 맞춤 액자를 만나보세요. 작품과 사진에 맞춘 프리미엄급 액자 제작 서비스를 제공합니다.',
             canonical: currentUrl,
         };
 
@@ -338,7 +349,7 @@ function Layout() {
     const isItems = location.pathname === '/' || location.pathname === '/main_Items_Clock';
     const isMain = location.pathname === '/';
 
-    const isMember = ['/modify', '/changePwd', '/orderList', '/orderDetail', '/orderList_Claim' , '/addrList', '/addrModify', '/myInquiryList', '/reviewWrite', '/supportInquiryForm',
+    const isMember = ['/modify', '/changePwd', '/orderList', '/orderDetail', '/orderList_Claim' , '/addrList', '/addrModify', '/myInquiryList', '/reviewWrite', '/supportInquiryForm', '/mypage/partner',
                       '/addrRegister', '/wishList', '/creditHistory', '/orderTracking', '/mypage/retouch'].some(p => path.startsWith(p)) || path.startsWith('/addrModify/') || path.startsWith('/orderDetail');
     const isAdmin = path.startsWith('/admin');
 
@@ -349,7 +360,6 @@ function Layout() {
 
     const navigate = useNavigate();
     const { setMember } = useMember();
-    // 깃 테스트 완료
 
     useEffect(() => {
         axios.post(`${API}/visit/track`, {}, { withCredentials: true })
@@ -469,97 +479,108 @@ function App() {
 
     return (
         <MemberProvider>
-            <SeoMetaManager />
-            <ScrollToTop />
-            <Routes>
-                <Route element={<Layout />}>
-                    <Route path="/" element={<Main />}/>
-                    <Route path="/userLogin" element={<Login />} />
-                    <Route path="/join" element={<Join />} />
-                    <Route path="/join_success" element={<Join_success />} />
-                    <Route path="/find_Id" element={<Find_Id />} />
-                    <Route path="/find_Id_success" element={<Find_Id_success />} />
-                    <Route path="/find_Pwd" element={<Find_Pwd />} />
-                    <Route path="/find_Pwd_success" element={<Find_Pwd_success />} />
-                    <Route path="/modify" element={<Modify />} />
-                    <Route path="/changePwd" element={<ChangePwd />} />
-                    <Route path="/cart" element={<Cart />} />
-                    <Route path="/orderList" element={<OrderList />} />
-                    {/* <Route path="/orderList_Lease" element={<OrderList_Lease />} /> */}
-                    <Route path="/orderDetail/:oid" element={<OrderDetail />} />
-                    <Route path="/orderTracking/:itemId" element={<OrderTracking />} />
-                    <Route path="/addrList" element={<AddrList />} />
-                    <Route path="/addrModify/:cno" element={<AddrModify />} />
-                    <Route path="/addrRegister" element={<AddrRegister />} />
-                    <Route path="/wishList" element={<WishList />} />
-                    <Route path="/none_custom_detail" element={<None_Custom_Detail/>} />
-                    <Route path="/main_Items" element={<Main_Itmes/>} />
-                    <Route path="/orderForm" element={<OrderForm/>} />
-                    <Route path="/orderComplete" element={<OrderComplete/>} />
-                    <Route path="/introduce" element={<Main_Introduce/>} />
-                    <Route path="/mainEvent" element={<Main_Event/>} />
-                    <Route path="/mainEventDetail/:id" element={<Main_EventDetail/>} />
-                    <Route path="/reviewWrite" element={<ReviewWrite/>} />
-                    <Route path="/inquiryForm" element={<InquiryForm/>} />
-                    <Route path="/productDetail" element={<ProductDetail />} />
-                    <Route path="/myInquiryList" element={<MyInquiryList />} />
-                    <Route path="/creditHistory" element={<CreditHistory />} />
-                    <Route path="/supportMain" element={<SupportMain />} />
-                    <Route path="/supportInquiryForm" element={<SupportInquiryForm />} />
-                    <Route path="/supportMyInquiryList" element={<SupportMyInquiryList />} />
-                    <Route path="/faqMain" element={<FaqMain />} />
-                    <Route path="/noticeList" element={<NoticeList />} />
-                    <Route path="/reviewBoard" element={<ReviewBoard />} />
-                    <Route path="/customFrames" element={<CustomFrames />} />
-                    <Route path="/admin_InquiryList" element={<Admin_InquiryList />} />
-                    <Route path="/admin_FAQManager" element={<Admin_FAQManager />} />
-                    <Route path="/admin_NoticeManager" element={<Admin_NoticeManager />} />
-                    <Route path="/admin_MemberManager" element={<Admin_MemberManager />} />
-                    <Route path="/admin_ProductManager" element={<Admin_ProductManager />} />
-                    <Route path="/admin_ReviewManager" element={<Admin_ReviewManager />} />
-                    <Route path="/admin_CollectionManager" element={<Admin_CollectionManager />} />
-                    <Route path="/admin_EventManager" element={<Admin_EventManager />} />
-                    <Route path="/bizOrderBoard" element={<BizOrderBoard />} />
-                    <Route path="/biz_OrderWrite" element={<Biz_OrderWrite />} />
-                    <Route path="/main_CompanyProfile" element={<Main_CompanyProfile />} />
-                    <Route path="/mypage/retouch" element={<MyRetouchList />} />
-                    <Route path="/mypage" element={<MemberHome />} />
-                    {/* <Route path="/leasePage" element={<LeasePage />} /> */}
-                    <Route path="/authorRegisterIntro" element={<AuthorRegisterIntro />} />
-                    <Route path="/authorRegisterForm" element={<AuthorRegisterForm />} />
-                    <Route path="/authorPage/:id" element={<AuthorPage />} />
-                    <Route path="/guestOrderSearch" element={<GuestOrderSearch />} />
-                    <Route path="/link-social" element={<LinkSocial />} />
-                    <Route path="/search" element={<SearchResults />} />
-                    <Route path="/policy/terms" element={<Terms />} />
-                    <Route path="/policy/privacy" element={<Privacy />} />
+            <PartnerProvider>
+                <SeoMetaManager />
+                <ScrollToTop />
+                <Routes>
+                    <Route element={<Layout />}>
+                        <Route path="/" element={<Main />}/>
+                        <Route path="/userLogin" element={<Login />} />
+                        <Route path="/join" element={<Join />} />
+                        <Route path="/join_success" element={<Join_success />} />
+                        <Route path="/find_Id" element={<Find_Id />} />
+                        <Route path="/find_Id_success" element={<Find_Id_success />} />
+                        <Route path="/find_Pwd" element={<Find_Pwd />} />
+                        <Route path="/find_Pwd_success" element={<Find_Pwd_success />} />
+                        <Route path="/modify" element={<Modify />} />
+                        <Route path="/changePwd" element={<ChangePwd />} />
+                        <Route path="/cart" element={<Cart />} />
+                        <Route path="/orderList" element={<OrderList />} />
+                        {/* <Route path="/orderList_Lease" element={<OrderList_Lease />} /> */}
+                        <Route path="/orderDetail/:oid" element={<OrderDetail />} />
+                        <Route path="/orderTracking/:itemId" element={<OrderTracking />} />
+                        <Route path="/addrList" element={<AddrList />} />
+                        <Route path="/addrModify/:cno" element={<AddrModify />} />
+                        <Route path="/addrRegister" element={<AddrRegister />} />
+                        <Route path="/wishList" element={<WishList />} />
+                        <Route path="/none_custom_detail" element={<None_Custom_Detail/>} />
+                        <Route path="/main_Items" element={<Main_Items/>} />
+                        <Route path="/orderForm" element={<OrderForm/>} />
+                        <Route path="/orderComplete" element={<OrderComplete/>} />
+                        <Route path="/introduce" element={<Main_Introduce/>} />
+                        <Route path="/mainEvent" element={<Main_Event/>} />
+                        <Route path="/mainEventDetail/:id" element={<Main_EventDetail/>} />
+                        <Route path="/reviewWrite" element={<ReviewWrite/>} />
+                        <Route path="/inquiryForm" element={<InquiryForm/>} />
+                        <Route path="/productDetail" element={<ProductDetail />} />
+                        <Route path="/myInquiryList" element={<MyInquiryList />} />
+                        <Route path="/creditHistory" element={<CreditHistory />} />
+                        <Route path="/supportMain" element={<SupportMain />} />
+                        <Route path="/supportInquiryForm" element={<SupportInquiryForm />} />
+                        <Route path="/supportMyInquiryList" element={<SupportMyInquiryList />} />
+                        <Route path="/faqMain" element={<FaqMain />} />
+                        <Route path="/noticeList" element={<NoticeList />} />
+                        <Route path="/reviewBoard" element={<ReviewBoard />} />
+                        <Route path="/customFrames" element={<CustomFrames />} />
+                        <Route path="/bizOrderBoard" element={<BizOrderBoard />} />
+                        <Route path="/biz_OrderWrite" element={<Biz_OrderWrite />} />
+                        <Route path="/main_CompanyProfile" element={<Main_CompanyProfile />} />
+                        <Route path="/mypage/retouch" element={<MyRetouchList />} />
+                        <Route path="/mypage" element={<MemberHome />} />
+                        {/* <Route path="/leasePage" element={<LeasePage />} /> */}
+                        <Route path="/authorRegisterIntro" element={<AuthorRegisterIntro />} />
+                        <Route path="/authorRegisterForm" element={<AuthorRegisterForm />} />
+                        <Route path="/authorPage/:id" element={<AuthorPage />} />
+                        <Route path="/guestOrderSearch" element={<GuestOrderSearch />} />
+                        <Route path="/link-social" element={<LinkSocial />} />
+                        <Route path="/search" element={<SearchResults />} />
+                        <Route path="/policy/terms" element={<Terms />} />
+                        <Route path="/policy/privacy" element={<Privacy />} />
+                        <Route path="/bizConsult" element={<Biz_ConsultWrite />} />
+                        <Route path="/bizConsultList" element={<Biz_ConsultList />} />
+                        <Route path="/bizPartner" element={<Biz_PartnerMain />} />
+                        <Route path="/bizPartnerApply" element={<Biz_PartnerApply />} />
+                        <Route path="/mypage/partner" element={<Member_PartnerStatus />} />
+                        
 
-                    {/* 어드민 */}
-                    <Route path="/admin_home" element={<Admin_Home />} />
-                    <Route path="/admin/insert_Product" element={<Insert_Product/>} />
-                    <Route path="/admin/order_Status" element={<Order_Status/>} />   
-                    <Route path="/admin/order_Detail/:itemId" element={<Admin_Order_Detail/>} />
-                    <Route path="/admin_BizList" element={<Admin_BizList />} />
-                    <Route path="/admin/biz/view/:id" element={<Admin_BizView />} />
-                    {/* <Route path="/admin/lease_Status" element={<Admin_Lease_Status />} /> */}
-                    <Route path="/admin_AuthorManager" element={<Admin_AuthorManager />} />
-                    <Route path="/admin_AdminRetouchList" element={<Admin_RetouchList />} />
-                    
-                </Route>
-            </Routes>
-            <ToastContainer
-                position="top-center"
-                autoClose={2500}
-                hideProgressBar={true}
-                closeOnClick
-                draggable={false}
-                pauseOnHover
-                toastClassName="custom-toast-white"
-                bodyClassName="custom-toast-body"
-            />
+                        {/* 어드민 */}
+                        <Route path="/admin_home" element={<AdminRoute><Admin_Home /></AdminRoute>} />
+                        <Route path="/admin/insert_Product" element={<AdminRoute><Insert_Product/></AdminRoute>} />
+                        <Route path="/admin/order_Status" element={<AdminRoute><Order_Status/></AdminRoute>} />   
+                        <Route path="/admin/order_Detail/:itemId" element={<AdminRoute><Admin_Order_Detail/></AdminRoute>} />
+                        <Route path="/admin_BizList" element={<AdminRoute><Admin_BizList /></AdminRoute>} />
+                        <Route path="/admin/biz/view/:id" element={<AdminRoute><Admin_BizView /></AdminRoute>} />
+                        <Route path="/admin_BizConsultList" element={<AdminRoute><Admin_BizConsultList /></AdminRoute>} />
+                        <Route path="/admin_biz-consult/view/:id" element={<AdminRoute><Admin_BizConsultView /></AdminRoute>} />
+                        <Route path="/admin_AuthorManager" element={<AdminRoute><Admin_AuthorManager /></AdminRoute>} />
+                        <Route path="/admin_AdminRetouchList" element={<AdminRoute><Admin_RetouchList /></AdminRoute>} />
+                        <Route path="/admin_BizPartnerList" element={<AdminRoute><Admin_BizPartnerList /></AdminRoute>} />
+                        <Route path="/admin_biz-partner/view/:id" element={<AdminRoute><Admin_BizPartnerView /></AdminRoute>} />
+                        <Route path="/admin_InquiryList" element={<AdminRoute><Admin_InquiryList /></AdminRoute>} />
+                        <Route path="/admin_FAQManager" element={<AdminRoute><Admin_FAQManager /></AdminRoute>} />
+                        <Route path="/admin_NoticeManager" element={<AdminRoute><Admin_NoticeManager /></AdminRoute>} />
+                        <Route path="/admin_MemberManager" element={<AdminRoute><Admin_MemberManager /></AdminRoute>} />
+                        <Route path="/admin_ProductManager" element={<AdminRoute><Admin_ProductManager /></AdminRoute>} />
+                        <Route path="/admin_ReviewManager" element={<AdminRoute><Admin_ReviewManager /></AdminRoute>} />
+                        <Route path="/admin_CollectionManager" element={<AdminRoute><Admin_CollectionManager /></AdminRoute>} />
+                        <Route path="/admin_EventManager" element={<AdminRoute><Admin_EventManager /></AdminRoute>} />
+                        
+                    </Route>
+                </Routes>
+                <ToastContainer
+                    position="top-center"
+                    autoClose={2500}
+                    hideProgressBar={true}
+                    closeOnClick
+                    draggable={false}
+                    pauseOnHover
+                    toastClassName="custom-toast-white"
+                    bodyClassName="custom-toast-body"
+                />
+            </PartnerProvider>
         </MemberProvider>
     );
-  }
+}
   
 
 export default App;

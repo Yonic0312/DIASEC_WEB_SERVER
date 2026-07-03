@@ -30,7 +30,7 @@ const ReviewWrite = () => {
 
     // 이미지 업로드
     const MAX_IMAGES = 5;
-    const MAX_FILE_BYTES = 3 * 1024 * 1024; // 3MB
+    const MAX_FILE_BYTES = 5 * 1024 * 1024; // 5MB
     const COMPRESS_MAX_PX = 1000;
     const COMPRESS_JPEG_QUALITY = 1;
 
@@ -118,7 +118,7 @@ const ReviewWrite = () => {
         }
         for (const file of files) {
             if (file.size > MAX_FILE_BYTES) {
-                toast.error('각 이미지는 3MB 이하만 등록 가능합니다.');
+                toast.error('각 이미지는 5MB 이하만 등록 가능합니다.');
                 return;
             }
             setImages(files);
@@ -353,7 +353,7 @@ const ReviewWrite = () => {
                         }
                         for (const file of files) {
                         if (file.size > MAX_FILE_BYTES) {
-                            toast.error('각 이미지는 3MB 이하만 등록 가능합니다.');
+                            toast.error('각 이미지는 5MB 이하만 등록 가능합니다.');
                             return;
                         }
                         }
@@ -364,7 +364,7 @@ const ReviewWrite = () => {
                     >
                     <label className="cursor-pointer block md:text-sm text-[clamp(11px,1.824vw,14px)]">
                         여기에 이미지를 드래그하거나 클릭하여 선택하세요 <br />
-                        <span className="md:text-xs text-[clamp(10px,1.564vw,12px)] text-gray-400">(최소 1장, 최대 5장, 각 3MB 이하)</span>
+                        <span className="md:text-xs text-[clamp(10px,1.564vw,12px)] text-gray-400">(최소 1장, 최대 5장, 각 5MB 이하)</span>
                         <input
                         type="file"
                         accept="image/png, image/jpeg"
@@ -377,7 +377,7 @@ const ReviewWrite = () => {
                             }
                             for (const file of files) {
                             if (file.size > MAX_FILE_BYTES) {
-                                toast.error('각 이미지는 3MB 이하만 등록 가능합니다.');
+                                toast.error('각 이미지는 5MB 이하만 등록 가능합니다.');
                                 return;
                             }
                             }

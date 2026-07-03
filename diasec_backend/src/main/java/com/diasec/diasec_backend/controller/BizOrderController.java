@@ -41,7 +41,6 @@ public class BizOrderController {
 
     @PostMapping("/register")
     public ResponseEntity<?> registerOrder(@ModelAttribute BizVo vo) {
-        System.out.println("register!!!!!!!!!");
         try {
             bizService.registerOrder(vo);
 
@@ -164,7 +163,6 @@ public class BizOrderController {
     // 비밀글 비밀번호 일치 확인
     @PostMapping("/check-password")
     public ResponseEntity<Boolean> checkPassword(@RequestBody Map<String, Object> payload) {
-        System.out.println(payload.get("password").toString());
         try {
             String inputPw = payload.get("password").toString();
             int postId = Integer.parseInt(payload.get("id").toString());

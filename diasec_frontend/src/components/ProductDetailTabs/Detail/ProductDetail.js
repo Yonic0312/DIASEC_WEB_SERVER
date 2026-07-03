@@ -30,7 +30,7 @@ const ProductDetail = ({ pid }) => {
         { title: '체형 보정', before: custom5, after: custom6},
         { title: '색감 보정', before: custom7, after: custom8},
         { title: '배경 정리', before: custom9, after: custom10},
-        { title: '고해상도 업스케일', before: custom11, after: custom12},
+        { title: '사진 업스케일링', before: custom11, after: custom12},
     ];
     const isCustomFramePid = (pid => Number(pid) === -3);
 

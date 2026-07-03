@@ -24,6 +24,15 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.core.user.OAuth2User;
+import org.springframework.web.server.ResponseStatusException;
+import com.diasec.diasec_backend.security.CustomUserDetails;
+import com.diasec.diasec_backend.vo.MemberVo;
+import com.diasec.diasec_backend.service.MemberService;
+
 import com.diasec.diasec_backend.dao.OrderMapper;
 import com.diasec.diasec_backend.service.CartService;
 import com.diasec.diasec_backend.service.CreditService;
@@ -53,6 +62,7 @@ public class OrderController {
     private final CartService cartService;
     private final CreditService creditService;
     private final ProductService productService;
+    private final MemberService memberService;
     private final ImageUtil imageUtil;
     private final PasswordEncoder passwordEncoder;
     private final OrderMapper orderMapper;
@@ -111,7 +121,16 @@ public class OrderController {
     // 주문내역 조회 리스트 가져오기
     @PostMapping("/list")
     public List<OrderVo> getOrderList(@RequestBody Map<String, String> body) {
+        String memberId = resolveLoginMemberId();
+        if (memberId == null) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "로그인이 필요합니다.");
+        }
+        
         String id = body.get("id");
+        if (!memberId.equals(id)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "본인 주문만 조회할 수 있습니다.");
+        }
+
         String startDate = body.get("startDate");
         String endDate = body.get("endDate");
         String status = body.get("status");
@@ -121,14 +140,30 @@ public class OrderController {
 
     // 주문내역 상세조회 (개별)
     @GetMapping("detail/{itemId}")
-    public OrderVo getOrderInfoDetail(@PathVariable Long itemId) {
-        return orderService.selectOrderInfoByItemId(itemId);
+    public ResponseEntity<?> getOrderInfoDetail(
+        @PathVariable Long itemId,
+        @RequestParam(required = false) String guestPassword
+    ) {
+        OrderVo order = orderService.selectOrderInfoByItemId(itemId);
+        String authError = verifyOrderViewAuth(order, guestPassword);
+        if (authError != null) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("error", authError));
+        }
+        return ResponseEntity.ok(sanitizeOrderForResponse(order));
     }
 
     // 주문내역 상세조회 (주문별 전체)
     @GetMapping("/detail/oid/{oid}")
-    public OrderVo getOrderDetail(@PathVariable Long oid) {
-        return orderService.selectOrderByOid(oid);
+    public ResponseEntity<?> getOrderDetail(
+        @PathVariable Long oid,
+        @RequestParam(required = false) String guestPassword
+    ) {
+        OrderVo order = orderService.selectOrderByOid(oid);
+        String authError = verifyOrderViewAuth(order, guestPassword);
+        if (authError != null) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("error", authError));
+        }
+        return ResponseEntity.ok(sanitizeOrderForResponse(order));
     }
 
     // 주문내역 전체 취소
@@ -136,21 +171,19 @@ public class OrderController {
     public ResponseEntity<?> cancelOrderItem(@RequestBody Map<String, Object> body) {
         try {
             Long oid = Long.parseLong(body.get("oid").toString());
-            String id = String.valueOf(body.get("id"));
-            int usedCredit = (Integer)body.get("usedCredit");
+            String id = body.get("id") == null ? null : String.valueOf(body.get("id"));
+            int usedCredit = body.get("usedCredit") == null ? 0
+                    : Integer.parseInt(String.valueOf(body.get("usedCredit")));
 
-            // 전체 취소 처리
             orderService.cancelAllOrderItems(oid);
 
-            // 크레딧 반환
-            if (usedCredit > 0) {
+            if (usedCredit > 0 && id != null && !"null".equals(id) && !id.isBlank()) {
                 CreditVo creditVo = new CreditVo();
                 creditVo.setId(id);
                 creditVo.setAmount(usedCredit);
                 creditVo.setType("적립");
                 creditVo.setDescription("주문 취소");
                 creditVo.setOid(oid);
-                
                 creditService.insertCreditHistory(creditVo);
             }
 
@@ -278,7 +311,7 @@ public class OrderController {
                 return ResponseEntity.ok(Map.of("success", false, "message", "비밀번호가 일치하지 않습니다."));
             }
 
-            return ResponseEntity.ok(Map.of("success", true, "order", order));
+            return ResponseEntity.ok(Map.of("success", true, "order", sanitizeOrderForResponse(order)));
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.internalServerError().body(Map.of("success", false, "message", e.getMessage()));
@@ -318,6 +351,13 @@ public class OrderController {
     public ResponseEntity<?> updateRetouch(@RequestBody Map<String, Object> body) {
         try {
             Long itemId = Long.parseLong(body.get("itemId").toString());
+            String guestPassword = body.get("guestPassword") == null ? null : body.get("guestPassword").toString();
+            String authError = verifyRetouchDecisionAuth(itemId, guestPassword);
+            if (authError != null) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("success", false, "message", authError));
+            }
+
             int retouchEnabled = Integer.parseInt(body.get("retouchEnabled").toString());
             String retouchTypes = body.get("retouchTypes") == null ? null : body.get("retouchTypes").toString();
             String retouchNote = body.get("retouchNote") == null ? null : body.get("retouchNote").toString();
@@ -351,31 +391,107 @@ public class OrderController {
 
     // 고객: 승인
     @PostMapping("/retouch/{itemId}/approve")
-    public ResponseEntity<?> approveRetouch(@PathVariable Long itemId) {
+    public ResponseEntity<?> approveRetouch(
+        @PathVariable Long itemId,
+        @RequestBody(required = false) Map<String, String> body
+    ) {
+        String guestPassword = body != null ? body.get("guestPassword") : null;
+        String authError = verifyRetouchDecisionAuth(itemId, guestPassword);
+        if (authError != null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(Map.of("success", false, "message", authError));
+        }
         orderService.approveRetouch(itemId);
         return ResponseEntity.ok(Map.of("success", true, "itemId", itemId));
     }
 
     // 고객: 반려
     @PostMapping("/retouch/{itemId}/reject")
-    public ResponseEntity rejectRetouch(
+    public ResponseEntity<?> rejectRetouch(
         @PathVariable Long itemId,
         @RequestBody Map<String, String> body
     ) {
+        String guestPassword = body.get("guestPassword");
+        String authError = verifyRetouchDecisionAuth(itemId, guestPassword);
+        if (authError != null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(Map.of("success", false, "message", authError));
+        }
         String feedback = body.getOrDefault("feedback", "");
         orderService.rejectRetouch(itemId, feedback);
         return ResponseEntity.ok(Map.of("success", true, "itemId", itemId));
     }
 
-    // 프리뷰 보여주기
-    @GetMapping("/order-items/{itemId}/retouch/preview")
-    public Map<String, Object> getLatestPreview(@PathVariable Long itemId) {
-        OrderItemFileVo latest = orderService.getLatestRetouchPreview(itemId);
-        return Map.of(
-            "ok", true,
-            "itemId", itemId,
-            "data", latest
-        );
+    private String verifyRetouchDecisionAuth(Long itemId, String guestPassword) {
+        Long oid = orderMapper.selectOidByItemId(itemId);
+        if (oid == null) return "주문 상품을 찾을 수 없습니다.";
+
+        OrderVo order = orderService.selectOrderByOid(oid);
+        return verifyOrderViewAuth(order, guestPassword);
+    }
+    
+    private String verifyOrderViewAuth(OrderVo order, String guestPassword) {
+        if (order == null) {
+            return "주문을 찾을 수 없습니다.";
+        }
+
+        if (isAdminUser()) {
+            return null;
+        }
+        
+        String memberId = resolveLoginMemberId();
+        if (memberId != null) {
+            return memberId.equals(order.getId()) ? null : "본인 주문만 조회할 수 있습니다.";
+        }
+
+        if (order.getGuestPassword() == null || order.getGuestPassword().isBlank()) {
+            return "로그인이 필요합니다.";
+        }
+        if (guestPassword == null || guestPassword.isBlank()) {
+            return "비회원 조회 비밀번호가 필요합니다.";
+        }
+        if (!passwordEncoder.matches(guestPassword, order.getGuestPassword())) {
+            return "비밀번호가 일치하지 않습니다.";
+        }
+        return null;
+    }
+
+    private boolean isAdminUser() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()
+            || "anonymousUser".equals(authentication.getPrincipal())) {
+            return false;
+        }
+        return authentication.getAuthorities().stream()
+            .anyMatch(a -> "ROLE_ADMIN".equals(a.getAuthority()));
+    }
+
+    private OrderVo sanitizeOrderForResponse(OrderVo order) {
+        if (order != null) {
+            order.setGuestPassword(null);
+        }
+        return order;
+    }
+
+    private String resolveLoginMemberId() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()
+            || "anonymousUser".equals(authentication.getPrincipal())) {
+        return null;
+        }
+        Object principal = authentication.getPrincipal();
+        if (principal instanceof CustomUserDetails userDetails) {
+            return userDetails.getMember().getId();
+        }
+        if (principal instanceof OAuth2User oAuth2User) {
+            String provider = oAuth2User.getAttribute("provider");
+            String providerUid = oAuth2User.getAttribute("providerUid");
+            String email = oAuth2User.getAttribute("email");
+            MemberVo member = memberService.findByProviderUid(provider, providerUid);
+            if (member == null) member = memberService.findWebMemberByEmail(email);
+            return member != null ? member.getId() : null;
+        }
+        return null;
     }
 
     // 보정 리터치 리스트 (고객)

@@ -8,7 +8,6 @@ import p8_2 from '../../assets/p8_2.png'
 import p9 from '../../assets/p9.jpg'
 import p9_1 from '../../assets/p9_1.png'
 import p10 from '../../assets/p10.jpg'
-import p10_1 from '../../assets/p10_1.png'
 import p10_2 from '../../assets/p10_2.png'
 
 const images = [

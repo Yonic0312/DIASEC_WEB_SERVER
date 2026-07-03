@@ -7,7 +7,6 @@ import java.util.Map;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -18,9 +17,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.diasec.diasec_backend.dao.OrderMapper;
 import com.diasec.diasec_backend.service.AdminOrderService;
-import com.diasec.diasec_backend.service.CreditService;
 import com.diasec.diasec_backend.service.OrderService;
-import com.diasec.diasec_backend.vo.CreditVo;
 import com.diasec.diasec_backend.vo.OrderItemsVo;
 import com.diasec.diasec_backend.vo.OrderVo;
 
@@ -33,7 +30,6 @@ import lombok.RequiredArgsConstructor;
 public class AdminOrderController {
     
     private final AdminOrderService adminOrderService;
-    private final CreditService creditService;
     private final OrderService orderService;
     private final OrderMapper orderMapper;
 
@@ -51,8 +47,6 @@ public class AdminOrderController {
     // 목록에서 진행상태 업데이트
     @PostMapping("/order/update-status")
     public Map<String, Object> updateStatus(@RequestBody Map<String, Object> request) {
-        System.out.println("update-status body = " + request);
-
         Object itemIdObj = request.get("itemId");
         Object statusObj = request.get("orderStatus");
         if (statusObj == null) {
@@ -86,20 +80,15 @@ public class AdminOrderController {
 
         // 환불 정보는 optional
         String bankName = (String) request.getOrDefault("bankName", null);
-        String accountNumber = (String) request.getOrDefault("accountNumber", null);
+        String accountNubmer = (String) request.getOrDefault("accountNubmer", null);
         String accountHolder = (String) request.getOrDefault("accountHolder", null);
 
-        // boolean success = adminOrderService.updateOrderDetail(
-        //     itemId, trackingCompany, trackingNumber, bankName, accountNubmer, accountHolder
-        // );
-
-        // return Map.of("success", success);
         return adminOrderService.updateOrderDetailWithNotification(
-            itemId, trackingCompany, trackingNumber, bankName, accountNumber, accountHolder
+            itemId, trackingCompany, trackingNumber, bankName, accountNubmer, accountHolder
         );
     }
 
-    // 관리자: 배송지/주문자 연락처 등 orders 정보 수정
+    /** 관리자: 배송지·주문자 연락처 등 orders 정보 수정 */
     @PostMapping("/order/update-shipping")
     public Map<String, Object> updateOrderShipping(@RequestBody Map<String, Object> body) {
         try {
@@ -118,7 +107,7 @@ public class AdminOrderController {
 
             boolean ok = orderService.updateOrderShippingByItemId(itemId, patch);
             if (!ok) {
-                return Map.of("success", false, "message", "주문을 찾을 수 업석나 저장에 실패했습니다.");
+                return Map.of("success", false, "message", "주문을 찾을 수 없거나 저장에 실패했습니다.");
             }
             return Map.of("success", true, "message", "");
         } catch (Exception e) {
@@ -162,7 +151,7 @@ public class AdminOrderController {
         }
     }
 
-    // 맞춤액자 150px 썸네일만 삭제
+    /** 맞춤액자 150px 썸네일만 삭제 */
     @PostMapping("/order/delete-custom-thumbnail")
     public ResponseEntity<?> deleteCustomThumbnailPreview(@RequestBody Map<String, Object> body) {
         try {
@@ -235,9 +224,11 @@ public class AdminOrderController {
         Map<String, Object> result = new HashMap<>();
         try {
             String url = orderService.uploadRetouchPreview(itemId, file);
+            Map<String, Object> smsResult = adminOrderService.sendRetouchPreviewReadySms(itemId);
             result.put("success", true);
             result.put("fileUrl", url);
             result.put("previewStatus", "WAITING_CUSTOMER");
+            result.putAll(smsResult);
             return ResponseEntity.ok(result);
         } catch (Exception e) {
             result.put("success", false);
@@ -252,6 +243,30 @@ public class AdminOrderController {
             Long itemId = Long.valueOf(String.valueOf(body.get("itemId")));
             orderService.deleteRetouchPreview(itemId);
             return ResponseEntity.ok(Map.of("success", true));
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.badRequest().body(Map.of("success", false, "message", e.getMessage()));
+        }
+    }
+
+    @PostMapping("/order/retouch/approve")
+    public ResponseEntity<?> adminApproveRetouch(@RequestBody Map<String, Object> body) {
+        try {
+            Long itemId = Long.valueOf(String.valueOf(body.get("itemId")));
+            orderService.adminApproveRetouch(itemId);
+            return ResponseEntity.ok(Map.of("success", true, "itemId", itemId));
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.badRequest().body(Map.of("success", false, "message", e.getMessage()));
+        }
+    }
+
+    @PostMapping("/order/retouch/clear-request")
+    public ResponseEntity<?> clearRetouchRequest(@RequestBody Map<String, Object> body) {
+        try {
+            Long itemId = Long.valueOf(String.valueOf(body.get("itemId")));
+            orderService.clearRetouchRequest(itemId);
+            return ResponseEntity.ok(Map.of("success", true, "itemId", itemId));
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.badRequest().body(Map.of("success", false, "message", e.getMessage()));

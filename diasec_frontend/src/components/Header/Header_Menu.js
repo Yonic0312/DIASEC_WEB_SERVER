@@ -57,7 +57,7 @@ const Header_Menu = () => {
 
             setSearchResult({
                 masterPiece: data?.masterPiece ?? [],
-                koreanPainting: data?.koreanPatinting ?? [],
+                koreanPainting: data?.koreanPainting ?? [],
                 photoIllustration: data?.photoIllustration ?? [],
                 fengShui: data?.fengShui ?? [],
             });
@@ -326,10 +326,10 @@ const Header_Menu = () => {
     const isDropdownMenu = (key) => 
         key === "diasec" || categories.includes(key);
 
-    const lastHoveredRef = useRef(null);
-    useEffect(() => {
-        if (hovered) lastHoveredRef.current = hovered;
-    }, [hovered]);
+    // const lastHoveredRef = useRef(null);
+    // useEffect(() => {
+    //     if (hovered) lastHoveredRef.current = hovered;
+    // }, [hovered]);
 
     const activeKey = hovered;
     const showDropdown = !!hovered && isDropdownMenu(hovered);

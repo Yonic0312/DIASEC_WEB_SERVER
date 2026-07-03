@@ -215,6 +215,7 @@ const Admin_MemberManager = () => {
                         <th className="border p-2">이름</th>
                         <th className="border p-2">이메일</th>
                         <th className="border p-2">가입일</th>
+                        <th className="border p-2">번호</th>
                         <th className="border p-2">역할</th>
                         <th className="border p-2">적립금</th>
                         <th className="border p-2">관리</th>
@@ -231,6 +232,7 @@ const Admin_MemberManager = () => {
                             <td className="border p-2 text-center">{member.name}</td>
                             <td className="border p-2 text-center">{member.email}</td>
                             <td className="border p-2 text-center">{member.createdAt?.slice(0, 10)}</td>
+                            <td className="border p-2 text-center">{member.phone ? member.phone : '-'}</td>
                             <td className="border p-2 text-center">
                                 <select
                                     value={member.role?.toLowerCase().replace("role_", "") || "user"}
