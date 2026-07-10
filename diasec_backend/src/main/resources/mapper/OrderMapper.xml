@@ -200,18 +200,20 @@
         WHERE oid = #{oid}
     </update>
 
+    <!-- 가상계좌 환불 계좌 저장 (주문 취소 요청 시) -->
+    <update id="updateRefundAccountByOid">
+        UPDATE order_items
+        SET 
+            bank_name = #{bankName},
+            account_number = #{accountNumber},
+            account_holder = #{accountHolder}
+        WHERE oid = #{oid}
+    </update>
+
     <!-- 주문 취소 요청 -->
     <update id="updateOrderItemsStatus">
         UPDATE order_items
         SET order_status = #{status}
-        WHERE oid = #{oid}
-    </update>
-
-    <update id="updateRefundAccountByOid">
-        UPDATE order_items
-        SET bank_name = #{bankName},
-            account_number = #{accountNumber},
-            account_holder = #{accountHolder}
         WHERE oid = #{oid}
     </update>
 

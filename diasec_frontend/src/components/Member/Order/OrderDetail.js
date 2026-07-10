@@ -6,6 +6,8 @@ import { toast } from 'react-toastify';
 import { MemberContext } from '../../../context/MemberContext';
 import thumbCustom from '../../../assets/CustomFrames/customFrames.png';
 
+const REVIEWABLE_ORDER_STATUSES = ['배송완료', '교환완료'];
+
 const OrderDetail = () => {
     const API = process.env.REACT_APP_API_BASE;
     const { member } = useContext(MemberContext);
@@ -236,31 +238,10 @@ const OrderDetail = () => {
 
     const [claimImages, setClaimImages] = useState([]);
     const [isDraggingClaim, setIsDraggingClaim] = useState(false);
-    const [refundModalOpen, setRefundModalOpen] = useState(false);
-
-    const submitCancelRequest = (item, account = {}) => {
-        const body = { oid: item.oid, id: member?.id };
-        if (account.bankName) Object.assign(body, account);
-        fetch(`${API}/order/cancelRequest`, {
-            credentials: 'include',
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(body),
-        })
-            .then(res => res.json())
-            .then(data => {
-                if (data.success) {
-                    toast.success('취소 요청이 접수되었습니다.');
-                    if (member) navigate('/orderList');
-                    else navigate('/guestOrderSearch');
-                } else {
-                    toast.error('취소 요청 실패: ' + (data.message || ''));
-                }
-            })
-            .catch(() => toast.error('요청 실패'));
-    };
 
     const handleSubmitReturn = async () => {
+        const needsRefundBankInfo = 
+            claimType === '반품' && order?.paymentMethod === '가상계좌';
 
         if (!returnReason) {
             toast.error('사유를 선택해주세요.');
@@ -344,26 +325,33 @@ const OrderDetail = () => {
 
     // 주문 취소 함수
     const handleCancel = (item) => {
-        if (!window.confirm(`"${item.title}" 주문에 대해 취소 요청을 보내시겠습니까?`)) return;
+        if (!window.confirm(`"${item.title}"을(를) 취소하시겠습니까?`)) return;
 
-        const needsRefund = order.paymentMethod === '가상계좌' && item.orderStatus === '결제완료';
-        if (needsRefund) {
-            setBankName(item.bankName || '');
-            setAccountNumber(item.accountNumber || '');
-            setAccountHolder(item.accountHolder || '');
-            setRefundModalOpen(true);
-            return;
-        }
-        submitCancelRequest(item);
-    };
-
-    const handleRefundModalSubmit = () => {
-        if (!bankName || !accountNumber || !accountHolder) {
-            toast.warn('환불 계좌를 모두 입력해 주세요.');
-            return;
-        }
-        submitCancelRequest(order.items[0], { bankName, accountNumber, accountHolder });
-        setRefundModalOpen(false);
+        fetch(`${API}/order/cancel`, {
+            credentials:'include',
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+                oid: item.oid, 
+                pid: item.pid,
+                usedCredit: order.usedCredit || 0,
+                id: member?.id
+            }) 
+        })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                toast.success('주문이 취소되었습니다.');
+                if (member) {
+                    navigate('/orderList');
+                } else {
+                    navigate('/guestOrderSearch');
+                }   
+            } else {
+                toast.error('취소 실패 : ' + data.message);
+            }
+        })
+        .catch(err => toast.error('요청 실패'));
     };
 
     const addClaimFiles = (files) => {
@@ -453,7 +441,7 @@ const OrderDetail = () => {
 
     return (
         <>
-            <div className="w-full bg-white sm:px-8 px-2 sm:mx-4 mx-2 sm:py-10 py-5 shadow-md border border-gray-200 sm:space-y-8 space-y-4 mb-20">
+            <div className="w-full bg-white sm:px-8 px-2 sm:mx-4 mx-2 sm:py-10 py-5 shadow-md border border-gray-200 space-y-4 mb-20">
                 {/* Title */}
                 <div>
                     <div className='flex items-center justify-between'>
@@ -502,7 +490,7 @@ const OrderDetail = () => {
                                 </button>
                             )}
 
-                            {order.items.some((it) => it.orderStatus === '배송완료') && (
+                            {order.items.some((it) => REVIEWABLE_ORDER_STATUSES.includes(it.orderStatus)) && (
                                 member ? (
                                     <button
                                         className="
@@ -573,63 +561,65 @@ const OrderDetail = () => {
                 </div>
 
                 {/* 상품 정보 */}
-                {order.items.map((item, index) => (
-                    <div key={item.itemId || index}
-                        className="
-                            flex sm:gap-6 gap-[6px] items-start border rounded-lg
-                            md:p-6 p-2
-                            bg-gray-50 cursor-pointer transition-transform hover:shadow-lg hover:bg-gray-200"
-                        onClick={() => navigate(`/orderTracking/${item.itemId}`)}
-                    >
-                        <img
-                            src={
-                                item.category === 'customFrames'
-                                    ? item.thumbnailPreview || item.thumbnail || thumbCustom
-                                    : item.thumbnail
-                            }
-                            alt={item.title}
+                <div className="overflow-y-scroll h-[300px] space-y-2">
+                    {order.items.map((item, index) => (
+                        <div key={item.itemId || index}
                             className="
-                                md:w-24 sm:w-[clamp(5rem,10.95vw,6rem)] w-[clamp(72px,12.52vw,5rem)]
-                                md:h-24 sm:h-[clamp(5rem,10.95vw,6rem)] h-[clamp(72px,12.52vw,5rem)]
-                                object-cover rounded border" 
-                        />
-                        <div className="
-                            flex flex-col
-                            md:h-24 sm:h-[clamp(5rem,10.948vw,6rem)]
-                            text-[14px] md:text-[16px]
-                            flex-1 justify-between"
+                                flex sm:gap-6 gap-[4px] items-start border rounded-lg
+                                md:p-6 p-2
+                                bg-gray-50 cursor-pointer transition-transform hover:shadow-lg hover:bg-gray-200"
+                            onClick={() => navigate(`/orderTracking/${item.itemId}`)}
                         >
-                            <div className="flex justify-between flex-row font-semibold">
-                                <span className="min-w-0 flex-1 truncate pr-2">{item.title}</span>
-                                <span>{item.orderStatus}</span> {/* 상태 색 넣기!!!!!!!!!!!!! */}
-                            </div>
-                            <div>
-                                <div className="w-full flex flex-col sm:flex-row sm:justify-between">
-                                    <div>
-                                        {/*     md:text-sm sm:text-[11px] text-[9px] */}
-                                        <div className="
-                                            flex flex-col
-                                            md:text-[14px] text-[clamp(12px,1.8252vw,14px)]
-                                            text-gray-500"
-                                        >
-                                            <span className="text-black">카테고리: {convertCategoryName(item.category)} ({item.finishType === 'matte' ? '무광' : '유광'})</span>
-                                            <span>수량: {item.quantity}개</span>
-                                            <span>사이즈: {convertInchToCm(item.size)}</span>
+                            <img
+                                src={
+                                    item.category === 'customFrames'
+                                        ? item.thumbnailPreview || item.thumbnail || thumbCustom
+                                        : item.thumbnail
+                                }
+                                alt={item.title}
+                                className="
+                                    md:w-24 sm:w-[clamp(5rem,10.95vw,6rem)] w-[clamp(72px,12.52vw,5rem)]
+                                    md:h-24 sm:h-[clamp(5rem,10.95vw,6rem)] h-[clamp(72px,12.52vw,5rem)]
+                                    object-cover rounded border" 
+                            />
+                            <div className="
+                                flex flex-col
+                                md:h-24 sm:h-[clamp(5rem,10.948vw,6rem)]
+                                text-[14px] md:text-[16px]
+                                flex-1 justify-between"
+                            >
+                                <div className="flex justify-between flex-row font-semibold">
+                                    <span className="min-w-0 flex-1 truncate pr-2">{item.title}</span>
+                                    {index === 0 && <span>{item.orderStatus}</span>}
+                                </div>
+                                <div>
+                                    <div className="w-full flex flex-col sm:flex-row sm:justify-between">
+                                        <div>
+                                            {/*     md:text-sm sm:text-[11px] text-[9px] */}
+                                            <div className="
+                                                flex flex-col
+                                                md:text-[14px] text-[clamp(12px,1.8252vw,14px)]
+                                                text-gray-500"
+                                            >
+                                                <span className="text-black">카테고리: {convertCategoryName(item.category)} ({item.finishType === 'matte' ? '무광' : '유광'})</span>
+                                                <span>수량: {item.quantity}개</span>
+                                                <span>사이즈: {convertInchToCm(item.size)}</span>
+                                            </div>
                                         </div>
-                                    </div>
-                                        {/* md:text-base sm:text-[13px] text-[10px] */}
-                                    <div 
-                                        className="
-                                            text-[14px] md:text-[16px]
-                                            flex sm:items-end justify-end self-end
-                                            font-bold text-right mt-[2px]">
-                                        {(item.price)?.toLocaleString()}원
+                                            {/* md:text-base sm:text-[13px] text-[10px] */}
+                                        <div 
+                                            className="
+                                                text-[14px] md:text-[16px]
+                                                flex sm:items-end justify-end self-end
+                                                font-bold text-right mt-[2px]">
+                                            {(item.price)?.toLocaleString()}원
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                ))}
+                    ))}
+                </div>
 
                 {/* 반품 입력창 */}
                 {showReturnForm && order.items[0].orderStatus !== '반품신청' && (
@@ -680,9 +670,8 @@ const OrderDetail = () => {
                             value={returnDetail}
                             onChange={(e) => setReturnDetail(e.target.value)}
                         />
-                        {claimType === '반품' && order.paymentMethod === '가상계좌' &&(
+                        {claimType === '반품' && (
                         <>
-                            <p className="text-xs text-gray-500">가상계좌 결제 반품 시 환불받을 계좌를 입력해 주세요.</p>
                             <input 
                                 type="text"
                                 placeholder="은행명"
@@ -854,20 +843,12 @@ const OrderDetail = () => {
                                 className="
                                     text-black mb-2">결제 수단: <span className="font-normal">{order.paymentMethod}</span></span>
                         </div>
-                        {order.paymentMethod === '가상계좌' && (order.vbankAccount || order.vbankName) && (
-                            <div className="rounded border border-[#D0AC88] bg-[#fffaf3] p-3 space-y-1">
-                                {order.vbankName && (
-                                    <div><span className="text-black">입금 은행:</span> {order.vbankName}</div>
-                                )}
-                                {order.vbankAccount && (
-                                    <div><span className="text-black">입금계좌:</span> <span className="font-semibold">{order.vbankAccount}</span></div>
-                                )}
-                                {order.vbankDueDate && (
-                                    <div><span className="text-xs text-gray-600">입금기한: {order.vbankDueDate}</span></div>
-                                )}
-
-                            </div>
-                        )}
+                        {/* { order.paymentMethod === '무통장입금' && (
+                            <>
+                                <div><span className="text-black mb-2">입금자명:</span> {order.depositor}</div>
+                                <div><span className="text-black mb-2">입금 계좌:</span> {order.bankAccount}</div>
+                            </>
+                        )} */}
                         <div><span className="text-black mb-2">총 상품금액:</span> {order.totalPrice.toLocaleString()}원</div>
                         <div><span className="text-black mb-2">적립금 사용:</span> {order.usedCredit.toLocaleString()}원</div>
                         <div><span className="text-black mb-2">배송비:</span> {order.deliveryFee.toLocaleString()}원</div>
@@ -1222,24 +1203,6 @@ const OrderDetail = () => {
                             <button className="text-gray-500 hover:text-black" onClick={() => setPreviewOpen(false)}>✕</button>
                         </div>
                         <img src={previewImg} alt="preview-large" className="max-w-[70vw] max-h-[80vh] object-contain rounded" />
-                    </div>
-                </div>
-            )}
-
-            {refundModalOpen && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-                    <div className="w-full max-w-md rounded-lg bg-white p-5 shadow-lg">
-                        <h3 className="font-semibold">환불 계좌 입력</h3>
-                        <p className="mt-1 text-sm text-gray-600">입금 완료된 가상계좌 주문입니다. 환불받을 계좌를 입력해 주세요.</p>
-                        <div className="mt-3 space-y-2">
-                            <input className="w-full border px-3 py-2 rounded" placeholder="은행명" value={bankName} onChange={e => setBankName(e.target.value)} />
-                            <input className="w-full border px-3 py-2 rounded" placeholder="계좌번호" value={accountNumber} onChange={e => setAccountNumber(e.target.value)} />
-                            <input className="w-full border px-3 py-2 rounded" placeholder="예금주" value={accountHolder} onChange={e => setAccountHolder(e.target.value)} />
-                        </div>
-                        <div className="mt-4 flex justify-end gap-2">
-                            <button type="button" className="border px-4 py-2 rounded text-sm" onClick={() => setRefundModalOpen(false)}>닫기</button>
-                            <button type="button" className="bg-blue-600 text-white px-4 py-2 rounded text-sm" onClick={handleRefundModalSubmit}>취소 요청</button>
-                        </div>
                     </div>
                 </div>
             )}

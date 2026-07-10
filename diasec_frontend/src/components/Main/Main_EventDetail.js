@@ -38,11 +38,6 @@ const Main_EventDetail = () => {
                 <span className="text-[16px] text-gray-500">{event.createdAt?.slice(0, 19).replace('T', ' ')}</span>
             </div>
 
-            {/* 본문 내용 */}
-            <div className="mt-3 mb-3 text-lg">
-                <span>{event.content}</span>
-            </div>
-
             {/* 상세 이미지 */}
             <div>
                 <img 
@@ -50,6 +45,11 @@ const Main_EventDetail = () => {
                     alt={event.title}
                     className="w-full object-contain"
                 />
+            </div>
+
+            {/* 본문 내용 */}
+            <div className="mt-3 mb-3 text-lg whitespace-pre-line leading-relaxed">
+                <span>{event.content}</span>
             </div>
 
             {/* 돌아가기 버튼 */}

@@ -422,13 +422,13 @@ const Admin_MemberManager = () => {
             {/* 크레딧 모달창 */}
             {selectedCreditMember && (
                 <div
-                    className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 overscroll-none"
+                    className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-[10000] overscroll-none"
                     onClick={() => setSelectedCreditMember(null)}
                     onTouchMove={(e) => {
                         if (e.target === e.currentTarget) e.preventDefault();
                     }}
                 >
-                    <div className="bg-white p-6 rounded w-full max-w-2xl" onClick={e => e.stopPropagation()}>
+                    <div className="bg-white p-6 rounded w-full h-1/2 max-w-2xl overflow-y-scroll" onClick={e => e.stopPropagation()}>
                         <h3 className="text-lg font-bold mb-4">{selectedCreditMember.name}님의 적립금 관리</h3>
 
                         <div className="mb-4 text-sm">

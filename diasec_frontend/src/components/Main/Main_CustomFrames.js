@@ -1267,8 +1267,8 @@ const Main_CustomFrames = () => {
                                     {customItems.map((item, idx) => (
                                         <div 
                                             key={item.id} 
-                                            onClick={() => setSelectedItemId(item.id)} 
-                                            className={`relative flex items-center gap-2 border rounded-2xl p-[8px] shadow-sm cursor-pointer bg-white transition
+                                            onClick={() => setSelectedItemId(item.id)}
+                                            className={`relative flex items-start gap-2 border rounded-2xl p-[8px] shadow-sm cursor-pointer bg-white transition
                                                 ${selectedItemId === item.id ? 'border-[#D0AC88] bg-[#fffaf3]' : 'hover:bg-[#fdf4ea]'}`}>
                                             {/* 썸네일 */}
                                             <div className='w-[70px] h-[70px] rounded-md border overflow-hidden bg-gray-100 flex items-center justify-center'>

@@ -132,7 +132,14 @@ const Order_Status = () => {
         const data = await res.json();
 
         if (!data.success) {
-            toast.error('상태 변경 실패');
+            console.error('[admin update-status] failed', {
+                httpStatus: res.status,
+                itemId,
+                oid,
+                newStatus,
+                response: data,
+            });
+            toast.error(data.message || '상태 변경 실패');
             return;
         }
 

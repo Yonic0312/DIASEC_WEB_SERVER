@@ -944,7 +944,7 @@ const None_Custom_Detail = () => {
                                     {customItems.map((item, idx) => (
                                         <div key={item.id} 
                                             onClick={() => setSelectedItemId(item.id)} 
-                                            className={`flex items-center gap-2 border rounded-xl p-[8px] shadow-sm cursor-pointer bg-white transition
+                                            className={`flex items-start gap-2 border rounded-xl p-[8px] shadow-sm cursor-pointer bg-white transition
                                                 ${selectedItemId === item.id ? 'border-[#D0AC88] bg-[#fffaf3]' : 'hover:bg-[#fdf4ea]'}`}>
                                             <img 
                                                 src={item.imageSrc}
@@ -971,7 +971,7 @@ const None_Custom_Detail = () => {
                                                     {canDeleteItem && (
                                                         <button
                                                             type="button"
-                                                            className="w-6 h-6 border rounded-full flex items-center justify-center transition font-bold text-red-500 hover:text-white hover:bg-red-500 border-red-300"
+                                                            className='w-6 h-6 shrink-0 text-red-500 hover:text-white hover:bg-red-500 border border-red-300 rounded-full flex items-center justify-center transition'
                                                             onClick={(e) => {
                                                                 e.stopPropagation();
                                                                 const deleteId = item.id;

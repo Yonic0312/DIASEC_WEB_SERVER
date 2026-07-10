@@ -10,7 +10,7 @@
         JOIN orders o ON oi.oid = o.oid
         LEFT JOIN reviews r ON r.item_id = oi.item_id
         WHERE o.id = #{id}
-            AND oi.order_status = '배송완료'
+            AND oi.order_status IN ('배송완료', '교환완료')
             AND r.rid IS NULL
     </select>
 
@@ -22,7 +22,7 @@
         WHERE o.oid = #{oid}
             AND o.guest_password IS NOT NULL AND o.guest_password != ''
             AND (o.id IS NULL OR TRIM(IFNULL(o.id, '')) = '')
-            AND oi.order_status = '배송완료'
+            AND oi.order_status IN ('배송완료', '교환완료')
             AND r.rid IS NULL
     </select>
 
@@ -36,7 +36,7 @@
             AND oi.pid = #{pid}
             AND o.guest_password IS NOT NULL AND o.guest_password != ''
             AND (o.id IS NULL OR TRIM(IFNULL(o.id,'')) = '')
-            AND oi.order_status = '배송완료'
+            AND oi.order_status IN ('배송완료', '교환완료')
             AND r.rid IS NULL
     </select>
 

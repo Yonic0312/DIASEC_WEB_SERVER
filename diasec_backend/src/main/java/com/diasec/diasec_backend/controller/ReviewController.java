@@ -62,7 +62,7 @@ public class ReviewController {
         return reviewService.getEligibleReviews(id);
     }
 
-    // 비회원: 주문번호 + 주문조회 비밀번호로 작성 가능한 배송완료 상품 목록 가져오기
+    // 비회원: 주문번호 + 주문조회 비밀번호로 작성 가능한 배송완료, 교환완료 상품 목록 가져오기
     @PostMapping("/guest-eligible")
     public ResponseEntity<?> getGuestEligible(@RequestBody Map<String, String> req) {
         try {

@@ -68,7 +68,12 @@ public class AdminOrderController {
         int usedCredit = request.get("usedCredit") == null ? 0 : Integer.valueOf(String.valueOf(request.get("usedCredit")));
         Long oid = request.get("oid") == null ? null : Long.valueOf(String.valueOf(request.get("oid")));
 
-        return adminOrderService.updateStatusWithSideEffects(itemId, newStatus, id, usedCredit, oid);
+        Map<String, Object> result = adminOrderService.updateStatusWithSideEffects(itemId, newStatus, id, usedCredit, oid);
+        if (Boolean.FALSE.equals(result.get("success"))) {
+            System.err.println("[AdminOrderController.updateStatus] failed itemId=" + itemId
+                + " oid=" + oid + " newStatus=" + newStatus + " => " + result);
+        }
+        return result;
     }
 
     // 상세 정보에서 배송 정보 업데이트

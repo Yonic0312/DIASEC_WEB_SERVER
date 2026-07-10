@@ -317,7 +317,7 @@ const OrderForm = () => {
     const [receiptInfo, setReceiptInfo] = useState(''); // 휴대폰번호 or 사업자 번호
     const [receiptMethod, setReceiptMethod] = useState('휴대폰번호'); // 선택된 방법 (개인일 경우)
 
-    const saveOrderRetryDraft = (method) => {
+    const saveOrderRetryDraft = (method, itemsSnapshot = items) => {
         const retryDraft = {
             ordererName,
             phone1,
@@ -344,11 +344,83 @@ const OrderForm = () => {
             buyerRequest,
             deliveryMessage,
             guestPassword: isGuest ? guestPassword : '',
-            items,
+            items: itemsSnapshot,
             savedAt: Date.now(),
         };
 
         sessionStorage.setItem(ORDER_RETRY_DRAFT_KEY, JSON.stringify(retryDraft));
+    };
+
+    const uploadCustomFrameToTmp = async (file) => {
+        const formData = new FormData();
+        formData.append('file', file);
+        const res = await axios.post(`${API}/uploads/customFrames/tmp`, formData, {
+            headers: { 'Content-Type': 'multipart/form-data' },
+            timeout: 600000,
+        });
+        if (!res.data?.url) {
+            throw new Error('맞춤액자 이미지 업로드에 실패했습니다.');
+        }
+        return res.data.url;
+    };
+
+    const prepareCustomFrameDraftItems = async (sourceItems) => {
+        const prepared = [];
+        for (const item of sourceItems) {
+            if (item.category !== 'customFrames') {
+                prepared.push(item);
+                continue;
+            }
+            if (item.thumbnailFile instanceof File) {
+                const tmpUrl = await uploadCustomFrameToTmp(item.thumbnailFile);
+                prepared.push({ ...item, thumbnail: tmpUrl });
+                continue;
+            }
+            prepared.push(item);
+        }
+        return prepared;
+    };
+
+    const mapItemsForNicepayDraft = (draftItems, orderStatus) =>
+        draftItems.map((item) => ({
+            cid: item.cid,
+            pid: item.pid,
+            category: item.category,
+            title: item.title,
+            author: item.author,
+            quantity: item.quantity,
+            price: getDiscountedUnitPrice(item.price, partnerDiscount),
+            period: item.period,
+            size: item.size,
+            thumbnail: item.thumbnail,
+            thumbnailPreview: item.thumbnailPreview,
+            orderStatus,
+            deposit: item.deposit,
+            finishType: item.finishType ?? 'glossy',
+            retouchEnabled: item.retouchEnabled ?? 0,
+            retouchTypes: item.retouchEnabled ? (item.retouchTypes ?? null) : null,
+            retouchNote: item.retouchEnabled ? (item.retouchNote ?? null) : null,
+        }));
+
+    const ensureCustomFrameOriginalsUploaded = async () => {
+        const needsUpload = items.some(
+            (it) => it.category === 'customFrames' && it.thumbnailFile instanceof File
+        );
+        if (!needsUpload) return items;
+
+        const toastId = toast.loading('맞춤액자 원본 이미지 업로드 중...');
+        try {
+            const prepared = await prepareCustomFrameDraftItems(items);
+            setItems(prepared);
+            setOrderItems(prepared);
+            return prepared;
+        } catch (err) {
+            console.error(err);
+            toast.error(err.response?.data?.message || err.message || '이미지 업로드에 실패했습니다.');
+            throw err;
+        } finally { 
+            toast.dismiss(toastId);
+        }
     };
 
     useEffect(() => {
@@ -466,65 +538,48 @@ const OrderForm = () => {
         // 무통장 입금
         if (paymentMethod === "가상계좌") {
             try {
-              saveOrderRetryDraft('가상계좌');
-              // 1) 주문 데이터 draft 저장 (카드용 orderData랑 거의 동일, 상태만 다르게)
-              const orderData = {
-                id: member ? member.id : '',
-                ordererName,
-                ordererPhone: `${phone1}-${phone2}-${phone3}`,
-                email: finalEmail,
-                recipient,
-                postcode,
-                address,
-                detailAddress,
-                usedCredit,
-                paymentMethod: '가상계좌',
-                depositor,
-                bankAccount,
-                receiptType,
-                receiptInfo,
-                receiptMethod,
-                totalPrice,
-                totalDeposit,
-                finalPrice,
-                deliveryFee,
-                deliveryMessage,
-                buyerRequest,
-                recipientPhone: `${recipientPhone1}-${recipientPhone2}-${recipientPhone3}`,
-                guestPassword: isGuest ? guestPassword : null,
-                nicepayTid: null,
-                nicepayOrderId: null,
-                payMethodCode: null,
-                vbankCode: null,
-                vbankName: null,
-                vbankAccount: null,
-                vbankHolder: null,
-                vbankDueDate: null,
-                webhookLastStatus: null,
-                items: items.map(item => ({
-                  cid: item.cid,
-                  pid: item.pid,
-                  category: item.category,
-                  title: item.title,
-                  author: item.author,
-                  quantity: item.quantity,
-                  price: getDiscountedUnitPrice(item.price),
-                  period: item.period,
-                  size: item.size,
-                  thumbnail: item.thumbnail,
-                  thumbnailPreview: item.thumbnailPreview,
-                  orderStatus: '입금대기',    // ★ 가상계좌는 입금대기
-                  deposit: item.deposit,
-                  finishType: item.finishType ?? 'glossy',
-                  retouchEnabled: item.retouchEnabled ?? 0,
-                  retouchTypes: item.retouchEnabled ? (item.retouchTypes ?? null) : null,
-                  retouchNote: item.retouchEnabled ? (item.retouchNote ?? null) : null,
-                }))
-              };
-              const res = await axios.post(`${API}/payment/nicepay/vbank/prepare`, orderData);
-              if (!res.data.success || !res.data.orderId) {
-                toast.error('가상계좌 준비에 실패했습니다.');
-                return;
+                const draftItems = await ensureCustomFrameOriginalsUploaded();
+                saveOrderRetryDraft('가상계좌', draftItems);
+                // 1) 주문 데이터 draft 저장 (카드용 orderData랑 거의 동일, 상태만 다르게)
+                const orderData = {
+                    id: member ? member.id : '',
+                    ordererName,
+                    ordererPhone: `${phone1}-${phone2}-${phone3}`,
+                    email: finalEmail,
+                    recipient,
+                    postcode,
+                    address,
+                    detailAddress,
+                    usedCredit,
+                    paymentMethod: '가상계좌',
+                    depositor,
+                    bankAccount,
+                    receiptType,
+                    receiptInfo,
+                    receiptMethod,
+                    totalPrice,
+                    totalDeposit,
+                    finalPrice,
+                    deliveryFee,
+                    deliveryMessage,
+                    buyerRequest,
+                    recipientPhone: `${recipientPhone1}-${recipientPhone2}-${recipientPhone3}`,
+                    guestPassword: isGuest ? guestPassword : null,
+                    nicepayTid: null,
+                    nicepayOrderId: null,
+                    payMethodCode: null,
+                    vbankCode: null,
+                    vbankName: null,
+                    vbankAccount: null,
+                    vbankHolder: null,
+                    vbankDueDate: null,
+                    webhookLastStatus: null,
+                    items: mapItemsForNicepayDraft(draftItems, '입금대기'),
+                };
+                const res = await axios.post(`${API}/payment/nicepay/vbank/prepare`, orderData);
+                if (!res.data.success || !res.data.orderId) {
+                    toast.error('가상계좌 준비에 실패했습니다.');
+                    return;
               }
               const draftOrderId = res.data.orderId;
               // 2) JS 결제창 호출 (method: 'vbank')
@@ -550,61 +605,44 @@ const OrderForm = () => {
                 toast.error(`카드·간편결제는 최소 ${CARD_MIN_PAYMENT}원 이상 결제해야 합니다.`);
                 return;
             }
-            saveOrderRetryDraft('카드결제');
-            const orderData = {
-                id: member ? member.id : '',
-                ordererName,
-                ordererPhone: `${phone1}-${phone2}-${phone3}`,
-                email: finalEmail,
-                recipient,
-                postcode,
-                address,
-                detailAddress,
-                usedCredit,
-                paymentMethod: '카드결제',
-                depositor,
-                bankAccount,
-                receiptType,
-                receiptInfo,
-                receiptMethod,
-                totalPrice,
-                totalDeposit,
-                finalPrice,
-                deliveryFee,
-                deliveryMessage,
-                buyerRequest,
-                recipientPhone: `${recipientPhone1}-${recipientPhone2}-${recipientPhone3}`,
-                guestPassword: isGuest ? guestPassword : null,
-                nicepayTid: null,
-                nicepayOrderId: null,
-                payMethodCode: null,
-                vbankCode: null,
-                vbankName: null,
-                vbankAccount: null,
-                vbankHolder: null,
-                vbankDueDate: null,
-                webhookLastStatus: null,
-                items: items.map(item => ({
-                    cid: item.cid,
-                    pid: item.pid,
-                    category: item.category,
-                    title: item.title,
-                    author: item.author,
-                    quantity: item.quantity,
-                    price: getDiscountedUnitPrice(item.price),
-                    period: item.period,
-                    size: item.size,
-                    thumbnail: item.thumbnail,
-                    thumbnailPreview: item.thumbnailPreview,
-                    orderStatus: '결제완료',
-                    deposit: item.deposit,
-                    finishType: item.finishType ?? 'glossy',
-                    retouchEnabled: item.retouchEnabled ?? 0,
-                    retouchTypes: item.retouchEnabled ? (item.retouchTypes ?? null) : null,
-                    retouchNote: item.retouchEnabled ? (item.retouchNote ?? null) : null,
-                }))
-            };
-            try { // 카드 결제 수정하려면 여기 수정하세요
+            try {
+                const draftItems = await ensureCustomFrameOriginalsUploaded();
+                saveOrderRetryDraft('카드결제', draftItems);
+                const orderData = {
+                    id: member ? member.id : '',
+                    ordererName,
+                    ordererPhone: `${phone1}-${phone2}-${phone3}`,
+                    email: finalEmail,
+                    recipient,
+                    postcode,
+                    address,
+                    detailAddress,
+                    usedCredit,
+                    paymentMethod: '카드결제',
+                    depositor,
+                    bankAccount,
+                    receiptType,
+                    receiptInfo,
+                    receiptMethod,
+                    totalPrice,
+                    totalDeposit,
+                    finalPrice,
+                    deliveryFee,
+                    deliveryMessage,
+                    buyerRequest,
+                    recipientPhone: `${recipientPhone1}-${recipientPhone2}-${recipientPhone3}`,
+                    guestPassword: isGuest ? guestPassword : null,
+                    nicepayTid: null,
+                    nicepayOrderId: null,
+                    payMethodCode: null,
+                    vbankCode: null,
+                    vbankName: null,
+                    vbankAccount: null,
+                    vbankHolder: null,
+                    vbankDueDate: null,
+                    webhookLastStatus: null,
+                    items: mapItemsForNicepayDraft(draftItems, '결제완료'),
+                };
                 const res = await axios.post(`${API}/payment/nicepay/prepare`, orderData);
                 if (!res.data.success || !res.data.orderId) {
                     toast.error('결제 준비에 실패했습니다.');

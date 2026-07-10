@@ -230,7 +230,7 @@
                 AND author = #{author}
             </if>
             <if test="titleKeyword != null and titleKeyword != ''">
-                AND LOWER(title) LIKE CONCAT('%', LOWER(#{titleKeyword}), '%')
+                AND REPLACE(LOWER(title), ' ', '') LIKE CONCAT('%', LOWER(REPLACE(#{titleKeyword}, ' ', '')), '%')
             </if>
         </where>
     </select>

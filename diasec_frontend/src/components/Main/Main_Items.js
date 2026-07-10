@@ -263,12 +263,20 @@ const Main_Items = () => {
         });
     }, [type]);
 
+    // 검색어 단어 띄어쓰기 처리 헬퍼
+    const normalize = (s) => 
+        (s ?? "")
+            .normalize("NFKC")
+            .replace(/[\s\u00A0\u200B\uFEFF]+/g, "")
+            .toLowerCase();
+
     // 상단 미니 라벨 렌더링
     const miniFilteredLabels = miniLabels.filter(item => {
         const matchesPeriod = !selectedPeriod || item.times === selectedPeriod;
-        const matchesSearch = item.label.toLowerCase().includes(authorSearch.toLowerCase());
+        const q = normalize(authorSearch);
+        const matchesSearch = !q || normalize(item.label).includes(q);
         return matchesPeriod && matchesSearch;
-    });
+      });
 
     const miniSortedLabels = [...miniFilteredLabels].sort((a, b) => {
         if (sortMode === 'popular') {
@@ -424,19 +432,19 @@ const Main_Items = () => {
         navigate(`/main_Items?type=${type}&author=${encodeURIComponent(label)}`);
     }
 
-    const q = titleSearch.trim().toLowerCase();
+    const titleQuery = normalize(titleSearch);
 
     const filteredAuthorProducts = useMemo(() => {
-        return !q
+        return !titleQuery
             ? authorProducts
-            : authorProducts.filter(p => (p.title ?? "").toLowerCase().includes(q));
-    }, [authorProducts, q]);
+            : authorProducts.filter(p => normalize(p.title).includes(titleQuery));
+    }, [authorProducts, titleQuery]);
 
     const filteredHomeProducts = useMemo(() => {
-        return !q
+        return !titleQuery
             ? homeProducts
-            : homeProducts.filter(p => (p.title ?? "").toLowerCase().includes(q));
-    }, [homeProducts, q]);
+            : homeProducts.filter(p => normalize(p.title).includes(titleQuery));
+    }, [homeProducts, titleQuery]);
 
     // 검색 중이면 전부 보여주고, 검색 아닐 때만 visibleCount 적용
     const displayProducts = useMemo(() => {
@@ -488,7 +496,8 @@ const Main_Items = () => {
     // 작가 목록 가져오기
     const filteredLabels = labels.filter(item => {
         const matchesPeriod = !selectedPeriod || item.times === selectedPeriod;
-        const matchesSearch = item.label.toLowerCase().includes(authorSearch.toLowerCase());
+        const q = normalize(authorSearch);
+        const matchesSearch = !q || normalize(item.label).includes(q);
         return matchesPeriod && matchesSearch;
     });
 
@@ -545,7 +554,7 @@ const Main_Items = () => {
     /** 상품명 검색 시 DB 기준 총 개수 (디바운스) */
     useEffect(() => {
         if (!type) return;
-        const q = titleSearch.trim();
+        const q = normalize(titleSearch);
         if (!q) {
             setTitleFilterCount(null);
             setTitleFilterLoading(false);
@@ -1040,7 +1049,7 @@ const Main_Items = () => {
         });
     }, [itemPriceMap, displayProducts]);
 
-    const hasTitleSearch = titleSearch.trim().length > 0;
+    const hasTitleSearch = normalize(titleSearch).length > 0;
     const productCountText = !hasTitleSearch
         ? totalCount.toLocaleString()
         : titleFilterLoading
