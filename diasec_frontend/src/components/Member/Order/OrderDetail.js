@@ -590,7 +590,7 @@ const OrderDetail = () => {
                             >
                                 <div className="flex justify-between flex-row font-semibold">
                                     <span className="min-w-0 flex-1 truncate pr-2">{item.title}</span>
-                                    {index === 0 && <span>{item.orderStatus}</span>}
+                                    <span>{item.orderStatus}</span>
                                 </div>
                                 <div>
                                     <div className="w-full flex flex-col sm:flex-row sm:justify-between">

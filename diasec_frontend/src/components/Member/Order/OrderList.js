@@ -13,34 +13,6 @@ const OrderList = () => {
 
     // 주문 목록
     const [orderList, setOrderList] = useState([]);
-    const [refundModalOpen, setRefundModalOpen] = useState(false);
-    const [cancelTarget, setCancelTarget] = useState(null);
-    const [refundBank, setRefundBank] = useState({ bankName: '', accountNumber: '', accountHolder: '' });
-
-    const needsVbankRefundForCancel = (order) =>
-        order.paymentMethod === '가상계좌'
-        && order.items.every(item => item.orderStatus === '결제완료');
-
-    const submitCancelRequest = (order, account = {}) => {
-        const body = { oid: order.oid, id: member.id };
-        if (account.bankName) Object.assign(body, account);
-        fetch(`${API}/order/cancelRequest`, {
-            method: 'POST',
-            credentials: 'include',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(body),
-        })
-            .then(res => res.json())
-            .then(data => {
-                if (data.success) {
-                    toast.success('취소 요청이 접수되었습니다.');
-                    handleSearch();
-                } else {
-                    toast.error('취소 요청 실패: ' + (data.message || ''));
-                }
-            })
-            .catch(() => toast.error('요청 실패'));
-    };
 
     // 오늘 날짜 설정하기
     useEffect(() => {
@@ -136,25 +108,50 @@ const OrderList = () => {
 
     // 주문 취소 함수
     const handleCancelOrder = (order) => {
-        const canCancel = order.items.every(item => ['입금대기', '결제완료'].includes(item.orderStatus));
-        if (!canCancel) {
+        if (order.items.every(item => item.orderStatus === '입금대기')) {
+            if (!window.confirm(`주문번호 ${order.oid}의 전체 상품을 취소하시겠습니까?`)) return;
+            // 즉시 취소 처리
+            fetch(`${API}/order/cancel`, {
+            method: 'POST',
+            credentials:'include',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+                id: member.id, 
+                oid: order.oid,
+                usedCredit: order.usedCredit 
+                }) 
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                toast.success('주문이 취소되었습니다.');
+                handleSearch();
+            } else {
+                toast.error('취소 실패 : ' + data.message);
+            }
+        })
+        .catch(err => toast.error('요청 실패'));    
+        } else if (order.items.every(item => item.orderStatus === '결제완료')) {
+            if (!window.confirm(`결제된 주문입니다. 취소 요청만 가능합니다. 취소 요청을 보내시겠습니까?`)) return;
+            // 취소 요청 API 호출
+            fetch(`${API}/order/cancelRequest`, {
+                method: 'POST',
+                headers: {'Content-Type' : 'application/json' },
+                body: JSON.stringify({ oid: order.oid, id: member.id })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    toast.success('취소 요청이 접수되었습니다.');
+                    handleSearch();
+                } else {
+                    toast.error('취소 요청 실패: ' + data.message);
+                }
+            })
+            .catch(err => toast.error('요청 실패'));
+        } else {
             toast.warn('해당 주문은 현재 취소할 수 없습니다.');
-            return;
-        }
-        if (!window.confirm(`주문번호 ${order.oid}에 대해 취소 요청을 보내시겠습니까?`)) return;
-
-        if (needsVbankRefundForCancel(order)) {
-            const first = order.items[0];
-            setCancelTarget(order);
-            setRefundBank({
-                bankName: first?.bankName || '',
-                accountNumber: first?.accountNumber || '',
-                accountHolder: first?.accountHolder || '',
-            });
-            setRefundModalOpen(true);
-            return;
-        }
-        submitCancelRequest(order);
+        }     
     };
 
     // 페이징
@@ -216,6 +213,39 @@ const OrderList = () => {
             return "맞춤액자";  
         } 
     }
+
+    /** 주문 목록: 동일 주문의 여러 상품을 1줄로 요약 */
+    const getDisplayItems = (order) => {
+        const items = order.items ?? [];
+        if (items.length <= 1) {
+            return items.map((it) => ({ ...it, isGrouped: false }));
+        }
+
+        const first = items[0];
+        const groupTotalQty = items.reduce((sum, it) => sum + (Number(it.quantity) || 1), 0);
+        const groupTotalPrice = items.reduce(
+            (sum, it) => sum + (Number(it.price) || 0) * (Number(it.quantity) || 1),
+            0
+        );
+        const uniqueSizes = new Set(items.map((it) => it.size).filter(Boolean));
+        const sameTitle = items.every((it) => it.title === first.title);
+
+        return [{
+            ...first,
+            itemId: `summary-${order.oid}`,
+            isGrouped: true,
+            groupCount: items.length,
+            groupTotalQty,
+            groupTotalPrice,
+            displayTitle: sameTitle
+                ? `${first.title} ${groupTotalQty}개`
+                : `상품 ${groupTotalQty}개`,
+            displaySize:
+                uniqueSizes.size <= 1
+                    ? convertInchToCm(first.size)
+                    : `사이즈 ${uniqueSizes.size}종`,
+        }];
+    };
 
     // 리스상품 반납일 계산기
     const calculateRemainingDays = (leaseEnd) => {
@@ -361,8 +391,8 @@ const OrderList = () => {
                                 </div>
                             </div>
 
-                            {/* 주문 상품들 */}
-                            {order.items.map((item, iidx) => (
+                            {/* 주문 상품들 (2개 이상이면 1줄 요약) */}
+                            {getDisplayItems(order).map((item) => (
                                 <div key={item.itemId} 
                                     className='flex flex-col'>
                                     <div className="
@@ -397,7 +427,7 @@ const OrderList = () => {
                                                     ? item.thumbnailPreview || item.thumbnail || thumbCustom
                                                     : item.thumbnail
                                             } 
-                                            alt={item.title} 
+                                            alt={item.isGrouped ? item.displayTitle : item.title} 
                                             className="
                                                 md:w-20 w-[clamp(4rem,10.43vw,5rem)]
                                                 md:h-20 h-[clamp(4rem,10.43vw,5rem)]
@@ -410,10 +440,14 @@ const OrderList = () => {
                                                     flex flex-col w-full
                                                     md:text-sm text-[clamp(12px,1.825vw,14px)]
                                             ">
-                                                <span className="font-bold text-black">{item.title}</span>
+                                                <span className="font-bold text-black">
+                                                    {item.isGrouped ? item.displayTitle : item.title}
+                                                </span>
                                                 <span>카테고리: {convertCategoryName(item.category)} ({item.finishType === 'matte' ? '무광' : '유광'})</span>
                                                 <div className="flex sm:flex-row flex-col">
-                                                    <span>사이즈: {convertInchToCm(item.size)}</span>
+                                                    <span>
+                                                        사이즈: {item.isGrouped ? item.displaySize : convertInchToCm(item.size)}
+                                                    </span>
                                                 </div>
                                                 {item.category === 'lease' && (
                                                 `기간 : ${item.period}`
@@ -430,7 +464,13 @@ const OrderList = () => {
                                                 {item.category === 'lease' && item.leaseEnd && (
                                                     ` / 남은 기간: ${calculateRemainingDays(item.leaseEnd)}일`)
                                                 }
-                                                <div className="flex font-bold ml-auto"><span>{(item.price).toLocaleString()}원</span></div>
+                                                <div className="flex font-bold ml-auto">
+                                                    <span>
+                                                        {item.isGrouped
+                                                            ? `총 ${(order.finalPrice ?? item.groupTotalPrice).toLocaleString()}원`
+                                                            : `총 ${(item.price).toLocaleString()}원`}
+                                                    </span>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -509,7 +549,7 @@ const OrderList = () => {
                                 disabled={currentPage === totalPages}
                                 className={`w-8 h-8 border rounded-full flex items-center justify-center 
                                     ${currentPage === totalPages 
-                                        ? 'text-gray-300 border-gray-200' 
+                                        ? 'text-gray-300 border-gray-200'
                                         : 'text-gray-700 hover:bg-gray-100 border-gray-300'}`}>
                                 {'>>'}
                             </button>
@@ -517,31 +557,6 @@ const OrderList = () => {
                     )
                 })()}
             </div>
-
-            {refundModalOpen && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-                    <div className="w-full max-w-md rounded-lg bg-white p-5 shadow-lg">
-                        <h3 className="font-semibold">환불 계좌 입력</h3>
-                        <p className="mt-1 text-sm text-gray-600">입금 완료된 가상계좌 주문입니다. 환불받을 계좌를 입력해 주세요.</p>
-                        <div className="mt-3 space-y-2">
-                            <input className="w-full border px-3 py-2 rounded text-sm" placeholder="은행명" value={refundBank.bankName} onChange={e => setRefundBank(p => ({ ...p, bankName: e.target.value }))} />
-                            <input className="w-full border px-3 py-2 rounded text-sm" placeholder="계좌번호" value={refundBank.accountNumber} onChange={e => setRefundBank(p => ({ ...p, accountNumber: e.target.value }))} />
-                            <input className="w-full border px-3 py-2 rounded text-sm" placeholder="예금주" value={refundBank.accountHolder} onChange={e => setRefundBank(p => ({ ...p, accountHolder: e.target.value }))} />
-                        </div>
-                        <div className="mt-4 flex justify-end gap-2">
-                            <button type="button" className="border px-4 py-2 rounded text-sm" onClick={() => setRefundModalOpen(false)}>닫기</button>
-                            <button type="button" className="bg-blue-600 text-white px-4 py-2 rounded text-sm" onClick={() => {
-                                if (!refundBank.bankName || !refundBank.accountNumber || !refundBank.accountHolder) {
-                                    toast.warn('환불 계좌를 모두 입력해 주세요.');
-                                    return;
-                                }
-                                submitCancelRequest(cancelTarget, refundBank);
-                                setRefundModalOpen(false);
-                            }}>취소 요청</button>
-                        </div>
-                    </div>
-                </div>
-            )}
         </div>
     );
 };
