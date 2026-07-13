@@ -130,6 +130,7 @@ const Main_CustomFrames = () => {
     const selectedItem = customItems.find(item => item.id === selectedItemId);
 
     const MIN_WIDTH = 30;
+    const MIN_HEIGHT = 30;
 
     // 중간 가져오기
     const getMidWidth = (minW, maxW, maxH, ratio) => {
@@ -153,12 +154,19 @@ const Main_CustomFrames = () => {
             const maxW = ratio >= 1 ? 200.7 : 101.6;
             const maxH = ratio >= 1 ? 101.6 : 200.7;
 
-            const startW = getMidWidth(MIN_WIDTH, maxW, maxH, ratio);
+            const effectiveMinWidth = Math.max(MIN_WIDTH, MIN_HEIGHT * ratio);
+            let startW = getMidWidth(effectiveMinWidth, maxW, maxH, ratio);
 
             let startH = parseFloat((startW / ratio).toFixed(1));
 
+            if (startH < MIN_HEIGHT) {
+                startH = MIN_HEIGHT;
+                startW = parseFloat((startH * ratio).toFixed(1));
+            }
+
             if (startH > maxH) {
                 startH = maxH;
+                startW = parseFloat((startH * ratio).toFixed(1));
             }
 
             const cfg = {
@@ -346,18 +354,30 @@ const Main_CustomFrames = () => {
                     const preview800 = makePreviewDataUrl(img, PREVIEW_MAX_SIDE_PX, 0.88);
                     const preview150 = makePreviewDataUrl(img, ORDER_THUMB_MAX_SIDE_PX, 0.78);
                     const preview150File = dataUrlToFile(preview150, `${uuidv4()}_150.jpg`);
+
                     setImageSrc(preview800);
+
+                    // 사이즈 계산
                     const ratio = img.width / img.height;
                     const maxWidth = ratio >= 1 ? 200.7 : 101.6;
                     const maxHeight = ratio >= 1 ? 101.6 : 200.7;
-                    let width = getMidWidth(MIN_WIDTH, maxWidth, maxHeight, ratio);
+
+                    const effectiveMinWidth = Math.max(MIN_WIDTH, MIN_HEIGHT * ratio);
+                    let width = getMidWidth(effectiveMinWidth, maxWidth, maxHeight, ratio);
                     let height = parseFloat((width / ratio).toFixed(1));
+                    
+                    if (height < MIN_HEIGHT) {
+                        height = MIN_HEIGHT;
+                        width = parseFloat((height * ratio).toFixed(1));
+                    }
                     if (height > maxHeight) {
                         height = maxHeight;
                         width = parseFloat((height * ratio).toFixed(1));
                     }
+
                     const area = width * height;
                     const price = calculateCumulativePrice(area);
+
                     const newItem = {
                         id: tempId,
                         imageSrc: preview800,
@@ -437,9 +457,11 @@ const Main_CustomFrames = () => {
 
         if (isNaN(value)) return;
 
-        if (value < MIN_WIDTH) {
-            showToastOnce(`최소 넓이는 ${Math.floor(MIN_WIDTH)}cm입니다.`);
-            value = MIN_WIDTH;
+        const minWidth = getActualMinWidth();
+
+        if (value < minWidth) {
+            showToastOnce(`최소 넓이는 ${Math.floor(minWidth)}cm입니다.`);
+            value = minWidth;
         } else if (value > actualMaxWidth) {
             showToastOnce(`최대 넓이는 ${Math.floor(actualMaxWidth)}cm입니다.`);
             value = actualMaxWidth;
@@ -449,6 +471,12 @@ const Main_CustomFrames = () => {
 
         if (aspectRatio) {
             let newHeight = parseFloat((value / aspectRatio).toFixed(1));
+
+            if (newHeight < MIN_HEIGHT) {
+                showToastOnce(`이미지 비율로 계산된 높이가 최소 높이 ${MIN_HEIGHT}cm 미만이라 자동 조정됩니다.`);
+                newHeight = MIN_HEIGHT;
+                value = parseFloat((newHeight * aspectRatio).toFixed(1));
+            }
 
             if (newHeight > maxHeight) {
                 showToastOnce(`이미지 비율로 계산된 높이가 최대 높이 ${maxHeight}cm를 초과하여 자동 조정됩니다.`);
@@ -470,11 +498,9 @@ const Main_CustomFrames = () => {
     
         if (isNaN(value)) return;
     
-        const minHeight = getActualMinHeight();
-    
-        if (value < minHeight) {
-            showToastOnce(`최소 높이는 ${Math.floor(minHeight)}cm입니다.`);
-            value = minHeight;
+        if (value < MIN_HEIGHT) {
+            showToastOnce(`최소 높이는 ${Math.floor(MIN_HEIGHT)}cm입니다.`);
+            value = MIN_HEIGHT;
         } else if (value > actualMaxHeight) {
             showToastOnce(`최대 높이는 ${Math.floor(actualMaxHeight)}cm입니다.`);
             value = actualMaxHeight;
@@ -484,6 +510,12 @@ const Main_CustomFrames = () => {
     
         if (aspectRatio) {
             let newWidth = parseFloat((value * aspectRatio).toFixed(1));
+
+            if (newWidth < MIN_WIDTH) {
+                showToastOnce(`이미지 비율로 계산된 가로가 최소 너비 ${MIN_WIDTH}cm 미만이라 자동 조정됩니다.`);
+                newWidth = MIN_WIDTH;
+                value = parseFloat((newWidth / aspectRatio).toFixed(1));
+            }
     
             if (newWidth > maxWidth) {
                 showToastOnce(`이미지 비율로 계산된 가로가 최대 너비 ${maxWidth}cm를 초과하여 자동 조정됩니다.`);
@@ -558,16 +590,16 @@ const Main_CustomFrames = () => {
     }
 
     const [paperKey, setPaperKey] = useState(null);
-    const [paperRotate, setPaperRotate] = useState(false);
+    const isPaperLandscape = aspectRatio != null && aspectRatio >= 1;
 
     const paper = paperKey ? PAPER_SIZES_CM[paperKey] : null;
 
     const paperWcm = paper
-        ? (paperRotate ? paper.h : paper.w)
+        ? (isPaperLandscape ? paper.h : paper.w)
         : 0;
 
     const paperHcm = paper
-        ? (paperRotate ? paper.w : paper.h)
+        ? (isPaperLandscape ? paper.w : paper.h)
         : 0;
 
     const paperWpx = paperWcm * CM_TO_PX;
@@ -576,13 +608,6 @@ const Main_CustomFrames = () => {
     const paperWidthPct = (paperWpx / BASE_BG_W) * 100;
     const paperHeightPct = (paperHpx / BASE_BG_H) * 100;
     // A3 ~ A0 오버레이 //
-
-    useEffect(() => {
-        if (!aspectRatio) return;
-
-        // 가로 이미지면 종이도 가로, 세로 이미지면 종이도 세로
-        setPaperRotate(aspectRatio >= 1);
-    }, [aspectRatio]);
 
     // 계산
     const calculateCumulativePrice = (area) => {
@@ -614,10 +639,12 @@ const Main_CustomFrames = () => {
         return Math.min(maxWidth, widthByHeight);
     };
 
-    const getActualMinHeight = () => {
+    const getActualMinWidth = () => {
         if (!aspectRatio) return MIN_WIDTH;
-        return MIN_WIDTH / aspectRatio;
+        return Math.max(MIN_WIDTH, MIN_HEIGHT * aspectRatio);
     };
+
+    const getActualMinHeight = () => MIN_HEIGHT;
 
     const getActualMaxHeight = () => {
         if (!aspectRatio)return maxHeight;
@@ -625,6 +652,7 @@ const Main_CustomFrames = () => {
         return Math.min(maxHeight, heightByWidth)
     }
 
+    const actualMinWidth = getActualMinWidth();
     const actualMaxWidth = getActualMaxWidth();
     const actualMaxHeight = getActualMaxHeight();
     const isCustomOrderFull = customItems.length >= MAX_CUSTOM_ORDER_ITEMS;
@@ -1282,7 +1310,7 @@ const Main_CustomFrames = () => {
                         <div className="mt-[4px] flex justify-between">
                             <input
                                 type="range"
-                                min={MIN_WIDTH}
+                                min={actualMinWidth}
                                 max={actualMaxWidth}
                                 step="0.1"
                                 value={width}
@@ -1321,17 +1349,6 @@ const Main_CustomFrames = () => {
                                     {k}
                                 </button>
                             ))}
-                            <button 
-                                className="flex-1 h-[34px] rounded-md border text-sm font-semibold bg-white text-gray-500 opacity-90 border-gray-300 hover:bg-[#ecd2af] hover:text-white hover:border-[#ecd2af]"
-                                onClick={() => {
-                                    if (!paperKey) {
-                                        toast.warn("A3~A0 중 하나를 먼저 선택해주세요.");
-                                    }
-                                    setPaperRotate(v => !v);
-                                }}
-                            >
-                                {paperRotate === true ?  "가로" : "세로"}
-                            </button>
                         </div>
 
                         <hr className='mt-3 border-[1px] border-gray-200 opacity-80' />
