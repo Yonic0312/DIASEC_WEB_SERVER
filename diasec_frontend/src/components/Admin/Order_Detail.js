@@ -213,6 +213,18 @@ const Order_Detail = () => {
         const ok = window.confirm(`주문 상태를 "${newStatus}"(으)로 변경할까요?`);
         if (!ok) return;
 
+        // 상세 화면: 환불완료 시 나이스페이 PG 환불은 하지 않음 (목록 order_Status와 구분)
+        if (newStatus === '환불완료') {
+            const okRefund = window.confirm(
+                `적립금이 사용된 경우 자동 반환됩니다. \n\n` +
+                `※ 카드·가상계좌 결제 환불은 이 화면에서 자동 처리되지 않습니다.\n` +
+                `나이스페이 관리자에서 수동으로 환불해 주세요. \n\n` +
+                `(목록의 "주문 상태 변경"에서는 나이스페이 환불이 자동으로 진행됩니다.)\n\n` +
+                `계속할까요?`
+            );
+            if (!okRefund) return;
+        }
+
         const hasClaimFiles = item?.claimFiles?.length > 0;
         const willDeleteClaimFiles = 
             hasClaimFiles && SHOULD_DELETE_CLAIM_FILES_STATUS.has(newStatus);
@@ -241,19 +253,19 @@ const Order_Detail = () => {
             method: 'POST',
             headers: { 'Content-Type': 'application/json'},
             credentials: "include",
-            body: JSON.stringify({ itemId, orderStatus: newStatus, id, usedCredit, oid})
+            body: JSON.stringify({ 
+                itemId, 
+                orderStatus: newStatus, 
+                id, 
+                usedCredit, 
+                oid,
+                skipPgRefund: true, // Order Detail만 PG 생략
+            })
         });
         
         const data = await res.json();
 
         if (!data.success) {
-            console.error('[admin update-status] failed', {
-                httpStatus: res.status,
-                itemId,
-                oid,
-                newStatus,
-                response: data,
-            });
             toast.error(data.message || "상태 변경 실패");
             return;
         }
@@ -849,6 +861,13 @@ const Order_Detail = () => {
                         </p>
                     </div>
                     <div className="flex gap-1 no-print">
+                        <button
+                            onClick={() => handlePrint()}
+                            className="px-3 py-1 border rounded bg-green-500 text-sm hover:bg-green-600 text-white"
+                        >
+                            인쇄하기★
+                        </button>
+                        
                         {order.items[0].category === 'customFrames' && order.items[0]?.thumbnail && (
                             <button
                                 className="px-2 py-1 text-[11px] font-medium border bg-gray-700 text-white rounded-xl hover:bg-gray-800 transition"
@@ -890,13 +909,6 @@ const Order_Detail = () => {
                             <option key={status} value={status}>{status}</option>
                         ))}
                         </select>
-
-                        <button
-                            onClick={() => handlePrint()}
-                            className="px-3 py-1 border rounded bg-white text-sm hover:bg-gray-100"
-                        >
-                            인쇄하기
-                        </button>
 
                         <button 
                             className="px-2 py-1 text-[11px] font-medium border bg-orange-500 text-white border-white rounded-xl hover:text-gray-300  transition" 
@@ -954,7 +966,13 @@ const Order_Detail = () => {
                     <div><span className="print-label font-medium">주문번호:</span> {order.oid}</div>
                     <div><span className="print-label font-medium">주문상태:</span> {order.items[0].orderStatus}</div>
                     <div><span className="print-label font-medium">주문일시:</span> {order.createdAt?.slice(0, 16)}</div>
-                    <div><span className="print-label font-medium">주문수단:</span> {order.paymentMethod}</div>
+                    <div>
+                        <span className="print-label font-medium">주문수단:</span>{" "}
+                        {order.paymentMethod}
+                        {order.paymentMethod === "카드결제" && order.cardName
+                            ? ` (${order.cardName})`
+                            : ""}
+                    </div>
                     <div><span className="print-label font-medium">주문자명:</span> {order.ordererName}</div>
                     <div><span className="print-label font-medium">주문자 연락처:</span> {order.ordererPhone}</div>
                 </div>
@@ -976,7 +994,7 @@ const Order_Detail = () => {
                             <span className="print-badge">
                                 {convertCategoryName(order.items[0].category)}
                             </span>
-                            <span className="print-badge print-badge-dark">
+                            <span className={item.finishType === 'matte' ? 'print-badge print-badge-dark' : 'print-badge'}>
                                  {item.finishType === 'matte' ? '무광' : '유광'}
                             </span>
                             <span className="print-badge">
@@ -1289,7 +1307,11 @@ const Order_Detail = () => {
                 {/* <h3 className="print-section-title font-semibold text-lg">결제 정보</h3> */}
                 <div className="print-grid-2 text-sm leading-6">
                     <div>
-                        <span className="print-label">결제 수단:</span> {order.paymentMethod}
+                        <span className="print-label">결제 수단:</span>{" "}
+                        {order.paymentMethod}
+                        {order.paymentMethod === '카드결제' && order.cardName
+                            ? ` (${order.cardName})`
+                            : ""}
                     </div>
 
                     { order.paymentMethod === '무통장입금' && (

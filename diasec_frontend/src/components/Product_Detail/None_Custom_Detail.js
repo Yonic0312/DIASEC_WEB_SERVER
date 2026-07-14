@@ -92,8 +92,8 @@ const None_Custom_Detail = () => {
     const [width, setWidth] = useState(35.6);
     const [height, setHeight] = useState(27.9);
 
-    const MIN_WIDTH = 30;
-    const MIN_HEIGHT = 30;
+    const MIN_WIDTH = 28;
+    const MIN_HEIGHT = 28;
 
     const [aspectRatio, setAspectRatio] = useState(null);
     const [toastCooldown, setToastCooldown] = useState(false);
@@ -421,6 +421,97 @@ const None_Custom_Detail = () => {
     const actualMinWidth = getActualMinWidth();
     const actualMaxWidth = getActualMaxWidth();
     const actualMaxHeight = getActualMaxHeight();
+
+    const applyPaperSizeByLongSide = (paperDef, ratio, landscape) => {
+        const orientedW = landscape ? paperDef.h : paperDef.w;
+        const orientedH = landscape ? paperDef.w : paperDef.h;
+        const paperLongSide = Math.max(orientedW, orientedH);
+
+        if (ratio >= 1) {
+            const newWidth = paperLongSide;
+            const newHeight = parseFloat((newWidth / ratio).toFixed(1));
+            return { width: newWidth, height: newHeight };
+        }
+
+        const newHeight = paperLongSide;
+        const newWidth = parseFloat((newHeight * ratio).toFixed(1));
+        return { width: newWidth, height: newHeight };
+    };
+
+    const clampSizeToLimits = (w, h, ratio) => {
+        let width = parseFloat(w.toFixed(1));
+        let height = parseFloat(h.toFixed(1));
+        const minW = Math.max(MIN_WIDTH, MIN_HEIGHT * ratio);
+        const maxW = Math.min(maxWidth, maxHeight * ratio);
+        const maxH = Math.min(maxHeight, maxWidth / ratio);
+
+        if (width < minW) {
+            width = minW;
+            height = parseFloat((width / ratio).toFixed(1));
+        }
+        if (width > maxW) {
+            width = maxW;
+            height = parseFloat((width / ratio).toFixed(1));
+        }
+        if (height < MIN_HEIGHT) {
+            height = MIN_HEIGHT;
+            width = parseFloat((height * ratio).toFixed(1));
+        }
+        if (height > maxH) {
+            height = maxH;
+            width = parseFloat((height * ratio).toFixed(1));
+        }
+
+        return {
+            width: Math.floor(width),
+            height: Math.floor(height),
+        };
+    };
+
+    const handlePaperPresetClick = (key) => {
+        if (paperKey === key) {
+            setPaperKey(null);
+            return;
+        }
+
+        if (!aspectRatio) {
+            toast.warn("이미지 로딩 후 이용해주세요.");
+            return;
+        }
+
+        if (customItems.length > 0 && !selectedItemId) {
+            toast.warn("사이즈를 적용할 항목을 선택해주세요.");
+            return;
+        }
+
+        const landscape = aspectRatio >= 1;
+        const raw = applyPaperSizeByLongSide(PAPER_SIZES_CM[key], aspectRatio, landscape);
+        const clamped = clampSizeToLimits(raw.width, raw.height, aspectRatio);
+
+        if (
+            clamped.width !== Math.floor(raw.width) ||
+            clamped.height !== Math.floor(raw.height)
+        ) {
+            const rawW = Math.floor(raw.width);
+            const rawH = Math.floor(raw.height);
+            const belowMin = rawW < actualMinWidth || rawH < MIN_HEIGHT;
+
+            if (belowMin) {
+                showToastOnce(
+                    `${key} 규격은 이 비율의 최소 제작 크기보다 작아 ${clamped.width}×${clamped.height}cm로 적용됩니다.`
+                );
+            } else {
+                showToastOnce("선택한 규격이 제작 가능 최대 크기를 초과하여 자동 조정됩니다.");
+            }
+        }
+
+        setWidth(clamped.width);
+        setHeight(clamped.height);
+        setWidthInput(String(clamped.width));
+        setHeightInput(String(clamped.height));
+        setPaperKey(key);
+        dismissSizeAdjustHint();
+    };
 
     // 최종 비용 계산(배송비)
     const SHIPPING_FEE = 3000; // 기본 배송비
@@ -1006,7 +1097,7 @@ const None_Custom_Detail = () => {
                                 <button
                                     key={k}
                                     type="button"
-                                    onClick={() => setPaperKey(prev => (prev === k ? null : k))}
+                                    onClick={() => handlePaperPresetClick(k)}
                                     className={`
                                         flex-1 h-[34px] rounded-md border text-sm font-semibold
                                         ${paperKey === k ? 'bg-[#ecd2af] text-white border-[#ecd2af]' : 'bg-white text-gray-500 opacity-90 border-gray-300 hover:bg-[#ecd2af] hover:text-white hover:border-[#ecd2af]'}    
@@ -1276,7 +1367,7 @@ const None_Custom_Detail = () => {
 
             {/* 구매 버튼 클릭 시 선택지 */}
             {showGuestChoice && (
-            <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+            <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-[10000]">
                 <div className="
                     bg-white p-8 rounded-lg shadow-lg
                     w-[90%] max-w-md sm:max-w-lg text-center

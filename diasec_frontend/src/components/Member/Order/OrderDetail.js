@@ -841,7 +841,12 @@ const OrderDetail = () => {
                         <div >
                             <span 
                                 className="
-                                    text-black mb-2">결제 수단: <span className="font-normal">{order.paymentMethod}</span></span>
+                                    text-black mb-2">결제 수단: <span className="font-normal">
+                                        {order.paymentMethod}
+                                        {order.paymentMethod === '카드결제' && order.cardName
+                                            ? ` (${order.cardName})`
+                                            : ''}
+                            </span></span>
                         </div>
                         {/* { order.paymentMethod === '무통장입금' && (
                             <>

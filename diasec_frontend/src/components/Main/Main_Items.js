@@ -1208,14 +1208,14 @@ const Main_Items = () => {
                             text-[15px] text-[#CDC9C3]
                         "
                     > 
-                        상품 <span className="text-[#555555]">{productCountText}</span>개
+                        작품 <span className="text-[#555555]">{productCountText}</span>개
                     </div>
                     
                     <div className='flex md:justify-end justify-center'>
                         <div className='relative md:w-[240px] w-[clamp(170px,31.29vw,240px)] md:mr-[4px]'>
                             <input 
                                 type="text"
-                                placeholder="상품명을 검색하세요"
+                                placeholder="작품명을 검색하세요"
                                 value={titleSearch}
                                 onChange={(e) => setTitleSearch(e.target.value)}
                                 className='
@@ -1229,7 +1229,7 @@ const Main_Items = () => {
                                     type="button"
                                     onClick={() => setTitleSearch('')}
                                     className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-700"
-                                    aria-label="상품 검색어 지우기"
+                                    aria-label="작품 검색어 지우기"
                                 >
                                     <X size={14} />
                                 </button>
@@ -1294,14 +1294,14 @@ const Main_Items = () => {
                                 text-[15px] text-[#888]
                             "
                         > 
-                            상품 <span className="text-[#555555]">{productCountText}</span>개
+                            작품 <span className="text-[#555555]">{productCountText}</span>개
                         </div>
                         
                         <div className='flex md:justify-end justify-center'>
                             <div className='relative md:w-[240px] w-[clamp(170px,31.29vw,240px)] md:mr-[4px]'>
                                 <input 
                                     type="text"
-                                    placeholder="상품명을 검색하세요"
+                                    placeholder="작품명을 검색하세요"
                                     value={titleSearch}
                                     onChange={(e) => setTitleSearch(e.target.value)}
                                     className='
@@ -1315,7 +1315,7 @@ const Main_Items = () => {
                                         type="button"
                                         onClick={() => setTitleSearch('')}
                                         className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-700"
-                                        aria-label="상품 검색어 지우기"
+                                        aria-label="작품 검색어 지우기"
                                     >
                                         <X size={14} />
                                     </button>

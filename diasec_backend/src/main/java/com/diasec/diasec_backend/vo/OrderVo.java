@@ -43,6 +43,7 @@ public class OrderVo {
     private String nicepayTid; // 나이스 거래 번호
     private String nicepayOrderId; // 나이스 주문번호
     private String payMethodCode;
+    private String cardName;
 
     // 가상계좌 정보
     private String vbankCode;

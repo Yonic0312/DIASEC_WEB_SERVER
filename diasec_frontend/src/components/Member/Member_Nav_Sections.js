@@ -5,7 +5,7 @@ export const Member_Nav_Sections = [
         items: [
             { label: '주문내역 조회', path: '/orderList' },
             { label: '보정내역 조회', path: '/mypage/retouch' },
-            { label: '관심상품 조회', path: '/wishList' },
+            { label: '관심작품 조회', path: '/wishList' },
             { label: '적립금 내역', path: '/creditHistory' },
         ],
     },

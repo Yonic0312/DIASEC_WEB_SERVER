@@ -22,7 +22,7 @@
         FROM order_items oi
         JOIN orders o ON oi.oid = o.oid
         WHERE o.id COLLATE utf8mb4_unicode_ci = #{memberId}
-            AND oi.order_status IN ('결제완료', '배송준비중', '배송중', '배송완료')
+            AND oi.order_status IN ('배송완료', '교환완료')
     </select>
 
     <select id="getApplicationList" resultType="BizPartnerApplicationVo">

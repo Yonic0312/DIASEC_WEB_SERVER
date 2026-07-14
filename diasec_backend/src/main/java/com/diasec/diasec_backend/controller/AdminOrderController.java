@@ -67,8 +67,11 @@ public class AdminOrderController {
         String id = request.get("id") == null ? null : String.valueOf(request.get("id"));
         int usedCredit = request.get("usedCredit") == null ? 0 : Integer.valueOf(String.valueOf(request.get("usedCredit")));
         Long oid = request.get("oid") == null ? null : Long.valueOf(String.valueOf(request.get("oid")));
+        // Order Detail: skipPgRefund=true -> PG(나이스페이) 환불 생략, 적립금만 반환
+        boolean skipPgRefund = Boolean.parseBoolean(String.valueOf(request.getOrDefault("skipPgRefund", false)));
 
-        Map<String, Object> result = adminOrderService.updateStatusWithSideEffects(itemId, newStatus, id, usedCredit, oid);
+        Map<String, Object> result = adminOrderService.updateStatusWithSideEffects(
+            itemId, newStatus, id, usedCredit, oid, skipPgRefund);
         if (Boolean.FALSE.equals(result.get("success"))) {
             System.err.println("[AdminOrderController.updateStatus] failed itemId=" + itemId
                 + " oid=" + oid + " newStatus=" + newStatus + " => " + result);

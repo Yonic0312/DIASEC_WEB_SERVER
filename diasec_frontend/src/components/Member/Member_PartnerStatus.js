@@ -67,7 +67,7 @@ const Member_PartnerStatus = () => {
                 {status.partnerStatus === '승인' ? (
                     <p className="text-sm text-blue-800">
                         사이트 기본 <strong>{sitePct}%</strong> + 파트너 <strong>{partnerPct}%</strong>
-                        {' '}= 총 <strong>{totalPct}%</strong> 할인이 상품 결제에 적용됩니다.
+                        {' '}= 총 <strong>{totalPct}%</strong> 할인이 작품 결제에 적용됩니다.
                     </p>
                 ) : (
                     <p className="text-sm text-blue-800">

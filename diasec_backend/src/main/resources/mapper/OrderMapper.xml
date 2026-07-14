@@ -38,6 +38,7 @@
         <result property="nicepayTid" column="nicepay_tid"/>
         <result property="nicepayOrderId" column="nicepay_order_id"/>
         <result property="payMethodCode" column="pay_method_code"/>
+        <result property="cardName" column="card_name"/>
         
         <result property="vbankCode" column="vbank_code"/>
         <result property="vbankName" column="vbank_name"/>
@@ -55,7 +56,7 @@
             used_credit, payment_method, depositor, bank_account, receipt_type, receipt_method, receipt_info,
             total_price, total_deposit, delivery_fee, final_price, created_at, delivery_message, buyer_request, recipient_phone,
             guest_password,
-            nicepay_tid, nicepay_order_id, pay_method_code,
+            nicepay_tid, nicepay_order_id, pay_method_code, card_name,
             vbank_code, vbank_name, vbank_account, vbank_holder, vbank_due_date,
             paid_at, webhook_last_status
         ) VALUES (
@@ -63,7 +64,7 @@
             #{usedCredit}, #{paymentMethod}, #{depositor}, #{bankAccount}, #{receiptType}, #{receiptMethod}, #{receiptInfo},
             #{totalPrice}, #{totalDeposit}, #{deliveryFee}, #{finalPrice}, NOW(), #{deliveryMessage}, #{buyerRequest}, #{recipientPhone},
             #{guestPassword},
-            #{nicepayTid}, #{nicepayOrderId}, #{payMethodCode},
+            #{nicepayTid}, #{nicepayOrderId}, #{payMethodCode}, #{cardName},
             #{vbankCode}, #{vbankName}, #{vbankAccount}, #{vbankHolder}, #{vbankDueDate},
             #{paidAt}, #{webhookLastStatus}
         )

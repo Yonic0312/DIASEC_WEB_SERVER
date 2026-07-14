@@ -213,7 +213,15 @@ public class AdminOrderService {
     @Transactional
     public Map<String, Object> updateStatusWithSideEffects(Long itemId, String newStatus, String id, int usedCredit, Long oid) {
         
-        if ("환불완료".equals(newStatus) && oid != null) {
+        return updateStatusWithSideEffects(itemId, newStatus, id, usedCredit, oid, false);
+    }
+
+    @Transactional
+    public Map<String, Object> updateStatusWithSideEffects(
+            Long itemId, String newStatus, String id, int usedCredit, Long oid, boolean skipPgRefund) {
+        
+        // 목록(order_Status): PG 환불 수행 / 상세(Order_Detail): skipPgRefund=true 로 생략
+        if ("환불완료".equals(newStatus) && oid != null && !skipPgRefund) {
             Map<String, Object> pgBlock = tryNicepayRefundBeforeRefundComplete(itemId, oid);
             if (pgBlock != null) {
                 return pgBlock;
@@ -341,16 +349,11 @@ public class AdminOrderService {
                                 + " (예: 국민은행, 신한은행 또는 3자리 코드)");
             }
         }
-        // 같은 주문의 다른 품목이 이미 환불완료면 PG 전체취소는 끝난 상태
-        boolean pgAlreadyCancelledForOrder = order.getItems().stream()
-                .anyMatch(i -> !Objects.equals(i.getItemId(), itemId)
-                        && "환불완료".equals(i.getOrderStatus()));
-        if (pgAlreadyCancelledForOrder) {
-            return null;
-        }
-        // cancelAmt 미전달 = 나이스페이 전체취소(승인 전액). cancelAmt를 넣으면 부분취소로 처리되어 2033 발생 가능
-        Integer cancelAmt = null;
-        String cancelOrderId = merchantOrderId + "-RF-" + oid;
+        int lineCount = order.getItems().size();
+        Integer cancelAmt = (lineCount > 1) ? line.getPrice() * line.getQuantity() : null;
+        String cancelOrderId = (cancelAmt != null)
+                ? merchantOrderId + "-R-" + itemId
+                : merchantOrderId;
         if (cancelOrderId.length() > 64) {
             cancelOrderId = cancelOrderId.substring(0, 64);
         }
@@ -364,10 +367,6 @@ public class AdminOrderService {
                 refundHolder);
         String rc = res != null ? String.valueOf(res.get("resultCode")) : "";
         if (!"0000".equals(rc)) {
-            // 재시도 시 orderId 중복 또는 이미 전액 취소된 경우 — DB 상태만 맞추면 됨
-            if ("U112".equals(rc)) {
-                return null;
-            }
             String msg = res != null && res.get("resultMsg") != null
                     ? String.valueOf(res.get("resultMsg"))
                     : "알 수 없는 오류";
