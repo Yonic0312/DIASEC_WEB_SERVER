@@ -5,7 +5,7 @@ import { MemberContext } from '../../context/MemberContext';
 import ProductDetailTabs from '../ProductDetailTabs/ProductDetailTabs';
 import { toast } from 'react-toastify';
 import { usePartner } from '../../context/PartnerContext';
-import { getDiscountedUnitPrice } from '../../utils/siteDiscount';
+import { getDiscountedUnitPrice, getSiteDiscountPercent } from '../../utils/siteDiscount';
 import {
     SitePriceRow,
     SitePriceTotal,
@@ -31,6 +31,31 @@ const None_Custom_Detail = () => {
     // 모바일 구매버튼 바텀에 스티키
     const buyButtonSectionRef = useRef(null);
     const [showBottomBuy, setShowBottomBuy] = useState(false);
+
+    
+    /** cm만 넣어 견적 확인(주문·이미지에 반영 안 함) */
+    const [adminQuoteModalOpen, setAdminQuoteModalOpen] = useState(false);
+    const [adminQuoteW, setAdminQuoteW] = useState('');
+    const [adminQuoteH, setAdminQuoteH] = useState('');
+
+    const openAdminQuoteModal = () => {
+        setAdminQuoteW(String(Math.floor(width)));
+        setAdminQuoteH(String(Math.floor(height)));
+        setAdminQuoteModalOpen(true);
+    };
+
+    const applyAdminQuotePaper = (key) => {
+        const paper = PAPER_SIZES_CM[key];
+        if (!paper) return;
+
+        // 기본 세로(짧은변 x 긴변). 가로가 긴 이미지가 선택돼 있으면 가로 규격
+        const landscape = aspectRatio != null && aspectRatio >= 1;
+        const w = landscape ? paper.h : paper.w;
+        const h = landscape ? paper.w : paper.h;
+
+        setAdminQuoteW(String(Math.floor(w)));
+        setAdminQuoteH(String(Math.floor(h)));
+    }
 
     // 헤더 높이만큼 빼고 판단
     const HEADER_OFFSET_PX = 45;
@@ -136,7 +161,9 @@ const None_Custom_Detail = () => {
         }
 
         // 현재 입력값 기준으로 새 옵션 생성
-        const newArea = Math.floor(width * height);
+        const nextW = Math.floor(width);
+        const nextH = Math.floor(height);
+        const newArea = getPriceAreaCm(width, height);
         const newPrice = calculateCumulativePrice(newArea);
 
         const newId = `opt-${nextIdRef.current++}`;
@@ -145,8 +172,8 @@ const None_Custom_Detail = () => {
             id: newId,
             imageSrc: mainImage,
             aspectRatio,
-            width,
-            height,
+            width: nextW,
+            height: nextH,
             maxWidth,
             maxHeight,
             price: newPrice,
@@ -375,6 +402,9 @@ const None_Custom_Detail = () => {
     const paperHeightPct = (paperHpx / BASE_BG_H) * 100;
     // A3 ~ A0 오버레이 //
 
+    //화면에 보이는 cm(내림) 기준으로 면적, 가격 통일
+    const getPriceAreaCm = (w, h) => Math.floor(Number(w) || 0) * Math.floor(Number(h) || 0);
+
     // 계산
     const calculateCumulativePrice = (area) => {
         let remainingArea = area;
@@ -519,7 +549,7 @@ const None_Custom_Detail = () => {
     
     // 가격 계산 로직 추가
     const totalPriceWithoutShipping = customItems.reduce((acc, item) => {
-        const area = item.width * item.height;
+        const area = getPriceAreaCm(item.width, item.height);
         const qty = item.quantity ?? 1;
         return acc + calculateCumulativePrice(area) * qty;
     }, 0);
@@ -583,7 +613,9 @@ const None_Custom_Detail = () => {
                             setWidthInput(String(Math.floor(startW)));
                             setHeightInput(String(Math.floor(startH)));
 
-                            const area = startW * startH;
+                            const storedW = Math.floor(startW);
+                            const storedH = Math.floor(startH);
+                            const area = getPriceAreaCm(storedW, storedH);
                             const price = calculateCumulativePrice(area);
 
                             setCustomItems([{
@@ -627,13 +659,15 @@ const None_Custom_Detail = () => {
         const current = customItems.find(it => it.id === selectedItemId);
         if (!current) return;
 
-        const newArea = width * height;
+        const newArea = getPriceAreaCm(width, height);
         const newPrice = calculateCumulativePrice(newArea);
+        const nextW = Math.floor(width);
+        const nextH = Math.floor(height);
 
         setCustomItems(prev => 
             prev.map(item => 
                 item.id === selectedItemId
-                ? { ...item, width, height, price: newPrice}
+                ? { ...item, width: nextW, height: nextH, price: newPrice}
                 : item
             )
         );
@@ -982,7 +1016,16 @@ const None_Custom_Detail = () => {
 
                     {/* 사이즈 입력 */}
                     <div className="flex flex-col">
-                        <label className="block md:mt-2 text-base font-semibold">사이즈 조정</label>
+                        <div className="flex flex-wrap items-center justify-between gap-2 md:mt-2">
+                            <label className="text-base font-semibold">사이즈 조정</label>
+                            <button
+                                type="button"
+                                onClick={openAdminQuoteModal}
+                                className="text-xs font-semibold px-2 py-1 rounded-md border border-[#D0AC88] text-[#a67a3e] bg-[#fffaf3] hover:border-[#ecd2af]"
+                            >
+                                가격 알아보기
+                            </button>
+                        </div>
                         
                         {/* <p className="text-sm text-gray-500 mt-2">원하는 사이즈(cm)를 입력해 주세요</p> */}
 
@@ -1459,6 +1502,134 @@ const None_Custom_Detail = () => {
                             <button 
                                 className='flex items-center justify-center w-1/2 xl:h-[66px] lg:h-[clamp(60px,5.16vw,66px)] md:h-[52px] h-[50px] bg-white text-[#D0AC88] border-[#D0AC88] border-[1px]'
                                 onClick={handleAddToWishlist}>관심상품
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+            {adminQuoteModalOpen && (
+                <div
+                    className="fixed inset-0 z-[10000] flex items-center justify-center bg-black/45 p-4 overscroll-none"
+                    role="presentation"
+                    onTouchMove={(e) => {
+                        if (e.target === e.currentTarget) e.preventDefault();
+                    }}
+                >
+                    <div
+                        role="dialog"
+                        aria-modal="true"
+                        aria-labelledby="admin-quote-modal-title"
+                        className="bg-white rounded-xl shadow-xl max-w-[370px] w-full p-5 border border-gray-200"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        {/* <h3 id="admin-quote-modal-title" className="text-[20px] font-bold text-gray-400">
+                            가격 알아보기
+                        </h3> */}
+                        <p className="text-[16px] font-medium text-gray-900 mb-8">
+                            가로·세로 수치를 입력하면 아래에 가격이 표시됩니다
+                        </p>
+                        <div className="flex flex-wrap items-end gap-3 mb-4">
+                            <div className="flex flex-col">
+                                <span className="text-xs text-gray-600 mb-1">가로 (cm)</span>
+                                <input
+                                    type="text"
+                                    inputMode="decimal"
+                                    value={adminQuoteW}
+                                    onChange={(e) => setAdminQuoteW(e.target.value.replace(/[^\d.]/g, ''))}
+                                    className="w-[110px] border border-gray-400 rounded-md px-2 py-2 text-base focus:outline-none focus:ring-2 focus:ring-[#D0AC88]"
+                                />
+                            </div>
+                            <span className="text-lg font-semibold text-gray-500 pb-2">×</span>
+                            <div className="flex flex-col">
+                                <span className="text-xs text-gray-600 mb-1">세로 (cm)</span>
+                                <input
+                                    type="text"
+                                    inputMode="decimal"
+                                    value={adminQuoteH}
+                                    onChange={(e) => setAdminQuoteH(e.target.value.replace(/[^\d.]/g, ''))}
+                                    className="w-[110px] border border-gray-400 rounded-md px-2 py-2 text-base focus:outline-none focus:ring-2 focus:ring-[#D0AC88]"
+                                />
+                            </div>
+                        </div>
+
+                        {/* A3 ~ A0 크기 선택 */}
+                        <div className="w-full flex justify-between gap-2 mb-4">
+                            {['A3', 'A2', 'A1', 'A0'].map((k) => (
+                                <button
+                                    key={k}
+                                    type="button"
+                                    onClick={() => applyAdminQuotePaper(k)}
+                                    className="flex-1 h-[34px] rounded-md border text-sm font-semibold bg-white text-gray-500 border-gray-300 hover:bg-[#ecd2af] hover:text-white hover:border-[#ecd2af]"
+                                >
+                                    {k}
+                                </button>
+                            ))}
+                        </div>
+
+                        <div className="rounded-lg bg-gray-50 border border-gray-200 p-4 mb-3 min-h-[88px]">
+                            {(() => {
+                                const pw = Math.floor(parseFloat(String(adminQuoteW).replace(/[^\d.]/g, '')) || 0);
+                                const ph = Math.floor(parseFloat(String(adminQuoteH).replace(/[^\d.]/g, '')) || 0);
+                                if (pw <= 0 || ph <= 0) {
+                                    return (
+                                        <p className="text-sm text-gray-500">가로·세로에 숫자를 입력하면 견적이 표시됩니다.</p>
+                                    );
+                                }
+                                const area = pw * ph;
+                                const original = calculateCumulativePrice(area);
+                                const discounted = getDiscountedUnitPrice(original, partnerDiscount);
+                                const sitePct = getSiteDiscountPercent();
+                                const partnerPct = Math.max(0, Number(partnerDiscount) || 0);
+                                const hasDiscount = discounted < original;
+                                const discountLabel = (() => {
+                                    if (sitePct > 0 && partnerPct > 0) {
+                                        return `사이트 ${sitePct}% + 파트너 ${partnerPct}% 할인 적용`;
+                                    }
+                                    if (sitePct > 0 && partnerPct > 0) {
+                                        return `사이트 ${sitePct}% + 파트너 ${partnerPct}% 할인 적용`;
+                                    }
+                                    if (sitePct > 0) return `사이트 ${sitePct}% 할인 적용`;
+                                    if (partnerPct > 0) return `파트너 ${partnerPct}% 할인 적용`;
+                                    return '';
+                                })();
+                                return (
+                                    <div className="space-y-2">
+                                        {hasDiscount ? (
+                                            <div className="text-sm md:text-base">
+                                                <p className="text-gray-700">
+                                                    가격{' '}
+                                                    <span className="line-through text-gray-500">
+                                                        {original.toLocaleString()}원
+                                                    </span>
+                                                </p>
+                                                <p className="mt-1 font-bold text-[#a67a3e]">
+                                                    할인가 {discounted.toLocaleString()}원
+                                                    {discountLabel && (
+                                                        <>
+                                                            <br/>
+                                                            <span className="font-normal text-xs text-gray-600">
+                                                                ({discountLabel})
+                                                            </span>
+                                                        </>
+                                                    )}
+                                                </p>
+                                            </div>
+                                        ) : (
+                                            <p className="text-base font-bold text-gray-900">
+                                                견적 {original.toLocaleString()}원
+                                            </p>
+                                        )}
+                                    </div>
+                                );
+                            })()}
+                        </div>
+                        <div className="flex justify-end gap-2">
+                            <button
+                                type="button"
+                                onClick={() => setAdminQuoteModalOpen(false)}
+                                className="px-3 py-2 rounded-lg border border-gray-300 text-sm font-medium text-gray-700 hover:bg-gray-50"
+                            >
+                                닫기
                             </button>
                         </div>
                     </div>

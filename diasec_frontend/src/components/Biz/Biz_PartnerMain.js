@@ -55,7 +55,7 @@ const Biz_PartnerMain = () => {
                 <section className="space-y-3">
                     <h2 className="text-xl font-bold">이런 파트너를 찾습니다</h2>
                     <p className="text-gary-700">
-                        웨딩 스튜디오, 인테리어 및 모델하우스, 전시·갤러리 기획사, 프렌차이즈 본사, 콘텐츠 제작자 등
+                        웨딩 스튜디오, 인테리어 및 모델하우스, 전시·갤러리 기획사, 프렌차이즈 본사, 콘텐츠 제작자 등 <br/>
                         장기적인 협업이 가능한 전문 파트너를 찾고 있습니다.
                     </p>
                 </section>
@@ -76,7 +76,7 @@ const Biz_PartnerMain = () => {
                         거래 실적에 따라 파트너 등급이 자동 조정되며, 등급에 따라 할인 혜택이 차등 적용됩니다.
                     </p>
                     <div className="overflow-x-auto">
-                        <table className="w-full border-collapse border text-center text-sm">
+                        <table className="w-full max-w-[490px] border-collapse border text-center text-sm">
                             <thead className="bg-gray-200">
                                 <tr>
                                     <th className="border p-2">등급</th>
