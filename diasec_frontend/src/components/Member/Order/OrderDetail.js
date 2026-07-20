@@ -490,7 +490,11 @@ const OrderDetail = () => {
                                 </button>
                             )}
 
-                            {order.items.some((it) => REVIEWABLE_ORDER_STATUSES.includes(it.orderStatus)) && (
+                            {order.items.some(
+                                (it) => 
+                                    REVIEWABLE_ORDER_STATUSES.includes(it.orderStatus) &&
+                                    !it.reviewed 
+                            ) && (
                                 member ? (
                                     <button
                                         className="
@@ -568,7 +572,12 @@ const OrderDetail = () => {
                                 flex sm:gap-6 gap-[4px] items-start border rounded-lg
                                 md:p-6 p-2
                                 bg-gray-50 cursor-pointer transition-transform hover:shadow-lg hover:bg-gray-200"
-                            onClick={() => navigate(`/orderTracking/${item.itemId}`)}
+                            onClick={() => 
+                                navigate(`/orderTracking/${item.itemId}`, {
+                                    state: guestPasswordFromSearch
+                                        ? { guestPassword: guestPasswordFromSearch }
+                                        : undefined,
+                                })}
                         >
                             <img
                                 src={

@@ -349,17 +349,20 @@ function Layout() {
     const isItems = location.pathname === '/' || location.pathname === '/main_Items_Clock';
     const isMain = location.pathname === '/';
 
-    const isMember = ['/modify', '/changePwd', '/orderList', '/orderDetail', '/orderList_Claim' , '/addrList', '/addrModify', '/myInquiryList', '/reviewWrite', '/supportInquiryForm', '/mypage/partner',
-                      '/addrRegister', '/wishList', '/creditHistory', '/orderTracking', '/mypage/retouch'].some(p => path.startsWith(p)) || path.startsWith('/addrModify/') || path.startsWith('/orderDetail');
+    const { member, setMember } = useMember();
+    const navigate = useNavigate();
+
+    const memberPaths = ['/modify', '/changePwd', '/orderList', '/orderDetail', '/orderList_Claim' , '/addrList', '/addrModify', '/myInquiryList', '/reviewWrite', '/supportInquiryForm', '/mypage/partner',
+                    '/addrRegister', '/wishList', '/creditHistory', '/orderTracking', '/mypage/retouch'];
+    const isMemberPage = memberPaths.some(p => path.startsWith(p)) || path.startsWith('/addrModify/') || path.startsWith('/orderDetail');
+    // 비회원 주문조회 경로는 마이페이지 사이드바 없이 표시
+    const isMember = Boolean(member?.id) && isMemberPage;
     const isAdmin = path.startsWith('/admin');
 
     const extraPb = 
         path === "/none_custom_detail" ? "mb-[100px] md:mb-0"
         : path === "/customFrames" ? " mb-[50px] md:mb-0"
         : "";
-
-    const navigate = useNavigate();
-    const { setMember } = useMember();
 
     useEffect(() => {
         axios.post(`${API}/visit/track`, {}, { withCredentials: true })

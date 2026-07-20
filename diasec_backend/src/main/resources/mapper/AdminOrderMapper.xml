@@ -27,11 +27,12 @@
         <result property="leaseStart" column="lease_start"/>
         <result property="leaseEnd" column="lease_end"/>
         <result property="id" column="user_id"/>
+        <result property="ordererName" column="orderer_name"/>
     </resultMap>
 
     <!-- 주문 상태 목록 가져오기 -->
     <select id="selectOrderItemsByStatus" resultMap="orderMap" resultType="com.diasec.diasec_backend.vo.OrderItemsVo">
-        SELECT oi.*, o.id AS user_id, o.used_credit as usedCredit, o.created_at AS createdAt
+        SELECT oi.*, o.id AS user_id, o.orderer_name AS orderer_name, o.used_credit as usedCredit, o.created_at AS createdAt
         FROM order_items oi 
         JOIN orders o ON oi.oid = o.oid
         <where>

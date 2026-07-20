@@ -133,7 +133,10 @@
             oi.return_detail as detail,
             oi.bank_name as bankName,
             oi.account_number as accountNumber,
-            oi.account_holder as accountHolder
+            oi.account_holder as accountHolder,
+            EXISTS (
+                SELECT 1 FROM reviews r WHERE r.item_id = oi.item_id
+            ) AS reviewed
         FROM order_items oi
         JOIN orders o
             ON oi.oid = o.oid
@@ -185,7 +188,10 @@
             oi.return_detail as detail,
             oi.bank_name as bankName,
             oi.account_number as accountNumber,
-            oi.account_holder as accountHolder
+            oi.account_holder as accountHolder,
+            EXISTS (
+                SELECT 1 FROM reviews r WHERE r.item_id = oi.item_id
+            ) AS reviewed
         FROM order_items oi
         LEFT JOIN order_item_file f
             ON f.item_id = oi.item_id
