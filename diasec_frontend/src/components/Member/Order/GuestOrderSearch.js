@@ -160,9 +160,12 @@ const GuestOrderSearch = () => {
                             {order.createdAt?.slice(0, 10)} · 주문번호: {order.oid}
                         </span>
                         <button
-                            onClick={() => navigate(`/orderDetail/${order.oid}`, {
-                                state: { guestPassword }
-                            })}
+                            onClick={() => {
+                                sessionStorage.setItem(`guestOrderPwd_${order.oid}`, guestPassword);
+                                navigate(`/orderDetail/${order.oid}`, {
+                                    state: { guestPassword },
+                                });
+                            }}
                             className='
                             ml-2 sm:px-2 px-[2px] py-1 border border-gray-400 text-gray-700 
                             md:text-[10px] text-[clamp(8px,1.303vw,10px)]

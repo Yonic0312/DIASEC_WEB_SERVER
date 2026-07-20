@@ -13,9 +13,32 @@ const OrderDetail = () => {
     const { member } = useContext(MemberContext);
     const navigate = useNavigate();
     const location = useLocation();
-    const guestPasswordFromSearch = location.state?.guestPassword;
     const { oid } = useParams();
+    const guestPasswordFromSearch =
+        location.state?.guestPassword ||
+        (oid ? sessionStorage.getItem(`guestOrderPwd_${oid}`) : null) ||
+        '';
     const [order, setOrder] = useState(null);
+
+    useEffect(() => {
+        if (!member?.id && location.state?.guestPassword && oid) {
+            sessionStorage.setItem(`guestOrderPwd_${oid}`, location.state.guestPassword);
+        }
+    }, [member?.id, location.state?.guestPassword, oid]);
+
+    const goToOrderTracking = (itemId) => {
+        if (!member?.id && !guestPasswordFromSearch) {
+            toast.warn('비회원 주문조회에서 다시 확인해 주세요.');
+            navigate('/guestOrderSearch');
+            return;
+        }
+        navigate(`/orderTracking/${itemId}`, {
+            state: member?.id ? undefined : { guestPassword: guestPasswordFromSearch },
+        });
+        if (!member?.id && guestPasswordFromSearch) {
+            sessionStorage.setItem(`guestOrderPwd_item_${itemId}`, guestPasswordFromSearch);
+        }
+    };
 
     // 보정 수정 관련
         const [retouchModalOpen, setRetouchModalOpen] = useState(false);
@@ -43,7 +66,7 @@ const OrderDetail = () => {
 
     const buildDetailRequestConfig = () => {
         const config = { withCredentials: true };
-        if (!member && guestPasswordFromSearch) {
+        if (!member?.id && guestPasswordFromSearch) {
             config.params = { guestPassword: guestPasswordFromSearch };
         }
         return config;
@@ -101,7 +124,7 @@ const OrderDetail = () => {
             }
 
             // 비회원 주문조회에서 넘어온 경우 비밀번호 함께 전송
-            if (!member && guestPasswordFromSearch) {
+            if (!member?.id && guestPasswordFromSearch) {
                 body.guestPassword = guestPasswordFromSearch;
             }
 
@@ -197,7 +220,7 @@ const OrderDetail = () => {
                 retouchNote: retouchDraft.note || null,
             };
 
-            if (!member && guestPasswordFromSearch) {
+            if (!member?.id && guestPasswordFromSearch) {
                 payload.guestPassword = guestPasswordFromSearch;
             }
 
@@ -572,12 +595,7 @@ const OrderDetail = () => {
                                 flex sm:gap-6 gap-[4px] items-start border rounded-lg
                                 md:p-6 p-2
                                 bg-gray-50 cursor-pointer transition-transform hover:shadow-lg hover:bg-gray-200"
-                            onClick={() => 
-                                navigate(`/orderTracking/${item.itemId}`, {
-                                    state: guestPasswordFromSearch
-                                        ? { guestPassword: guestPasswordFromSearch }
-                                        : undefined,
-                                })}
+                            onClick={() => goToOrderTracking(item.itemId)}
                         >
                             <img
                                 src={

@@ -1,26 +1,38 @@
-import { useParams, useNavigate } from 'react-router-dom';
-import { useEffect, useState } from 'react';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
+import { useEffect, useState, useContext } from 'react';
 import axios from 'axios';
+import { MemberContext } from '../../../context/MemberContext';
 import { resolveTrackingLookupUrl } from '../../../utils/deliveryTrackingUrls';
 import thumbCustom from '../../../assets/CustomFrames/customFrames.png';
 
 const OrderTracking = () => {
     const API = process.env.REACT_APP_API_BASE;
+    const { member } = useContext(MemberContext);
     const navigate = useNavigate();
+    const location = useLocation();
     const { itemId } = useParams();
+    const guestPassword =
+        location.state?.guestPassword ||
+        sessionStorage.getItem(`guestOrderPwd_item_${itemId}`) ||
+        '';
     const [item, setItem] = useState(null);
 
     useEffect(() => {
-        axios.get(`${API}/order/detail/${itemId}`, { withCredentials: true })
+        const config = { withCredentials: true };
+        if (!member?.id && guestPassword) {
+            config.params = { guestPassword };
+        }
+
+        axios.get(`${API}/order/detail/${itemId}`, config)
             .then(res => setItem(res.data))
             .catch(err => {
                 if (err.response?.status === 403 || err.response?.status === 401) {
-                    navigate('/orderList', { replace: true });
+                    navigate(member?.id ? '/orderList' : '/guestOrderSearch', { replace: true });
                     return;
                 }
                 console.error('배송 정보 불러오기 실패', err);
             });
-    }, [itemId, API, navigate]);
+    }, [itemId, API, navigate, member?.id, guestPassword]);
 
     if (!item) return <div className="text-center py-20 text-gray-500">로딩 중...</div>;
 
