@@ -11,6 +11,8 @@ import java.util.HexFormat;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.stereotype.Service;
 
@@ -22,21 +24,47 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class VisitService {
     private static final ZoneId KOREA = ZoneId.of("Asia/Seoul");
+    // 마지막 허트비트 이후 이 시간(ms)이 지나면 오프라인으로 간주
+    private static final long ONLINE_TTL_MS = 60_000L;
+
     private final VisitMapper visitMapper;
+    // visitorKey ->  presence (ip + lastSeen)
+    private final ConcurrentHashMap<String, Presence> activeVisitors = new ConcurrentHashMap<>();
+
+    private record Presence(String ip, long lastSeen) {}
     
     public void trackVisit(String ip, String userAgent) {
         LocalDate today = LocalDate.now(KOREA);
-        String raw = (ip == null ? "" : ip) + "|" + (userAgent == null ? "" : userAgent);
+        String normalizedIp = normalizeIp(ip);
+        String raw = normalizedIp + "|" + (userAgent == null ? "" : userAgent);
         String visitorKey = sha256(raw);
-        visitMapper.insertTodayVisit(today, visitorKey, ip, userAgent);
+        visitMapper.insertTodayVisit(today, visitorKey, normalizedIp, userAgent);
+        activeVisitors.put(visitorKey, new Presence(normalizedIp, System.currentTimeMillis()));
     }
 
-    public Map<String, Integer> getStats() {
+    public Map<String, Integer> getStats(String excludeIp) {
         LocalDate today = LocalDate.now(KOREA);
         return Map.of(
             "today", visitMapper.countToday(today),
-            "total", visitMapper.countTotal()
+            "total", visitMapper.countTotal(),
+            "online", countOnline(excludeIp)
         );
+    }
+
+    // 최근 ONLINE_TTL_MS 이내 허트비트. excludeIp 제외
+    public int countOnline(String excludeIp) {
+        long cutoff = System.currentTimeMillis() - ONLINE_TTL_MS;
+        String exclude = normalizeIp(excludeIp);
+        activeVisitors.entrySet().removeIf(e -> e.getValue().lastSeen() < cutoff);
+
+        int count = 0;
+        for (Presence p : activeVisitors.values()) {
+            if (exclude != null && !exclude.isBlank() && sameClientIp(exclude, p.ip())) {
+                continue;
+            }
+            count++;
+        }
+        return count;
     }
 
     // 최근 N일(오늘 포함) 일별 방문자 수. 방문 없는 날은 0으로 채움
@@ -73,6 +101,33 @@ public class VisitService {
             result.add(item);
         }
         return result;
+    }
+
+    public static String clientIp(String xff, String remoteAddr) {
+        if (xff != null && !xff.isBlank()) {
+            return normalizeIp(xff.split(",")[0].trim());
+        }
+        return normalizeIp(remoteAddr);
+    }
+
+    private static String normalizeIp(String ip) {
+        if (ip == null) return "";
+        String v = ip.trim();
+        if (v.startsWith("[") && v.contains("]")) {
+            v = v.substring(1, v.indexOf(']'));
+        }
+        // Ipv4-mapped Ipv6 (::ffff:127.0.0.1)
+        if (v.startsWith("::ffff:")) {
+            v = v.substring(7);
+        }
+        if ("::1".equals(v)) {
+            return "127.0.0.1";
+        }
+        return v;
+    }
+
+    private static boolean sameClientIp(String a, String b) {
+        return Objects.equals(normalizeIp(a), normalizeIp(b));
     }
 
     private String sha256(String value) {

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
@@ -14,6 +14,32 @@ const GuestOrderSearch = () => {
     const [phone3, setPhone3] = useState('');
     const [guestPassword, setGuestPassword] = useState('');
     const [orders, setOrders] = useState([]);
+
+    // 페이징
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 5;
+
+    const [pageGroupSize, setPageGroupSize] = useState(
+        window.innerWidth < 640 ? 5 : 10
+    );
+
+    useEffect(() => {
+        const handleResize = () => {
+            setPageGroupSize(window.innerWidth < 640 ? 5 : 10);
+        };
+        window.addEventListener("resize", handleResize);
+        return () => window.removeEventListener("resize", handleResize);
+    }, []);
+
+    const totalPages = Math.max(1, Math.ceil(orders.length / itemsPerPage));
+    const currentGroup = Math.floor((currentPage - 1) / pageGroupSize);
+    const groupStart = currentGroup * pageGroupSize + 1;
+    const groupEnd = Math.min(groupStart + pageGroupSize - 1, totalPages);
+
+    const currentOrders = orders.slice(
+        (currentPage - 1) * itemsPerPage,
+        currentPage * itemsPerPage
+    );
 
     const ordererPhone = `${phone1}-${phone2}-${phone3}`;
 
@@ -33,16 +59,19 @@ const GuestOrderSearch = () => {
             if (res.data.success) {
                 const result = res.data.orders || (res.data.order ? [res.data.order] : []);
                 setOrders(result);
+                setCurrentPage(1);
                 if (result.length === 0) {
                     toast.error("조회된 주문이 없습니다.");
                 }
             } else {
                 setOrders([]);
+                setCurrentPage(1);
                 toast.error(res.data.message || "조회 실패");
             }
         } catch (err) {
             console.error(err);
             setOrders([]);
+            setCurrentPage(1);
             toast.error("조회된 주문이 없습니다.");
         }
     };
@@ -115,7 +144,7 @@ const GuestOrderSearch = () => {
                     <label className="block font-medium mb-1 shrink-0">휴대폰 번호</label>
                     <div className="flex gap-1 sm:w-[226px] w-[156px]">
                         <select
-                            className="w-1/3 h-10 border px-1 rounded text-[12px]"
+                            className="w-1/3 h-10 border px-1 rounded"
                             value={phone1}
                             onChange={(e) => setPhone1(e.target.value)}
                         >
@@ -185,7 +214,7 @@ const GuestOrderSearch = () => {
             {/* 주문 결과 */}
             {orders.length > 0 && (
                 <div className="w-full max-w-3xl mt-8 space-y-4">
-                    {orders.map((order) => (
+                    {currentOrders.map((order) => (
                         <div
                             key={order.oid}
                             className="border rounded sm:p-4 p-2 bg-white shadow-sm"
@@ -245,6 +274,83 @@ const GuestOrderSearch = () => {
                             ))}
                         </div>
                     ))}
+
+                    {/* 페이징 (OrderList와 동일 패턴) */}
+                    <div className="flex justify-center gap-2 mt-4 md:mt-8 text-sm">
+                        {(() => {
+                            const maxVisible = 5;
+                            let startPage = Math.max(currentPage - 2, 1);
+                            let endPage = Math.min(startPage + maxVisible - 1, totalPages);
+
+                            if (endPage - startPage < maxVisible - 1) {
+                                startPage = Math.max(endPage - maxVisible + 1, 1);
+                            }
+
+                            const pageNumbers = Array.from(
+                                { length: endPage - startPage + 1 },
+                                (_, i) => startPage + i
+                            );
+
+                            return (
+                                <div className="flex justify-center gap-1 text-sm font-medium">  
+                                    {/* 맨 처음 */}
+                                    <button
+                                        onClick={() => setCurrentPage(1)}
+                                        disabled={currentPage === 1}
+                                        className={`w-8 h-8 border rounded-full flex items-center justify-center 
+                                            ${currentPage === 1 
+                                                ? 'text-gray-300 border-gray-200' 
+                                                : 'text-gray-700 hover:bg-gray-100 border-gray-300'}`}>
+                                        {'<<'}
+                                    </button>
+                                    {/* 이전 */}
+                                    <button
+                                        onClick={() => setCurrentPage(prev => prev -1)}
+                                        disabled={currentPage === 1}
+                                        className={`w-8 h-8 border rounded-full flex items-center justify-center 
+                                            ${currentPage === 1 
+                                                ? 'text-gray-300 border-gray-200' 
+                                                : 'text-gray-700 hover:bg-gray-100 border-gray-300'}`}>
+                                        {'<'}
+                                    </button>
+
+                                    {/* 숫자 */}
+                                    {pageNumbers.map((pageNum) => (
+                                        <button
+                                            key={pageNum}
+                                            onClick={() => setCurrentPage(pageNum)}
+                                            className={`w-8 h-8 rounded-full border flex items-center justify-center
+                                                ${currentPage === pageNum 
+                                                    ? 'bg-black text-white border-black' 
+                                                    : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-100'}`}>
+                                            <span>{pageNum}</span>
+                                        </button>
+                                    ))}
+
+                                    {/* 다음 */}
+                                    <button
+                                        onClick={() => setCurrentPage(prev => prev + 1)}
+                                        disabled={currentPage >= totalPages}
+                                        className={`w-8 h-8 border rounded-full flex items-center justify-center 
+                                            ${currentPage === totalPages 
+                                                ? 'text-gray-300 border-gray-200' 
+                                                : 'text-gray-700 hover:bg-gray-100 border-gray-300'}`}>
+                                        {'>'}
+                                    </button>
+                                    {/* 마지막 */}
+                                    <button
+                                        onClick={() => setCurrentPage(totalPages)}
+                                        disabled={currentPage === totalPages}
+                                        className={`w-8 h-8 border rounded-full flex items-center justify-center 
+                                            ${currentPage === totalPages 
+                                                ? 'text-gray-300 border-gray-200' 
+                                                : 'text-gray-700 hover:bg-gray-100 border-gray-300'}`}>
+                                        {'>>'}
+                                    </button>
+                                </div>
+                            )
+                        })()}
+                    </div>
                 </div>
             )}
         </div>

@@ -22,16 +22,23 @@ public class VisitController {
     private final VisitService visitService;
 @PostMapping("/visit/track")
     public ResponseEntity<Void> track(HttpServletRequest req) {
-        String xff = req.getHeader("X-Forwarded-For");
-        String ip = (xff != null && !xff.isBlank()) ? xff.split(",")[0].trim() : req.getRemoteAddr();
+        String ip = VisitService.clientIp(req.getHeader("X-Forwarded-For"), req.getRemoteAddr());
         String ua = req.getHeader("User-Agent");
         visitService.trackVisit(ip, ua);
         return ResponseEntity.ok().build();
     }
 
     @GetMapping("/admin/visit/stats")
-    public ResponseEntity<Map<String, Integer>> stats() {
-        return ResponseEntity.ok(visitService.getStats());
+    public ResponseEntity<Map<String, Integer>> stats(HttpServletRequest req) {
+        String adminIp = VisitService.clientIp(req.getHeader("X-Forwarded-For"), req.getRemoteAddr());
+        return ResponseEntity.ok(visitService.getStats(adminIp));
+    }
+
+    // 실시간 접속 중(최근 허트비트 기준). 조회하는 관리자 IP는 제외
+    @GetMapping("/admin/visit/online")
+    public ResponseEntity<Map<String, Integer>> online(HttpServletRequest req) {
+        String adminIp = VisitService.clientIp(req.getHeader("X-Forwarded-For"), req.getRemoteAddr());
+        return ResponseEntity.ok(Map.of("online", visitService.countOnline(adminIp)));
     }
 
     // 최근 N일 일별 방문자 (기본30, days=0 이면 전체)

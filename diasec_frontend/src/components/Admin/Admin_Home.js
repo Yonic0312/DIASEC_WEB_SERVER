@@ -222,7 +222,7 @@ const Admin_Home = () => {
     const navigate = useNavigate();
     const { member } = useContext(MemberContext);
 
-    const [visitStats, setVisitStats] = useState({ today: 0, total: 0 });
+    const [visitStats, setVisitStats] = useState({ today: 0, total: 0, online: 0 });
     const [inquiryUnanswered, setInquiryUnanswered] = useState(0);
     const [bizConsultCount, setBizConsultCount] = useState(0);
     const [bizPartnerCount, setBizPartnerCount] = useState(0);
@@ -247,7 +247,7 @@ const Admin_Home = () => {
                     axios.get(`${API}/admin/biz-partner/count`, { withCredentials: true }).then((r) => r.data),
                 ]);
                 if (cancelled) return;
-                setVisitStats(vis || { today: 0, total: 0 });
+                setVisitStats(vis || { today: 0, total: 0, online: 0 });
                 setInquiryUnanswered(Number(inq) || 0);
                 setBizConsultCount(Number(bizConsult) || 0);
                 setBizPartnerCount(Number(bizPartner) || 0);
@@ -265,6 +265,30 @@ const Admin_Home = () => {
         run();
         return () => {
             cancelled = true;
+        };
+    }, [API]);
+
+    // 실시간 접속자 수 폴링 (10초)
+    useEffect(() => {
+        let cancelled = false;
+        const pollOnline = async () => {
+            try {
+                const { data } = await axios.get(`${API}/admin/visit/online`, { withCredentials: true });
+                if (!cancelled) {
+                    setVisitStats((prev) => ({
+                        ...prev,
+                        online: Number(data?.online ?? 0),
+                    }));
+                }
+            } catch (e) {
+                // 조용히 무시 (관리자 세션 만료 등은 기존 로드에서 처리)
+            }
+        };
+        pollOnline();
+        const id = setInterval(pollOnline, 10_000);
+        return () => {
+            cancelled = true;
+            clearInterval(id);
         };
     }, [API]);
 
@@ -329,8 +353,28 @@ const Admin_Home = () => {
 
     return (
         <div className="flex-1 max-w-[960px] pr-4 pb-20">
-            <div className="mb-8">
+            <div className="flex justify-between items-center gap-3 mb-8 flex-wrap">
                 <h1 className="text-2xl md:text-3xl font-bold text-gray-900">관리자 홈</h1>
+                <div
+                    className="
+                        inline-flex items-center gap-2.5 rounded-full
+                        border border-emerald-200/80 bg-gradient-to-r from-emerald-50 to-white
+                        pl-3 pr-4 py-1.5 shadow-sm
+                    "
+                    title="최근 60초 이내 활동 기준 · 본인(관리자) IP 제외 · 10초마다 갱신"
+                >
+                    <span className="relative flex h-2.5 w-2.5 shrink-0">
+                        <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-60" />
+                        <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-emerald-500" />
+                    </span>
+                    <span className="text-xs font-semibold tracking-wide text-emerald-800/80">
+                        실시간 접속
+                    </span>
+                    <span className="text-lg font-bold tabular-nums text-emerald-900 leading-none">
+                        {Number(visitStats.online || 0).toLocaleString()}
+                        <span className="ml-0.5 text-sm font-semibold text-emerald-700">명</span>
+                    </span>
+                </div>
             </div>
 
             {loading && <p className="text-gray-500 text-sm mb-6">불러오는 중…</p>}

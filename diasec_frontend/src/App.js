@@ -349,8 +349,8 @@ function Layout() {
     const isItems = location.pathname === '/' || location.pathname === '/main_Items_Clock';
     const isMain = location.pathname === '/';
 
-    const { member, setMember } = useMember();
     const navigate = useNavigate();
+    const { member, setMember } = useMember();
 
     const memberPaths = ['/modify', '/changePwd', '/orderList', '/orderDetail', '/orderList_Claim' , '/addrList', '/addrModify', '/myInquiryList', '/reviewWrite', '/supportInquiryForm', '/mypage/partner',
                     '/addrRegister', '/wishList', '/creditHistory', '/orderTracking', '/mypage/retouch'];
@@ -365,8 +365,24 @@ function Layout() {
         : "";
 
     useEffect(() => {
-        axios.post(`${API}/visit/track`, {}, { withCredentials: true })
+        const sendHeartbeat = () => {
+            if (document.visibilityState === "hidden") return;
+            axios.post(`${API}/visit/track`, {}, { withCredentials: true })
             .catch(() => {});
+        };
+        
+        sendHeartbeat();
+        const id = setInterval(sendHeartbeat, 30_000);
+
+        const onVisibility = () => {
+            if (document.visibilityState === 'visible') sendHeartbeat();
+        };
+        document.addEventListener('visibilitychange', onVisibility);
+
+        return () => {
+            clearInterval(id);
+            document.removeEventListener('visibilitychange', onVisibility);
+        };
     }, [API]);
 
     useEffect(() => {
