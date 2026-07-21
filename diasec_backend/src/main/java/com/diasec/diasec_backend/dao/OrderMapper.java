@@ -46,6 +46,9 @@ public interface OrderMapper {
     // 나이스페이 orderId로 oid 조회 (U112 중복 호출 시 완료 페이지 리다이렉트용)
     Long selectOidByNicepayOrderId(@Param("nicepayOrderId") String nicepayOrderId);
 
+    // 비회원: 주문자 휴대폰(숫자만)으로 후보 주문 조회
+    List<OrderVo> selectGuestOrdersByOrdererPhoneDigits(@Param("phoneDigits") String phoneDigits);
+
     // 3. 상세페이지로 들어갈 itemId 개별 주문 상품 조회
     OrderItemsVo selectOrderItemById(@Param("itemId") Long itemId);
 

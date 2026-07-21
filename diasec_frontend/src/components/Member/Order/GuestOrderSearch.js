@@ -9,31 +9,41 @@ const GuestOrderSearch = () => {
     const FILE_BASE = API.replace('/api', '');
     const navigate = useNavigate();
     
-    const [oid, setOid] = useState('');
+    const [phone1, setPhone1] = useState('010');
+    const [phone2, setPhone2] = useState('');
+    const [phone3, setPhone3] = useState('');
     const [guestPassword, setGuestPassword] = useState('');
-    const [order, setOrder] = useState(null);
+    const [orders, setOrders] = useState([]);
+
+    const ordererPhone = `${phone1}-${phone2}-${phone3}`;
 
     // 조회 요청
     const handleSearch = async () => {
-        if (!oid || !guestPassword) {
-        toast.error("주문번호와 비밀번호를 입력해주세요.");
-        return;
+        if (!phone2.trim() || !phone3.trim() || !guestPassword) {
+            toast.error("휴대폰 번호와 비밀번호를 입력해주세요.");
+            return;
         }
 
         try {
-        const res = await axios.post(`${API}/order/guest-search`, {
-            oid,
-            guestPassword
-        });
+            const res = await axios.post(`${API}/order/guest-search`, {
+                ordererPhone,
+                guestPassword,
+            });
 
-        if (res.data.success) {
-            setOrder(res.data.order);
-        } else {
-            toast.error(res.data.message || "조회 실패");
-        }
+            if (res.data.success) {
+                const result = res.data.orders || (res.data.order ? [res.data.order] : []);
+                setOrders(result);
+                if (result.length === 0) {
+                    toast.error("조회된 주문이 없습니다.");
+                }
+            } else {
+                setOrders([]);
+                toast.error(res.data.message || "조회 실패");
+            }
         } catch (err) {
-        console.error(err);
-        toast.error("조회된 주문이 없습니다.");
+            console.error(err);
+            setOrders([]);
+            toast.error("조회된 주문이 없습니다.");
         }
     };
 
@@ -72,7 +82,7 @@ const GuestOrderSearch = () => {
         return `약 ${wCm} x ${hCm} cm (${wInch.toFixed(1)} x ${hInch.toFixed(1)} inch)`;
     };
 
-    const resolveItemThumbnail = (item) => {
+    const resolveItemThumb = (item) => {
         if (item.category === 'customFrames') {
             const path = item.thumbnail || item.thumbnailPreview;
             if (!path) return thumbCustom;
@@ -81,6 +91,13 @@ const GuestOrderSearch = () => {
 
         if (!item.thumbnail) return thumbCustom;
         return item.thumbnail.startsWith('http') ? item.thumbnail : `${FILE_BASE}${item.thumbnail}`;
+    };
+
+    const goToOrderDetail = (order) => {
+        sessionStorage.setItem(`guestOrderPwd_${order.oid}`, guestPassword);
+        navigate(`/orderDetail/${order.oid}`, {
+            state: { guestPassword },
+        });
     };
 
     return (
@@ -95,16 +112,39 @@ const GuestOrderSearch = () => {
                     md:text-base text-[clamp(12px,2.085vw,16px)]
                     max-w-md bg-white mt-4 mb-2">
                 <div className="flex items-center justify-between mb-4 gap-2">
-                    <label className="block font-medium mb-1">주문번호</label>
-                    <input 
-                        type="text" 
-                        value={oid} 
-                        onChange={(e) => setOid(e.target.value)}
-                        className="
-                            sm:w-[226px] w-[156px] h-10
-                            border px-3 py-2 rounded"
-                        placeholder="주문번호 입력" 
-                    />
+                    <label className="block font-medium mb-1 shrink-0">휴대폰 번호</label>
+                    <div className="flex gap-1 sm:w-[226px] w-[156px]">
+                        <select
+                            className="w-1/3 h-10 border px-1 rounded text-[12px]"
+                            value={phone1}
+                            onChange={(e) => setPhone1(e.target.value)}
+                        >
+                            <option value="010">010</option>
+                            <option value="011">011</option>
+                            <option value="016">016</option>
+                            <option value="017">017</option>
+                            <option value="018">018</option>
+                            <option value="019">019</option>
+                        </select>
+                        <input
+                            type="text"
+                            value={phone2}
+                            onChange={(e) => setPhone2(e.target.value.replace(/\D/g, ''))}
+                            maxLength="4"
+                            inputMode="numeric"
+                            className="w-1/3 h-10 border px-2 rounded"
+                            placeholder="0000"
+                        />
+                        <input
+                            type="text"
+                            value={phone3}
+                            onChange={(e) => setPhone3(e.target.value.replace(/\D/g, ''))}
+                            maxLength="4"
+                            inputMode="numeric"
+                            className="w-1/3 h-10 border px-2 rounded"
+                            placeholder="0000"
+                        />
+                    </div>
                 </div>
 
                 <div className="flex items-center justify-between mb-4 gap-2">
@@ -131,7 +171,7 @@ const GuestOrderSearch = () => {
                 </button>
                 
                 <p className="mt-2 text-xs text-gray-500">
-                    ※ 주문번호와 비밀번호를 모두 잊으신 경우 고객센터로 문의해주세요.
+                    ※ 주문 시 입력한 주문자 휴대폰 번호와 비밀번호로 조회합니다. 분실 시 고객센터로 문의해주세요.
                 </p>
 
                 <div className="flex flex-row w-full justify-center mt-3">
@@ -142,76 +182,69 @@ const GuestOrderSearch = () => {
                 </div>
             </div>
 
-            
-
             {/* 주문 결과 */}
-            {order && (
-                <div className="w-full max-w-3xl mt-8">
-                    <div 
-                        className="border rounded sm:p-4 p-2 sm:mb-4 mb-2 bg-white shadow-sm"
-                    >
-                        {/* 주문번호 및 날짜 */}
-                        <div 
-                            className="flex justify-between items-center 
-                                md:text-sm text-[clamp(11px,1.8252vw,14px)]
-                                text-gray-500"
+            {orders.length > 0 && (
+                <div className="w-full max-w-3xl mt-8 space-y-4">
+                    {orders.map((order) => (
+                        <div
+                            key={order.oid}
+                            className="border rounded sm:p-4 p-2 bg-white shadow-sm"
                         >
-                        <span className='font-medium'>
-                            {order.createdAt?.slice(0, 10)} · 주문번호: {order.oid}
-                        </span>
-                        <button
-                            onClick={() => {
-                                sessionStorage.setItem(`guestOrderPwd_${order.oid}`, guestPassword);
-                                navigate(`/orderDetail/${order.oid}`, {
-                                    state: { guestPassword },
-                                });
-                            }}
-                            className='
-                            ml-2 sm:px-2 px-[2px] py-1 border border-gray-400 text-gray-700 
-                            md:text-[10px] text-[clamp(8px,1.303vw,10px)]
-                            rounded hover:bg-gray-100'
-                        >
-                            주문 상세
-                        </button>
-                        </div>
-
-                        {/* 주문 상품들 */}
-                        {order.items?.map((item) => (
-                            <div key={item.itemId} className="flex flex-col">
-                                <div className="flex items-center gap-2 mt-1 
-                                md:text-sm text-[clamp(11px,1.8252vw,14px)] text-gray-700">
-                                {/* 배송 상태 */}
-                                <span className="text-sm md:text-base font-semibold text-black">
-                                    {item.orderStatus}
+                            <div 
+                                className="flex justify-between items-center 
+                                    md:text-sm text-[clamp(11px,1.8252vw,14px)]
+                                    text-gray-500"
+                            >
+                                <span className='font-medium'>
+                                    {order.createdAt?.slice(0, 10)} · 주문번호: {order.oid}
                                 </span>
-                                </div>
+                                <button
+                                    onClick={() => goToOrderDetail(order)}
+                                    className='
+                                    ml-2 sm:px-2 px-[2px] py-1 border border-gray-400 text-gray-700 
+                                    md:text-[10px] text-[clamp(8px,1.303vw,10px)]
+                                    rounded hover:bg-gray-100'
+                                >
+                                    주문 상세
+                                </button>
+                            </div>
 
-                                <div className="flex flex-row gap-4 py-2">
-                                    <img 
-                                        src={resolveItemThumbnail(item)}
-                                        alt={item.title} 
-                                        className="md:w-20 w-[clamp(4rem,10.43vw,5rem)] 
-                                        md:h-20 h-[clamp(4rem,10.43vw,5rem)] 
-                                        object-cover rounded border" 
-                                    />
-                                    <div className="flex sm:justify-between flex-1 text-gray-500">
-                                        <div className="flex flex-col w-full
-                                            md:text-sm text-[clamp(9px,1.825vw,14px)]">
-                                            <span className="font-bold text-black">{item.title}</span>
-                                            <span>카테고리: {convertCategoryName(item.category)}</span>
-                                            <div className="flex sm:flex-row flex-col">
-                                                <span>사이즈: </span>
-                                                <span>{convertInchToCm(item.size)} ({item.quantity}개)</span>
-                                            </div>
-                                            <div className="flex font-bold ml-auto">
-                                                <span>{(item.price).toLocaleString()}원</span>
+                            {order.items?.map((item) => (
+                                <div key={item.itemId} className="flex flex-col">
+                                    <div className="flex items-center gap-2 mt-1 
+                                    md:text-sm text-[clamp(11px,1.8252vw,14px)] text-gray-700">
+                                        <span className="text-sm md:text-base font-semibold text-black">
+                                            {item.orderStatus}
+                                        </span>
+                                    </div>
+
+                                    <div className="flex flex-row gap-4 py-2">
+                                        <img 
+                                            src={resolveItemThumb(item)}
+                                            alt={item.title} 
+                                            className="md:w-20 w-[clamp(4rem,10.43vw,5rem)] 
+                                            md:h-20 h-[clamp(4rem,10.43vw,5rem)] 
+                                            object-cover rounded border" 
+                                        />
+                                        <div className="flex sm:justify-between flex-1 text-gray-500">
+                                            <div className="flex flex-col w-full
+                                                md:text-sm text-[clamp(9px,1.825vw,14px)]">
+                                                <span className="font-bold text-black">{item.title}</span>
+                                                <span>카테고리: {convertCategoryName(item.category)}</span>
+                                                <div className="flex sm:flex-row flex-col">
+                                                    <span>사이즈: </span>
+                                                    <span>{convertInchToCm(item.size)} ({item.quantity}개)</span>
+                                                </div>
+                                                <div className="flex font-bold ml-auto">
+                                                    <span>{(item.price).toLocaleString()}원</span>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
-                        ))}
-                    </div>
+                            ))}
+                        </div>
+                    ))}
                 </div>
             )}
         </div>

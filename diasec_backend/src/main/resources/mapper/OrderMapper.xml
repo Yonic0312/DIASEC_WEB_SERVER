@@ -166,6 +166,14 @@
         ORDER BY created_at DESC
     </select>
 
+    <!-- 비회원: 주문자 휴대폰으로 주문 후보 조회 -->
+    <select id="selectGuestOrdersByOrdererPhoneDigits" resultMap="orderMap">
+        SELECT * FROM orders
+        WHERE guest_password IS NOT NULL
+            AND REPLACE(REPLACE(REPLACE(orderer_phone, '-', ''), ' ', ''), '.', '') = #{phoneDigits}
+        ORDER BY created_at DESC
+    </select>
+
     <!-- 3. 상세페이지로 들어갈 itemId 개별 주문 상품 조회 -->
     <select id="selectOrderItemById" resultType="OrderItemsVo">
         SELECT 

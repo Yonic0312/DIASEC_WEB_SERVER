@@ -1,5 +1,7 @@
 package com.diasec.diasec_backend.controller;
 
+import java.util.ArrayList;
+
 /**
  * [배포·동기화 주의] 운영 서버는 나이스페이(PG) 연동·주문 조회 로직이 포함되어 로컬과 다를 수 있습니다.
  * 로컬 파일로 서버를 덮어쓰지 마세요. OrderMapper.xml 등과 함께 검토 후 병합하세요.
@@ -303,21 +305,34 @@ public class OrderController {
     // 비회원 조회
     @PostMapping("/guest-search")
     public ResponseEntity<?> guestSearch(@RequestBody Map<String, String> req) {
-        Long oid = Long.valueOf(req.get("oid"));
+        String ordererPhone = req.get("ordererPhone");
         String guestPassword = req.get("guestPassword");
 
         try {
-            OrderVo order = orderService.selectOrderByOid(oid);
-
-            if (order == null || order.getGuestPassword() == null) {
-                return ResponseEntity.ok(Map.of("success", false, "message", "주문을 찾을 수 없습니다."));
+            if (ordererPhone == null || ordererPhone.isBlank()
+                    || guestPassword == null || guestPassword.isBlank()) {
+                return ResponseEntity.ok(Map.of("success", false, "message", "휴대폰 번호와 비밀번호를 입력해주세요."));
             }
 
-            if (!passwordEncoder.matches(guestPassword, order.getGuestPassword())) {
-                return ResponseEntity.ok(Map.of("success", false, "message", "비밀번호가 일치하지 않습니다."));
+            List<OrderVo> candidates = orderService.selectGuestOrdersByOrdererPhone(ordererPhone);
+            List<OrderVo> matched = new ArrayList<>();
+
+            for (OrderVo order : candidates) {
+                if (order.getGuestPassword() != null
+                    && passwordEncoder.matches(guestPassword, order.getGuestPassword())) {
+                        matched.add(sanitizeOrderForResponse(order));
+                }
             }
 
-            return ResponseEntity.ok(Map.of("success", true, "order", sanitizeOrderForResponse(order)));
+            if (matched.isEmpty()) {
+                return ResponseEntity.ok(Map.of("success", false, "message", "조회된 주문이 없습니다."));
+            }
+
+            if (matched.size() == 1) {
+                return ResponseEntity.ok(Map.of("success", true, "order", matched.get(0)));
+            }
+
+            return ResponseEntity.ok(Map.of("success", true, "orders", matched));
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.internalServerError().body(Map.of("success", false, "message", e.getMessage()));

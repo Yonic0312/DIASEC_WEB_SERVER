@@ -8,6 +8,7 @@ package com.diasec.diasec_backend.service;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -205,6 +206,34 @@ public class OrderService {
 
         order.setItems(items);
         return order;
+    }
+
+    public List<OrderVo> selectGuestOrdersByOrdererPhone(String ordererPhone) {
+        String phoneDigits = normalizePhoneDigits(ordererPhone);
+        if (phoneDigits.isBlank()) {
+            return List.of();
+        }
+
+        List<OrderVo> orders = orderMapper.selectGuestOrdersByOrdererPhoneDigits(phoneDigits);
+        List<OrderVo> loaded = new ArrayList<>();
+
+        for (OrderVo order : orders) {
+            List<OrderItemsVo> items = orderMapper.selectOrderItems(order.getOid());
+            for (OrderItemsVo item : items) {
+                item.setClaimFiles(orderMapper.selectOrderItemClaimFiles(item.getItemId()));
+            }
+            order.setItems(items);
+            loaded.add(order);
+        }
+
+        return loaded;
+    }
+
+    private static String normalizePhoneDigits(String phone) {
+        if (phone == null) {
+            return "";
+        }
+        return phone.replaceAll("[^0-9]", "");
     }
 
     // 주문목록 상세페이지 (order_items 하나씩 불러오기)
