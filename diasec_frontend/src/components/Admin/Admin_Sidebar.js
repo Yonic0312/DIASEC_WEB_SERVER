@@ -141,6 +141,7 @@ const Admin_Sidebar = () => {
 
             <span className="text-lg font-bold mt-10">정보 관리</span>
             <button className="text-sm opacity-65" onClick={() => navigate('/admin_MemberManager')}>회원 정보 관리</button>
+            <button className="text-sm opacity-65" onClick={() => navigate('/admin_MemberSalesRanking')}>회원 매출 순위</button>
             {/* <button className="text-sm opacity-65" onClick={() => navigate('/admin_AuthorManager')}>작가 상태 관리({pendingAuthorCount}명 / {pendingWorkCount}건)</button> */}
 
             <span className="text-lg font-bold mt-10">문의 관리</span>

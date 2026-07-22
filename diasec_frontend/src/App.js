@@ -82,6 +82,7 @@ import Admin_InquiryList from './components/Admin/Admin_InquiryList'
 import Admin_FAQManager from './components/Admin/Admin_FAQManager'
 import Admin_NoticeManager from './components/Admin/Admin_NoticeManager'
 import Admin_MemberManager from './components/Admin/Admin_MemberManager'
+import Admin_MemberSalesRanking from './components/Admin/Admin_MemberSalesRanking'
 import Admin_ProductManager from './components/Admin/Admin_ProductManager'
 import Admin_ReviewManager from './components/Admin/Admin_ReviewManager'
 import Admin_CollectionManager from './components/Admin/Admin_CollectionManager'
@@ -579,6 +580,7 @@ function App() {
                         <Route path="/admin_FAQManager" element={<AdminRoute><Admin_FAQManager /></AdminRoute>} />
                         <Route path="/admin_NoticeManager" element={<AdminRoute><Admin_NoticeManager /></AdminRoute>} />
                         <Route path="/admin_MemberManager" element={<AdminRoute><Admin_MemberManager /></AdminRoute>} />
+                        <Route path="/admin_MemberSalesRanking" element={<AdminRoute><Admin_MemberSalesRanking /></AdminRoute>} />
                         <Route path="/admin_ProductManager" element={<AdminRoute><Admin_ProductManager /></AdminRoute>} />
                         <Route path="/admin_ReviewManager" element={<AdminRoute><Admin_ReviewManager /></AdminRoute>} />
                         <Route path="/admin_CollectionManager" element={<AdminRoute><Admin_CollectionManager /></AdminRoute>} />

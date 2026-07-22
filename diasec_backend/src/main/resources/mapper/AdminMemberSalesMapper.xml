@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.diasec.diasec_backend.dao.AdminMemberSalesMapper">
+
+    <select id="selectMemberSalesRanking" resultType="map">
+        SELECT
+            sales.memberId,
+            m.name AS memberName,
+            m.email AS email,
+            m.partner_status AS partnerStatus,
+            sales.totalSales,
+            sales.completedItemCount
+        FROM (
+            SELECT
+                TRIM(o.id) AS memberId,
+                COALESCE(SUM(oi.price * IFNULL(oi.quantity, 1)), 0) AS totalSales,
+                COUNT(oi.item_id) AS completedItemCount
+            FROM order_items oi
+            INNER JOIN orders o ON oi.oid = o.oid
+            WHERE oi.order_status IN ('배송완료', '교환완료')
+                AND o.id IS NOT NULL
+                AND TRIM(o.id) != ''
+            GROUP BY TRIM(o.id)
+            HAVING COALESCE(SUM(oi.price * IFNULL(oi.quantity, 1)), 0) > 0
+        ) sales
+        LEFT JOIN member m ON m.id COLLATE utf8mb4_unicode_ci = sales.memberId
+        <where>
+            <if test="keyword != null and keyword != ''">
+                (
+                    sales.memberId LIKE CONCAT('%', #{keyword}, '%')
+                    OR m.name LIKE CONCAT('%', #{keyword}, '%')
+                    OR m.email LIKE CONCAT('%', #{keyword}, '%')
+                )
+            </if>
+        </where>
+        ORDER BY sales.totalSales DESC
+    </select>
+</mapper>

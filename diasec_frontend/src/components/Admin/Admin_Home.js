@@ -339,6 +339,7 @@ const Admin_Home = () => {
             { label: '상품 등록', path: '/admin/insert_Product' },
             { label: '상품 수정', path: '/admin_ProductManager' },
             { label: '회원 관리', path: '/admin_MemberManager' },
+            { label: '회원 매출 순위', path: '/admin_MemberSalesRanking' },
             { label: '고객 문의', path: '/admin_InquiryList' },
             { label: '기업컨설팅', path: '/admin_BizConsultList' },
             { label: '업무제휴', path: '/admin_BizPartnerList' },
