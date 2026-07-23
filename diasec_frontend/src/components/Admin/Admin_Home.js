@@ -336,6 +336,7 @@ const Admin_Home = () => {
     const quickLinks = useMemo(
         () => [
             { label: '주문 상태', path: '/admin/order_Status' },
+            { label: '기업주문', path: '/admin_BizList' },
             { label: '상품 등록', path: '/admin/insert_Product' },
             { label: '상품 수정', path: '/admin_ProductManager' },
             { label: '회원 관리', path: '/admin_MemberManager' },

@@ -64,35 +64,53 @@
         <result property="title" column="title" />
         <result property="content" column="content" />
         <result property="createdAt" column="created_at" />
+        <result property="hidden" column="hidden" />
         <collection property="images" ofType="string">
             <result column="image_url"/>
         </collection>
     </resultMap>
 
     <select id="getReviewsByPid" resultMap="ReviewWithImagesResultMap">
-        SELECT r.rid, r.pid, r.id, r.rating, r.title, r.content, r.created_at, ri.image_url
+        SELECT r.rid, r.pid, r.id, r.rating, r.title, r.content, r.created_at, r.hidden, ri.image_url
         FROM reviews r
         LEFT JOIN review_images ri ON r.rid = ri.rid
         WHERE r.pid = #{pid}
+            AND IFNULL(r.hidden, 0) = 0
         ORDER BY r.created_at DESC
     </select>
 
-    <!-- 전체 리뷰 가져오기 -->
+    <!-- 전체 리뷰 (공개: 숨김 제외) -->
     <select id="getAllReviews" resultMap="ReviewWithImagesResultMap">
-        SELECT r.rid, r.pid, r.id, r.rating, r.title, r.content, r.created_at, ri.image_url
+        SELECT r.rid, r.pid, r.id, r.rating, r.title, r.content, r.created_at, r.hidden, ri.image_url
         FROM reviews r
         INNER JOIN review_images ri ON r.rid = ri.rid
+        WHERE IFNULL(r.hidden, 0) = 0
+        ORDER BY r.created_at DESC
+    </select>
+
+    <!-- 관리자: 숨김 포함 전체 -->
+    <select id="getAllReviewsAdmin" resultMap="ReviewWithImagesResultMap">
+        SELECT r.rid, r.pid, r.id, r.rating, r.title, r.content, r.created_at, r.hidden, ri.image_url
+        FROM reviews r
+        LEFT JOIN review_images ri ON r.rid = ri.rid
         ORDER BY r.created_at DESC
     </select>
 
     <!-- 리뷰 한 페이지씩 불러오기 -->
     <select id="getRecentReviews" resultMap="ReviewWithImagesResultMap">
-        SELECT r.rid, r.pid, r.id, r.rating, r.title, r.content, r.created_at, ri.image_url
+        SELECT r.rid, r.pid, r.id, r.rating, r.title, r.content, r.created_at, r.hidden, ri.image_url
         FROM reviews r
         LEFT JOIN review_images ri ON r.rid = ri.rid
+        WHERE IFNULL(r.hidden, 0) = 0
         ORDER BY r.created_at DESC
         LIMIT #{limit}
     </select>
+
+    <update id="updateReviewHidden">
+        UPDATE reviews
+        SET hidden = #{hidden}
+        WHERE rid = #{rid}
+    </update>
 
     <!-- rid로 이미지 url들 가져오기 -->
     <select id="getImageUrlsByRid" resultType="string">

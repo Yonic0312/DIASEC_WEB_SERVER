@@ -73,6 +73,13 @@
         WHERE item_id = #{itemId}
     </update>
 
+    <update id="updateTrackingByOid">
+        UPDATE order_items
+        SET tracking_company = #{trackingCompany},
+            tracking_number = #{trackingNumber}
+        WHERE oid = #{oid}
+    </update>
+
     <select id="selectShippingNotificationTarget" resultType="map">
         SELECT
             oi.item_id AS itemId,

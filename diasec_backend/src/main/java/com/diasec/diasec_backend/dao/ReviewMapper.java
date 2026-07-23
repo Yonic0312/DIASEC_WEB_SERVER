@@ -28,8 +28,13 @@ public interface ReviewMapper {
     // 리뷰 전체 가져오기
     List<ReviewVo> getAllReviews();
 
+    // 관리자: 숨김 포함
+    List<ReviewVo> getAllReviewsAdmin();
+
     // 리뷰 한 페이지씩 불러오기
     List<ReviewVo> getRecentReviews(int limit);
+
+    int updateReviewHidden(@Param("rid") Long rid, @Param("hidden") boolean hidden);
 
     // rid로 이미지 url들 가져오기
     List<String> getImageUrlsByRid(Long rid);

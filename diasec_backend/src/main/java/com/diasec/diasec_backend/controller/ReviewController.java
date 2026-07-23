@@ -218,16 +218,39 @@ public class ReviewController {
         return ResponseEntity.ok(reviewService.getReviewsByPid(pid));
     }
 
-    // 리뷰 리스트 전체 가져오기
+    // 리뷰 리스트 전체 가져오기 (공개)
     @GetMapping("/all")
     public ResponseEntity<List<ReviewVo>> getAllReviews() {
         return ResponseEntity.ok(reviewService.getAllReviews());
+    }
+
+    // 관리자: 숨김 포함 전체 목록
+    @GetMapping("/admin/all")
+    public ResponseEntity<List<ReviewVo>> getAllReviewsAdmin() {
+        return ResponseEntity.ok(reviewService.getAllReviewsAdmin());
     }
 
     // 리뷰 한 페이지씩 불러오기
     @GetMapping("/recent")
     public ResponseEntity<List<ReviewVo>> getRecentReviews(@RequestParam(defaultValue = "10") int limit) {
         return ResponseEntity.ok(reviewService.getRecentReviews(limit));
+    }
+
+    // 관리자: 후기 숨김/표시
+    @PostMapping("/hide/{rid}")
+    public ResponseEntity<?> setHidden(
+        @PathVariable Long rid,
+        @RequestBody Map<String, Object> body
+    ) {
+        try {
+            boolean hidden = Boolean.parseBoolean(String.valueOf(body.getOrDefault("hidden", true)));
+            reviewService.setReviewHidden(rid, hidden);
+            return ResponseEntity.ok(Map.of("success", true, "hidden", hidden));
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(Map.of("success", false));
+        }
     }
 
     // 리뷰 삭제 & 실제 이미지 삭제

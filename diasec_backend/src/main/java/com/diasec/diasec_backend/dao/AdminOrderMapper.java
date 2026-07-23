@@ -26,6 +26,10 @@ public interface AdminOrderMapper {
                             @Param("accountNumber") String accountNumber,
                             @Param("accountHolder") String accountHolder);
 
+    int updateTrackingByOid(@Param("oid") Long oid,
+                            @Param("trackingCompany") String trackingCompany,
+                            @Param("trackingNumber") String trackingNumber);
+
     Map<String, Object> selectShippingNotificationTarget(@Param("itemId") Long itemId);
 
     // 리스정보 수정

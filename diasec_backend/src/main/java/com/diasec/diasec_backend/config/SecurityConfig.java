@@ -58,6 +58,7 @@ public class SecurityConfig {
                 .requestMatchers( "/uploads/**", "/css/**", "/js/**", "/img/**").permitAll()
 
                 // 2. 공개 GET API (조회는 공개)
+                .requestMatchers(HttpMethod.GET, "/api/review/admin/**").hasRole("ADMIN")
                 .requestMatchers(HttpMethod.GET, 
                     "/api/collections/**",
                     "/api/product/**",
@@ -129,6 +130,8 @@ public class SecurityConfig {
                 // 5. 관리자
                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
                 .requestMatchers("/api/product/insert", "/api/order/delete", "/api/inquiry/answer", "/api/event/insert").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.POST, "/api/review/hide/**").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.DELETE, "/api/review/delete/**").hasRole("ADMIN")
 
                 // 3. 로그인 사용자만 가능
                 .requestMatchers("/api/member/**").authenticated()

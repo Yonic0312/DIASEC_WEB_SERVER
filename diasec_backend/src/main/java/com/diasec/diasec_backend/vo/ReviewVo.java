@@ -19,4 +19,7 @@ public class ReviewVo {
     private int item_id;
     private String thumbnail;
 
+    // 1이면 공개 목록에서 숨김 (악성후기 등)
+    private boolean hidden;
+
 }

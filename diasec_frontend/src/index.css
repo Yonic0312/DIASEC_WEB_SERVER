@@ -15,3 +15,73 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
+/* Smartlog 채팅 아이콘 — FloatingButtons와 같은 크기·간격으로 맞춤
+   FloatingButtons: bottom-28(112px) + right-8(32px), gap≈12px */
+.chat-icon,
+.chat-icon.active {
+  position: fixed !important;
+  right: 2rem !important; /* = right-8 */
+  bottom: 58px !important; /* 112 - 12 - 42 */
+  width: 42px !important;
+  height: 42px !important;
+  z-index: 100 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+.chat-icon img,
+img[alt="chat-icon"] {
+  width: 42px !important;
+  height: 42px !important;
+  max-width: 42px !important;
+  object-fit: contain !important;
+  display: block !important;
+}
+
+@media (min-width: 768px) {
+  .chat-icon,
+  .chat-icon.active {
+    bottom: 52px !important; /* 112 - 12 - 48 */
+    width: 48px !important;
+    height: 48px !important;
+  }
+  .chat-icon img,
+  img[alt="chat-icon"] {
+    width: 48px !important;
+    height: 48px !important;
+    max-width: 48px !important;
+  }
+}
+
+@media (min-width: 1024px) {
+  .chat-icon,
+  .chat-icon.active {
+    bottom: 44px !important; /* 112 - 12 - 56 */
+    width: 56px !important;
+    height: 56px !important;
+  }
+  .chat-icon img,
+  img[alt="chat-icon"] {
+    width: 56px !important;
+    height: 56px !important;
+    max-width: 56px !important;
+  }
+}
+
+@media (min-width: 1280px) {
+  .chat-icon,
+  .chat-icon.active {
+    bottom: 36px !important; /* 112 - 12 - 64 */
+    width: 64px !important;
+    height: 64px !important;
+  }
+  .chat-icon img,
+  img[alt="chat-icon"] {
+    width: 64px !important;
+    height: 64px !important;
+    max-width: 64px !important;
+  }
+}
+
+

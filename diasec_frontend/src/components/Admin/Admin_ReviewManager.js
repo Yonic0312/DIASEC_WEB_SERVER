@@ -12,16 +12,16 @@ const Admin_ReviewManager = () => {
     const itemsPerPage = 4;
 
     useEffect(() => {
-        axios.get(`${API}/review/all`)
+        axios.get(`${API}/review/admin/all`, { withCredentials: true })
             .then(res => setReviews(res.data))
-            .catch(err => console.error('FAQ 불러오기 실패', err));
-    }, []);
+            .catch(err => console.error('리뷰 불러오기 실패', err));
+    }, [API]);
 
     const filteredReviews = reviews.filter(review => {
         const keywordMatch = 
-            review.id.includes(searchKeyword) ||
-            review.title.includes(searchKeyword) ||
-            review.content.includes(searchKeyword)
+            (review.id || '').includes(searchKeyword) ||
+            (review.title || '').includes(searchKeyword) ||
+            (review.content || '').includes(searchKeyword)
 
         const dateMatch = 
             (!startDate || review.createdAt >= startDate) && 
@@ -33,13 +33,31 @@ const Admin_ReviewManager = () => {
     const handleDelete = async (rid) => {
         if (window.confirm('정말 삭제하시겠습니까?')) {
             try {
-                await axios.delete(`${API}/review/delete/${rid}`);
+                await axios.delete(`${API}/review/delete/${rid}`, { withCredentials: true });
                 toast.success('삭제되었습니다.');
                 setReviews(prev => prev.filter(f => f.rid !== rid));
             } catch (err) {
                 console.error('삭제 실패', err);
                 toast.error('삭제에 실패했습니다.');
             }
+        }
+    };
+
+    const handleToggleHidden = async (review) => {
+        const nextHidden = !review.hidden;
+        try {
+            await axios.post(
+                `${API}/review/hide/${review.rid}`,
+                { hidden: nextHidden },
+                { withCredentials: true }
+            );
+            setReviews((prev) =>
+                prev.map((r) => (r.rid === review.rid ? { ...r, hidden: nextHidden } : r))
+            );
+            toast.success(nextHidden ? '후기를 숨겼습니다.' : '후기를 다시 표시합니다.');
+        } catch (err) {
+            console.error('숨김 처리 실패', err);
+            toast.error('숨김 처리에 실패했습니다.');
         }
     };
 
@@ -69,9 +87,21 @@ const Admin_ReviewManager = () => {
             <table className="table-fixed w-full text-sm bg-white shadow-sm rounded-md overflow-hidden">
                 <div className="grid grid-cols-2 gap-6">
                     {currentItems.map((review, index) => (
-                        <div key={review.rid} className="bg-white rounded-lg shadow-md p-4 flex flex-col justify-between">
+                        <div 
+                            key={review.rid} 
+                            className={`bg-white rounded-lg shadow-md p-4 flex flex-col justify-between ${
+                                review.hidden ? 'opacity-70 ring-1 ring-red-200' : ''
+                            }`}
+                        >
                             <div className="mb-3">
-                                <div className="text-sm text-gray-400 mb-1">No. {(currentPage -1) * itemsPerPage + 1 + index +1}</div>
+                                <div className="flex items-center gap-2 text-sm text-gray-400 mb-1">
+                                    <span>No. {(currentPage -1) * itemsPerPage + 1 + index +1}</span>
+                                    {review.hidden && (
+                                        <span className="px-1.5 py-0.5 rounded text-[11px] font-semibold bg-red-100 text-red-700">
+                                            숨김
+                                        </span>
+                                    )}
+                                </div>
                                 <div className="font-bold text-lg text-gray-800 truncate">{review.title}</div>
                                 <div className="text-sm text-gray-500">작성자: <span className="font-medium">{review.id}</span></div>
                                 <div className="text-sm text-yellow-600 mt-1">평점: {review.rating}점</div>
@@ -88,14 +118,28 @@ const Admin_ReviewManager = () => {
 
                             <div className="mt-4 flex justify-between items-center text-sm text-gray-500">
                                 <span>{review.createdAt?.slice(0, 10)}</span>
-                                <button onClick={() => handleDelete(review.rid)} className="text-red-500 hover:underline">삭제</button>
+                                <div className="flex gap-3">
+                                    <button
+                                        type="button"
+                                        onClick={() => handleToggleHidden(review)}
+                                        className={review.hidden ? 'text-emerald-600 hover:underline' : 'text-amber-700 hover:underline'}
+                                    >
+                                        {review.hidden ? '표시' : '숨김'}
+                                    </button>
+                                    <button
+                                        type="button" 
+                                        onClick={() => handleDelete(review.rid)} 
+                                        className="text-red-500 hover:underline"
+                                    >
+                                        삭제
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     ))}
                 </div>
             </table>
 
-            {/* 페이징 */}
             {/* 페이징 (InquiryList와 동일 패턴) */}
             <div className="flex justify-center gap-2 mt-4 md:mt-8 text-sm">
                 {(() => {

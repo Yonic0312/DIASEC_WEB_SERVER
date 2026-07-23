@@ -12,7 +12,7 @@ const FloatingButtons = () => {
     const isCartPage = pathname === '/cart';
 
     return (
-        <div className="fixed bottom-28 right-3 flex flex-col gap-3 z-[100]">
+        <div className="fixed bottom-28 right-8 flex flex-col gap-2 md:gap-3 z-[100]">
             {!isCartPage && (
                 <button
                     type="button"
@@ -26,7 +26,7 @@ const FloatingButtons = () => {
                     className="flex items-center justify-center 
                         xl:w-16 lg:w-14 md:w-12 w-[42px]
                         xl:h-16 lg:h-14 md:h-12 h-[42px]
-                        p-3 rounded-full bg-[#a67a3e] text-white shadow-lg hover:bg-[#8b652f] transition"
+                        p-2 md:p-3 rounded-full bg-[#a67a3e] text-white shadow-lg hover:bg-[#8b652f] transition"
                     aria-label="장바구니"
                 >
                     <ShoppingCart/>
@@ -39,7 +39,7 @@ const FloatingButtons = () => {
                 className="flex items-center justify-center 
                 xl:w-16 lg:w-14 md:w-12 w-[42px]
                 xl:h-16 lg:h-14 md:h-12 h-[42px]
-                p-3 rounded-full bg-gray-700 text-white shadow-lg hover:bg-gray-900 transition"
+                p-2 md:p-3 rounded-full bg-gray-700 text-white shadow-lg hover:bg-gray-900 transition"
                 aria-label="맨 위로"
             >
                 <ArrowUp/>

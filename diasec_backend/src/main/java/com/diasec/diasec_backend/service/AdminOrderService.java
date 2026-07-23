@@ -58,9 +58,20 @@ public class AdminOrderService {
         String trackingNumber,
         String bankName,
         String accountNumber,
-        String accountHolder
+        String accountHolder,
+        boolean applyToSameOrder
     ) {
-        boolean success = updateOrderDetail(itemId, trackingCompany, trackingNumber, bankName, accountNumber, accountHolder);
+        boolean success;
+        if (applyToSameOrder) {
+            Long oid = orderMapper.selectOidByItemId(itemId);
+            if (oid == null) {
+                return Map.of("success", false, "smsTried", false, "smsSent", false);
+            }
+            success = adminOrderMapper.updateTrackingByOid(oid, trackingCompany, trackingNumber) > 0;
+        } else {
+            success = updateOrderDetail(itemId, trackingCompany, trackingNumber, bankName, accountNumber, accountHolder);
+        }
+
         if (!success) {
             return Map.of("success", false, "smsTried", false, "smsSent", false);
         }

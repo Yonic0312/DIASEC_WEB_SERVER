@@ -242,6 +242,7 @@ const Order_Status = () => {
     const [accountHolder, setAccountHolder] = useState('');
 
     const [customCompany, setCustomCompany] = useState(''); // 직접 입력일 때 사용하는 변수
+    const [applyToSameOrder, setApplyToSameOrder] = useState(true);
     // 모달 값 저장 함수
     const handleSave = () => {
         if(!trackingCompany || trackingCompany.trim() === '') {
@@ -277,17 +278,20 @@ const Order_Status = () => {
             body: JSON.stringify({
                 itemId: selectedItem.itemId,
                 trackingCompany: finalTrackingCompany,
-                trackingNumber
+                trackingNumber,
+                applyToSameOrder,
             }),
         })
         .then(res => res.json())
         .then(data => {
             if (data.success) {
-                toast.success('저장되었습니다.')
+                toast.success(applyToSameOrder ? '같은 주문에 운송장이 일괄 저장되었습니다.' : '저장되었습니다.');
                 if (data.smsTried) {
-                    toast.success('고객에게 배송 알림 문자를 전송했습니다.');
-                } else {
-                    toast.warn(`배송 알림 문자 전송 실패: ${data.smsMessage || '설정을 확인해주세요.'}`);
+                    if (data.smsSent) {
+                        toast.success('고객에게 배송 알림 문자를 전송했습니다.');
+                    } else {
+                        toast.warn(`배송 알림 문자 전송 실패: ${data.smsMessage || '설정을 확인해주세요.'}`);
+                    }
                 }
                 setShowModal(false);
                 fetchOrders(); // 목록 갱신
@@ -593,9 +597,18 @@ const Order_Status = () => {
                             </div>
                         ) : null}
 
+                        <label className="flex items-center gap-2 mb-3 text-sm text-gray-800 cursor-pointer select-none">
+                            <input 
+                                type="checkbox"
+                                checked={applyToSameOrder}
+                                onChange={(e) => setApplyToSameOrder(e.target.checked)}
+                            />
+                            <span className="font-medium">같은 주문 전체적용</span>
+                        </label>
+
                         <button 
                             onClick={handleSave}
-                            className="mt-4 w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700">
+                            className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700">
                             저장
                         </button>
 

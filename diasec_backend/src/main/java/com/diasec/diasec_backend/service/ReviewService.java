@@ -55,9 +55,17 @@ public class ReviewService {
         return reviewMapper.getAllReviews();
     }
 
+    public List<ReviewVo> getAllReviewsAdmin() {
+        return reviewMapper.getAllReviewsAdmin();
+    }
+
     // 최근 리뷰 20개 불러오기
     public List<ReviewVo> getRecentReviews(int limit) {
         return reviewMapper.getRecentReviews(limit);
+    }
+
+    public void setReviewHidden(Long rid, boolean hidden) {
+        reviewMapper.updateReviewHidden(rid, hidden);
     }
 
     public void deleteReview(Long rid) {

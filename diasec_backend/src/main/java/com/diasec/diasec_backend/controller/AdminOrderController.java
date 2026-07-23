@@ -92,7 +92,9 @@ public class AdminOrderController {
         String accountHolder = (String) request.getOrDefault("accountHolder", null);
 
         return adminOrderService.updateOrderDetailWithNotification(
-            itemId, trackingCompany, trackingNumber, bankName, accountNubmer, accountHolder
+            itemId, trackingCompany, trackingNumber, bankName, accountNubmer, accountHolder,
+            Boolean.TRUE.equals(request.get("applyToSameOrder"))
+                || "true".equalsIgnoreCase(String.valueOf(request.get("applyToSameOrder")))
         );
     }
 
