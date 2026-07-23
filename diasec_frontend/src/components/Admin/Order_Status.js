@@ -372,7 +372,7 @@ const Order_Status = () => {
                     <span className="mx-1">~</span>
                     <input type="date" className="w-[130px] h-[40px] border text-center" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
                     
-                    <input type="text" placeholder="회원ID 또는 상품명" className="w-[180px] h-[40px] border text-sm px-3" value={keyword} onChange={(e) => setKeyword(e.target.value)} />
+                    <input type="text" placeholder="회원ID, 주문자명, 상품명" className="w-[20px] h-[40px] border text-sm px-3" value={keyword} onChange={(e) => setKeyword(e.target.value)} />
                 </div>
             </div>
             

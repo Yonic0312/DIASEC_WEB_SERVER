@@ -47,7 +47,10 @@
             </if>
             
             <if test="keyword != null and keyword != ''">
-                AND (o.id LIKE CONCAT('%', #{keyword}, '%') or oi.title LIKE CONCAT('%', #{keyword}, '%')
+                AND (
+                    o.id LIKE CONCAT('%', #{keyword}, '%') 
+                    or oi.title LIKE CONCAT('%', #{keyword}, '%')
+                    or o.orderer_name LIKE CONCAT('%', #{keyword}, '%')
                 )
             </if>
         </where>
