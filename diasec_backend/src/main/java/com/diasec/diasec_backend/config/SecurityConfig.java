@@ -100,6 +100,7 @@ public class SecurityConfig {
 
                 // 방문자 집계 (비로그인 포함)
                 .requestMatchers(HttpMethod.POST, "/api/visit/track").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/site-setting/**").permitAll()
 
                 // 맞춤액자 원본 tmp 업로드 (나이스페이 결제 전, 비회원 포함)
                 .requestMatchers(HttpMethod.POST, "/api/uploads/customFrames/tmp").permitAll()

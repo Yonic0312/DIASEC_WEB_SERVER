@@ -157,6 +157,7 @@ const Admin_Sidebar = () => {
             <button className="text-sm opacity-65" onClick={() => navigate('/admin_FAQManager')}>FAQ 관리</button>
             <button className="text-sm opacity-65" onClick={() => navigate('/admin_ReviewManager')}>후기 관리</button>
             <button className="text-sm opacity-65" onClick={() => navigate('/admin_EventManager')}>이벤트 관리</button>
+            <button className="text-sm opacity-65" onClick={() => navigate('/admin_SiteDiscount')}>사이트 할인율 관리</button>
         </div>
     )
 }

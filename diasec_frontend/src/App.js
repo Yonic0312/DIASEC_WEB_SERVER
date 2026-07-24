@@ -7,6 +7,7 @@ import './App.css';
 import { Routes, Route, useLocation, Outlet } from 'react-router-dom';
 import { MemberProvider } from './context/MemberContext';
 import { PartnerProvider } from './context/PartnerContext';
+import { SitePromoProvider } from './context/SitePromoContext';
 import AdminRoute from './components/common/AdminRoute';
 
 import { ToastContainer } from 'react-toastify';
@@ -88,6 +89,7 @@ import Admin_ReviewManager from './components/Admin/Admin_ReviewManager'
 import Admin_CollectionManager from './components/Admin/Admin_CollectionManager'
 import Admin_Order_Detail from './components/Admin/Order_Detail'
 import Admin_EventManager from './components/Admin/Admin_EventManager'
+import Admin_SiteDiscount from './components/Admin/Admin_SiteDiscount'
 import Admin_BizList from './components/Admin/Admin_BizList'
 import Admin_BizConsultList from './components/Admin/Admin_BizConsultList'
 import Admin_BizConsultView from './components/Admin/Admin_BizConsultView'
@@ -108,46 +110,51 @@ import {
     clearMainItemsScrollSession,
     MAIN_ITEMS_SCROLL_PREFIX,
 } from './utils/navigationReload';
+import { getSiteWideDiscountPercent } from './config/sitePromo';
 
 const SEO_SITE_ORIGIN = 'https://diasec.co.kr';
 const SEO_DEFAULT_OG_IMAGE = `${SEO_SITE_ORIGIN}/icon.png`;
-const SEO_PROMO_TITLE = ' · 20% 오픈할인 · 무료배송';
+const getSeoPromoTitle = () => {
+    const pct = getSiteWideDiscountPercent();
+    return pct > 0 ? ` | ${pct}% 오픈할인 · 무료배송` : ' · 무료배송';
+};
 
 function getMainItemsSeoByType(type) {
+    const promo = getSeoPromoTitle();
     switch (type) {
         case 'masterPiece':
             return {
-                title: `명화 | 디아섹코리아${SEO_PROMO_TITLE}`,
+                title: `명화 | 디아섹코리아${promo}`,
                 description:
                     '명화·고전 회화를 고해상 디아섹 액자로 제작합니다. 작품에 맞는 사이즈와 마감으로 갤러리 수준의 인테리어를 완성해 보세요.',
             };
         case 'koreanPainting':
             return {
-                title: `동양화 | 디아섹코리아${SEO_PROMO_TITLE}`,
+                title: `동양화 | 디아섹코리아${promo}`,
                 description:
                     '민화·수묵·동양풍 작품을 위한 디아섹 액자. 선명한 발색과 깊이 있는 표현을 살리는 맞춤 제작 서비스입니다.',
             };
         case 'photoIllustration':
             return {
-                title: `사진·일러스트 | 디아섹코리아${SEO_PROMO_TITLE}`,
+                title: `사진·일러스트 | 디아섹코리아${promo}`,
                 description:
                     '스냅·일러스트·디지털 아트까지 사진과 그래픽 작품용 디아섹 액자. 출력 품질과 보존성에 최적화된 프리미엄 액자입니다.',
             };
         case 'fengShui':
             return {
-                title: `풍수그림 | 디아섹코리아${SEO_PROMO_TITLE}`,
+                title: `풍수그림 | 디아섹코리아${promo}`,
                 description:
                     '풍수 인테리어용 그림을 디아섹 액자로 제작합니다. 공간에 맞는 사이즈와 마감으로 맞춤 주문이 가능합니다.',
             };
         case 'authorCollection':
             return {
-                title: `작가 컬렉션 | 디아섹코리아${SEO_PROMO_TITLE}`,
+                title: `작가 컬렉션 | 디아섹코리아${promo}`,
                 description:
                     '작가별 컬렉션 작품을 디아섹 액자로 만나보세요. 고해상 프린트와 아크릴 마감으로 작품을 오래 보존합니다.',
             };
         default:
             return {
-                title: `디아섹코리아${SEO_PROMO_TITLE}`,
+                title: `디아섹코리아${promo}`,
                 description:
                     '디아섹코리아에서 디아섹 액자와 맞춤 액자를 만나보세요. 작품과 사진에 맞춘 프리미엄급 액자 제작 서비스를 제공합니다.',
             };
@@ -252,9 +259,9 @@ function SeoMetaManager() {
         const search = location.search;
         const currentUrl = `${origin}${path}${search}`;
 
-        const promoTitle = SEO_PROMO_TITLE;
+        const promoTitle = getSeoPromoTitle();
         const seoDefaults = {
-            title: `디아섹 액자 전문 맞춤액자 디아섹코리아 | 20% 오픈할인 · 무료배송`,
+            title: `디아섹 액자 전문 맞춤액자 디아섹코리아${promoTitle}`,
             description:
                 '디아섹코리아에서 디아섹 액자와 맞춤 액자를 만나보세요. 작품과 사진에 맞춘 프리미엄급 액자 제작 서비스를 제공합니다.',
             canonical: currentUrl,
@@ -499,6 +506,7 @@ function App() {
 
     return (
         <MemberProvider>
+            <SitePromoProvider>
             <PartnerProvider>
                 <SeoMetaManager />
                 <ScrollToTop />
@@ -585,6 +593,7 @@ function App() {
                         <Route path="/admin_ReviewManager" element={<AdminRoute><Admin_ReviewManager /></AdminRoute>} />
                         <Route path="/admin_CollectionManager" element={<AdminRoute><Admin_CollectionManager /></AdminRoute>} />
                         <Route path="/admin_EventManager" element={<AdminRoute><Admin_EventManager /></AdminRoute>} />
+                        <Route path="/admin_SiteDiscount" element={<AdminRoute><Admin_SiteDiscount /></AdminRoute>} />
                         
                     </Route>
                 </Routes>
@@ -599,6 +608,7 @@ function App() {
                     bodyClassName="custom-toast-body"
                 />
             </PartnerProvider>
+            </SitePromoProvider>
         </MemberProvider>
     );
 }

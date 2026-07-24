@@ -349,6 +349,7 @@ const Admin_Home = () => {
             { label: 'FAQ', path: '/admin_FAQManager' },
             { label: '후기', path: '/admin_ReviewManager' },
             { label: '이벤트', path: '/admin_EventManager' },
+            { label: '사이트 할인율', path: '/admin_SiteDiscount' },
         ],
         []
     );

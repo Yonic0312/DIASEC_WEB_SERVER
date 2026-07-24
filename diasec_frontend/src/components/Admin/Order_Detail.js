@@ -1328,6 +1328,31 @@ const Order_Detail = () => {
                         </>
                     )}
 
+                    {order.paymentMethod === '가상계좌' && (order.vbankAccount || order.vbankName) && (
+                        <>
+                            {order.vbankName && (
+                                <div>
+                                    <span className="print-label">입금 은행:</span> {order.vbankName}
+                                </div>
+                            )}
+                            {order.vbankAccount && (
+                                <div>
+                                    <span className="print-label">입금 계좌:</span> {order.vbankAccount}
+                                </div>
+                            )}
+                            {order.vbankHolder && (
+                                <div>
+                                    <span className="print-label">예금주:</span> {order.vbankHolder}
+                                </div>
+                            )}
+                            {order.vbankDueDate && (
+                                <div>
+                                    <span className="print-label">입금기한:</span> {order.vbankDueDate}
+                                </div>
+                            )}
+                        </>
+                    )}
+
                     <div>
                         <span className="print-label">총 상품금액:</span> {order.totalPrice.toLocaleString()}원
                     </div>

@@ -1,3 +1,5 @@
+// 가상계좌쪽 서버코드가 다름 복붙 금지
+
 import { useEffect, useState, useContext } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
@@ -874,12 +876,25 @@ const OrderDetail = () => {
                                             : ''}
                             </span></span>
                         </div>
-                        {/* { order.paymentMethod === '무통장입금' && (
-                            <>
-                                <div><span className="text-black mb-2">입금자명:</span> {order.depositor}</div>
-                                <div><span className="text-black mb-2">입금 계좌:</span> {order.bankAccount}</div>
-                            </>
-                        )} */}
+                        {order.paymentMethod === '가상계좌' && (order.vbankAccount || order.vbankName) && (
+                            <div className="rounded border border-[#D0AC88] bg-[#fffaf3] p-3 space-y-1">
+                                {order.vbankName && (
+                                    <div><span className="text-black">입금 은행:</span> {order.vbankName}</div>
+                                )}
+                                {order.vbankAccount && (
+                                    <div>
+                                        <span className="text-black">입금 계좌:</span>{' '}
+                                        <span className="font-semibold">{order.vbankAccount}</span>
+                                    </div>
+                                )}
+                                {order.vbankHolder && (
+                                    <div><span className="text-black">예금주:</span> {order.vbankHolder}</div>
+                                )}
+                                {order.vbankDueDate && (
+                                    <div className="text-xs text-gray-600">입금기한: {order.vbankDueDate}</div>
+                                )}
+                            </div>
+                        )}
                         <div><span className="text-black mb-2">총 상품금액:</span> {order.totalPrice.toLocaleString()}원</div>
                         <div><span className="text-black mb-2">적립금 사용:</span> {order.usedCredit.toLocaleString()}원</div>
                         <div><span className="text-black mb-2">배송비:</span> {order.deliveryFee.toLocaleString()}원</div>

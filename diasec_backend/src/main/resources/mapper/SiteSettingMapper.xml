@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.diasec.diasec_backend.dao.SiteSettingMapper">
+
+    <select id="selectValue" resultType="string">
+        SELECT setting_value
+        FROM site_setting
+        WHERE setting_key = #{key}
+    </select>
+
+    <insert id="upsertValue">
+        INSERT INTO site_setting (setting_key, setting_value)
+        VALUES (#{key}, #{value})
+        ON DUPLICATE KEY UPDATE setting_value = #{value}
+    </insert>
+</mapper>
