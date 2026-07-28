@@ -118,9 +118,13 @@ const Main_CustomFrames = () => {
     const [adminQuoteW, setAdminQuoteW] = useState('');
     const [adminQuoteH, setAdminQuoteH] = useState('');
 
+    // 관리자만 볼 수 있는 버튼 (파트너 할인 적용/미적용)
+    const [adminQuoteApplyPartnerDiscount, setAdminQuoteApplyPartnerDiscount] = useState(false);
+
     const openAdminQuoteModal = () => {
         setAdminQuoteW(String(Math.floor(width)));
         setAdminQuoteH(String(Math.floor(height)));
+        setAdminQuoteApplyPartnerDiscount(false)
         setAdminQuoteModalOpen(true);
     };
 
@@ -2112,6 +2116,22 @@ const Main_CustomFrames = () => {
                             ))}
                         </div>
 
+                        {member?.role === 'ADMIN' && (
+                            <div className="mb-3 flex justify-end">
+                                <button
+                                    type="button"
+                                    onClick={() => setAdminQuoteApplyPartnerDiscount((v) => !v)}
+                                    className={`px-3 py-1.5 rounded-md border text-xs font-semibold transition ${
+                                        adminQuoteApplyPartnerDiscount
+                                            ? 'bg-white text-black border-green-500'
+                                            : 'bg-white text-black border-red-500'
+                                    }`}
+                                >
+                                    파트너 할인 {adminQuoteApplyPartnerDiscount ? '적용' : '미적용'}
+                                </button>
+                            </div>
+                        )}
+
                         <div className="rounded-lg bg-gray-50 border border-gray-200 p-4 mb-3 min-h-[88px]">
                             {(() => {
                                 const pw = Math.floor(parseFloat(String(adminQuoteW).replace(/[^\d.]/g, '')) || 0);
@@ -2123,9 +2143,10 @@ const Main_CustomFrames = () => {
                                 }
                                 const area = pw * ph;
                                 const original = calculateCumulativePrice(area);
-                                const discounted = getDiscountedUnitPrice(original, partnerDiscount);
+                                const effectivePartnerDiscount = adminQuoteApplyPartnerDiscount ? partnerDiscount : 0;
+                                const discounted = getDiscountedUnitPrice(original, effectivePartnerDiscount);
                                 const sitePct = getSiteDiscountPercent();
-                                const partnerPct = Math.max(0, Number(partnerDiscount) || 0);
+                                const partnerPct = Math.max(0, Number(effectivePartnerDiscount) || 0);
                                 const hasDiscount = discounted < original;
                                 const discountLabel = (() => {
                                     if (sitePct > 0 && partnerPct > 0) {
@@ -2162,7 +2183,7 @@ const Main_CustomFrames = () => {
                                             </div>
                                         ) : (
                                             <p className="text-base font-bold text-gray-900">
-                                                견적 {original.toLocaleString()}원
+                                                가격 {original.toLocaleString()}원
                                             </p>
                                         )}
                                     </div>
