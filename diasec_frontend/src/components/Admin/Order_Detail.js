@@ -631,7 +631,7 @@ const Order_Detail = () => {
         const cW = Math.max(0, wCm + 3);
         const cH = Math.max(0, hCm + 3);
 
-        return `${wCm} x ${hCm} cm | C: ${cW} x ${cH} | P: ${pW} x ${pH}`;
+        return `${wCm} x ${hCm} cm | C: ${cW} x ${cH} | P: ${pW} x ${pH} | B: ${wCm + 5} x ${hCm + 5}`;
     }
 
     const convertCategoryName = (category) => {

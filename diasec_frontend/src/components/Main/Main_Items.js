@@ -5,7 +5,7 @@ import { X, Search } from 'lucide-react';
 import { getMinFrameConfigByRatio } from '../../utils/customFramePrice';
 import { SitePriceRow } from '../common/SitePriceDisplay';
 import { MAIN_ITEMS_SCROLL_PREFIX } from '../../utils/navigationReload';
-import pic_author from '../../assets/collections/author.png';
+import pic_author from '../../assets/collections/author.jpg';
 import pic_photoIllustration from '../../assets/collections/photoIllustration.png'
 import pic_fungShui from '../../assets/collections/fungShui.png';
 

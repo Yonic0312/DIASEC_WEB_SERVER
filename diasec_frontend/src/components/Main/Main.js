@@ -7,8 +7,23 @@ import { SitePriceRow, SITE_PRICE_TEXT } from '../common/SitePriceDisplay';
 import MainEventPopup from './MainEventPopup';
 
 // 배너
-import customFrame from '../../assets/banner/customFrame.png';
+import customFrame from '../../assets/banner/customFrame.jpg';
 import aboutBanner from '../../assets/images/introduce.png';
+
+// 카테고리 바로가기 이미지
+import catMasterPiece from '../../assets/collections/popular.png';
+import catKoreanPainting from '../../assets/collections/author.jpg';
+import catPhotoIllustration from '../../assets/collections/photoIllustration.png';
+import catFengShui from '../../assets/collections/fungShui.png';
+import catCustomFrame from '../../assets/dropDownMenu/customFrame/c1.jpg';
+
+const CATEGORY_SHORTCUTS = [
+    { label: '명화', image: catMasterPiece, link: '/main_Items?type=masterPiece' },
+    { label: '동양화', image: catKoreanPainting, link: '/main_Items?type=koreanPainting' },
+    { label: '사진 · 일러스트', image: catPhotoIllustration, link: '/main_Items?type=photoIllustration' },
+    { label: '풍수그림', image: catFengShui, link: '/main_Items?type=fengShui' },
+    { label: '맞춤액자', image: catCustomFrame, link: '/customFrames' },
+];
 
 // 보정
 // import faceDot_1 from '../../assets/custom_Frames/faceDot_1.jpg';
@@ -428,6 +443,71 @@ const Main = () => {
             lg:gap-32
             md:gap-28
             gap-24'>
+            {/* 맞춤액자 배너
+            <div className="w-full px-4">
+                <button
+                    type="button"
+                    onClick={() => navigate('/customFrames')}
+                    className="
+                        group relative block w-full overflow-hidden
+                        border border-gray-200 bg-[#f7f4ef]
+                        transition-all duration-300
+                        hover:border-[#d0ac88]
+                        hover:shadow-[0_4px_14px_rgba(0,0,0,0.08)]
+                    "
+                    aria-label="맞춤액자 만들기"
+                >
+                    <img
+                        src={customFrame}
+                        alt="내 사진으로 만드는 단 하나뿐인 맞춤액자"
+                        className="w-full h-auto object-cover transition duration-300 group-hover:opacity-95"
+                    />
+                </button>
+            </div> */}
+
+            {/* 카테고리 바로가기 */}
+            <div className="w-full px-4">
+                <div className="grid grid-cols-5 gap-2 md:gap-[0.8%]">
+                    {CATEGORY_SHORTCUTS.map((item) => (
+                        <button
+                            key={item.label}
+                            type="button"
+                            onClick={() => navigate(item.link)}
+                            className="
+                                group relative w-full overflow-hidden
+                                aspect-[220/220]
+                                border border-gray-200
+                                bg-white
+                                cursor-pointer
+                                transition-all duration-300
+                                hover:border-[#d0ac88]
+                                hover:shadow-[0_4px_14px_rgba(0,0,0,0.08)]
+                            "
+                            aria-label={item.label}
+                        >
+                            <img 
+                                src={item.image}
+                                alt=""
+                                className="h-full w-full object-cover transition duration-300 group-hover:opacity-90"
+                            />
+                            <div className="absolute inset-0 bg-black/20 transition-colors duration-300 group-hover:bg-black/30" />
+                            <span
+                                className="
+                                    absolute inset-0 flex items-center justify-center
+                                    px-1 text-center text-white
+                                    text-[clamp(11px,2.2vw,22px)]
+                                    font-bold tracking-wide
+                                    break-keep
+                                "
+                                style={{ textShadow: '1px 1px 3px rgba(0,0,0,0.45)' }}
+                            >
+                                {item.label}
+                            </span>
+                        </button>
+                    ))}
+                </div>
+            </div>
+
             {/* 인기작품 */}
             <div>
                 <div className='
