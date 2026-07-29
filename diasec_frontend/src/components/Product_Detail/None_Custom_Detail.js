@@ -543,20 +543,12 @@ const None_Custom_Detail = () => {
         dismissSizeAdjustHint();
     };
 
-    // 최종 비용 계산(배송비)
-    const SHIPPING_FEE = 3000; // 기본 배송비
-    const FREE_SHIPPING_THRESHOLD = 50000; // - 이상 무료
-    
-    // 가격 계산 로직 추가
+    // 최종 비용 계산(배송비 없음 - 전 구간 무료배송)
     const totalPriceWithoutShipping = customItems.reduce((acc, item) => {
         const area = getPriceAreaCm(item.width, item.height);
         const qty = item.quantity ?? 1;
         return acc + calculateCumulativePrice(area) * qty;
     }, 0);
-
-    const totalPrice = totalPriceWithoutShipping >= FREE_SHIPPING_THRESHOLD
-        ? totalPriceWithoutShipping
-        : totalPriceWithoutShipping + SHIPPING_FEE;
 
     const totalPriceWithoutShippingDiscounted = customItems.reduce(
         (acc, item) => {
@@ -678,7 +670,7 @@ const None_Custom_Detail = () => {
     const productInfo = [
         { label: "작가", value: `${product.author}` },
         { label: "배송방법", value: "택배" },
-        { label: "배송비", value: "3,000원 (50,000원 이상 구매 시 무료)" },
+        { label: "배송비", value: "무료배송" },
     ];
 
     const sizePriceMap = {
@@ -1354,9 +1346,6 @@ const None_Custom_Detail = () => {
                             </span>
                         </div>
                         <div className="text-right">
-                            {/* {totalPriceWithoutShipping < FREE_SHIPPING_THRESHOLD && (
-                                <span className='text-[11.5px] text-green-600 mt-1'>(5만원 이상 구매 시 무료배송 적용)</span>
-                            )} */}
                             {/* <div className="text-[13px] font-semibold text-[#a57647]">
                                 제작 1~3일 배송 1~2일 (주문후 2~5일 수령)
                             </div> */}

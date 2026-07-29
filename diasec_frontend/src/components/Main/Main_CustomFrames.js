@@ -789,10 +789,8 @@ const Main_CustomFrames = () => {
         }
     }
 
-    // 최종 비용 계산(배송비)
-    const SHIPPING_FEE = 3000; // 기본 배송비
-    const FREE_SHIPPING_THRESHOLD = 50000; // - 이상 무료
-
+    // 최종 비용 계산(배송비 없음 - 전 구간 무료배송)
+    // 가격 계산: 등록 이미지 합산, 없으면 예시 이미지(현재 사이즈) 기준 미리보기
     const examplePreviewPrice =
         customItems.length === 0 && aspectRatio && width > 0 && height > 0
             ? calculateCumulativePrice(getPriceAreaCm(width, height))
@@ -807,10 +805,6 @@ const Main_CustomFrames = () => {
             }, 0)
             : examplePreviewPrice;
 
-    const totalPrice = totalPriceWithoutShipping >= FREE_SHIPPING_THRESHOLD
-        ? totalPriceWithoutShipping
-        : totalPriceWithoutShipping + SHIPPING_FEE;
-    
     const totalPriceWithoutShippingDiscounted =
         customItems.length > 0
             ? customItems.reduce(
@@ -1715,9 +1709,6 @@ const Main_CustomFrames = () => {
                             </span>
                         </div>
                         <div className="text-right">
-                            {/* {totalPriceWithoutShipping < FREE_SHIPPING_THRESHOLD && (
-                                <span className='text-[11.5px] text-green-600 mt-1'>(5만원 이상 구매 시 무료배송 적용)</span>
-                            )} */}
                             <div className="text-[11px] text-gray-500">
                                 {/* ※ 이미지를 기준으로 비율이 자동 조정됩니다<br /> */}
                                 <span>※ 제작 과정에서 ±1cm 오차가 발생할 수 있습니다</span>
