@@ -9,14 +9,19 @@ export const SITE_PRICE_TEXT =
 export const SITE_PRICE_STRIKE_TEXT =
     'text-[12px]';
 
+const DISCOUNT_PCT_CLASS =
+    'text-[11px] md:text-[12px] font-bold text-[#45b035] leading-none';
+
 export function SitePriceRow({
     unitPrice,
     quantity = 1,
     suffix = '',
     className = '',
+    showDiscountPercent = true,
     neutralClassName = `${SITE_PRICE_TEXT} font-semibold text-[#a67a3e]`,
     strikeClassName = `${SITE_PRICE_STRIKE_TEXT} text-gray-500 line-through`,
     saleClassName = `${SITE_PRICE_TEXT} font-bold text-[#45b035]`,
+    discountPercentClassName = DISCOUNT_PCT_CLASS,
 }) {
     const { partnerDiscount } = usePartner();
     const originalU = Math.round(Number(unitPrice) || 0);
@@ -42,6 +47,9 @@ export function SitePriceRow({
             <span className={saleClassName}>
                 {saleTotal.toLocaleString()}원{suffix}
             </span>
+            {showDiscountPercent && (
+                <span className={discountPercentClassName}>{pct}%</span>
+            )}
         </span>
     );
 }
@@ -50,8 +58,10 @@ export function SitePriceTotal({
     original,
     discounted,
     className = '',
+    showDiscountPercent = true,
     strikeClassName = `${SITE_PRICE_STRIKE_TEXT} text-gray-500 line-through`,
     saleClassName = `${SITE_PRICE_TEXT} font-bold text-[#45b035]`,
+    discountPercentClassName = DISCOUNT_PCT_CLASS,
 }) {
     const { partnerDiscount } = usePartner();
     const o = Math.round(Number(original) || 0);
@@ -65,6 +75,9 @@ export function SitePriceTotal({
         <span className={`inline-flex items-baseline gap-2 flex-wrap ${className}`.trim()}>
             <span className={strikeClassName}>{o.toLocaleString()}원</span>
             <span className={saleClassName}>{s.toLocaleString()}원</span>
+            {showDiscountPercent && (
+                <span className={discountPercentClassName}>{pct}%</span>
+            )}
         </span>
     );
 }
