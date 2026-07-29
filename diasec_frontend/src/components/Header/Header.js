@@ -192,7 +192,7 @@ const Header = () => {
                 <div className="flex items-center flex-1 h-full">
                     <button 
                         onClick={() => window.location.href = '/'} 
-                        className="h-full font-bold text-lg"
+                        className="h-full font-bold text-lg flex items-center-end pb-px"
                     >
                         <img className="w-auto h-[75%] md:h-full" src={logo} />
                     </button>

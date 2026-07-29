@@ -1,5 +1,5 @@
 import { usePartner } from '../../context/PartnerContext';
-import { getSiteDiscountPercent, getDiscountedUnitPrice, getTotalDiscountPercent } from '../../utils/siteDiscount';
+import { getDiscountedUnitPrice, getTotalDiscountPercent } from '../../utils/siteDiscount';
 
 /** 공통 가격 텍스트 크기 — import 해서 neutralClassName 등에 재사용 */
 export const SITE_PRICE_TEXT =

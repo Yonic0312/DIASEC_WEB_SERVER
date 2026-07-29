@@ -15,6 +15,7 @@ import 'react-toastify/dist/ReactToastify.css'
 
 import Header from './components/Header/Header'
 import Header_Menu from './components/Header/Header_Menu'
+import SitePromoBar from './components/common/SitePromoBar'
 import Main_Image from './components/Main/Main_Image'
 import Login from './components/Login/Login'
 import Join from './components/Login/Join'
@@ -437,10 +438,11 @@ function Layout() {
 
             {/* 헤더 */}
             <div className="sticky z-[9999] top-0 w-full bg-white">
+                {!isAdmin && <SitePromoBar />}
                 <div className="max-w-[2560px] h-[45px] mx-auto">
                     <Header />
                 </div>
-                <div className="hidden md:flex w-full h-[44px] mx-auto">
+                <div className="hidden md:flex w-full h-fit mx-auto">
                     <Header_Menu />
                 </div>
             </div>
