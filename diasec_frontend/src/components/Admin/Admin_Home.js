@@ -35,6 +35,81 @@ function StatCard({ title, subtitle, value, hint, onClick, accent }) {
     );
 }
 
+// 용량 원형 그래프
+function DiskRing({ usedPercent = 0, freeHuman ='-', totalHuman ='-', freePercent = 0 }) {
+    const size = 88;
+    const stroke = 8;
+    const r = (size - stroke) / 2;
+    const c = 2 * Math.PI * r;
+    const pct = Math.min(100, Math.max(0, Number(usedPercent) || 0));
+    const offset = c * (1 - pct / 100);
+    const warn = pct >= 90;
+    const caution = pct >= 75 && !warn;
+    const color = warn ? '#dc2626' : caution ? '#d97706' : '#059669';
+
+    return (
+        <div className="flex items-center gap-4">
+            <div className="relative shrink-0" style={{ width: size, height: size }}>
+                <svg width={size} height={size} className="-rotate-90">
+                    <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="#e5e7eb" strokeWidth={stroke} />
+                    <circle
+                        cx={size / 2}
+                        cy={size / 2}
+                        r={r}
+                        fill="none"
+                        stroke={color}
+                        strokeWidth={stroke}
+                        strokeLinecap="round"
+                        strokeDasharray={c}
+                        strokeDashoffset={offset}
+                    />
+                </svg>
+                <div className="absolute inset-0 flex flex-col items-center justify-center">
+                    <span className="text-sm font-bold tabular-nums text-gray-900">{pct.toFixed(0)}%</span>
+                    <span className="text-[10px] text-gray-500">사용</span>
+                </div>
+            </div>
+            <div className="min-w-0">
+                <div className="text-xs font-semibold uppercase tracking-wide text-gray-500">서버 디스크</div>
+                <div className="mt-1 text-lg font-bold tabular-nums text-gray-900">
+                    여유 {Number(freePercent).toFixed(0)}%
+                </div>
+                <div className="mt-0.5 text-sm text-gray-600">
+                전체 {totalHuman} / {freeHuman} 남음
+                </div>
+                <div className="mt-2 text-[11px] text-gray-500 leading-relaxed">
+                    최적화 코드: {' '}
+                    <button
+                        type="button"
+                        title="클릭하면 복사됩니다"
+                        onClick={async () => {
+                            const cmd = 'docker system prune -a';
+                            try {
+                                await navigator.clipboard.writeText(cmd);
+                                window.alert('복사되었습니다: ' + cmd);
+                            } catch {
+                                const ta = document.createElement('textarea');
+                                ta.value = cmd;
+                                document.body.appendChild(ta);
+                                ta.select();
+                                document.execCommand('copy');
+                                document.body.removeChild(ta);
+                                window.alert('복사되었습니다: ' + cmd);
+                            }
+                        }}
+                        className="
+                            rounded bg-gray-100 px-1.5 py-0.5 font-mono text-[11px] text-gray-700
+                            hover:bg-gray-200 hover:text-gray-900 transition cursor-pointer
+                        "
+                    >
+                        docker system prune -a
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+}
+
 function formatMd(dateStr) {
     if (!dateStr) return '';
     const parts = String(dateStr).split('-');
@@ -227,6 +302,7 @@ const Admin_Home = () => {
     const [bizConsultCount, setBizConsultCount] = useState(0);
     const [bizPartnerCount, setBizPartnerCount] = useState(0);
     const [orderCounts, setOrderCounts] = useState({});
+    const [disk, setDisk] = useState(null);
     const [loading, setLoading] = useState(true);
 
     const [visitModalOpen, setVisitModalOpen] = useState(false);
@@ -239,18 +315,23 @@ const Admin_Home = () => {
         const run = async () => {
             setLoading(true);
             try {
-                const [vis, inq, ord, bizConsult, bizPartner] = await Promise.all([
+                const [vis, inq, ord, bizConsult, bizPartner, diskRes] = await Promise.all([
                     axios.get(`${API}/admin/visit/stats`, { withCredentials: true }).then((r) => r.data),
                     axios.get(`${API}/inquiry/unanswered`).then((r) => r.data),
                     axios.get(`${API}/order/admin/count-by-status`, { withCredentials: true }).then((r) => r.data),
                     axios.get(`${API}/admin/biz-consult/count`, { withCredentials: true }).then((r) => r.data),
                     axios.get(`${API}/admin/biz-partner/count`, { withCredentials: true }).then((r) => r.data),
+                    axios
+                        .get(`${API}/admin/disk`, {withCredentials: true })
+                        .then((r) => r.data)
+                        .catch(() => null),
                 ]);
                 if (cancelled) return;
                 setVisitStats(vis || { today: 0, total: 0, online: 0 });
                 setInquiryUnanswered(Number(inq) || 0);
                 setBizConsultCount(Number(bizConsult) || 0);
                 setBizPartnerCount(Number(bizPartner) || 0);
+                setDisk(diskRes || null);
                 const map = {};
                 (ord || []).forEach((row) => {
                     map[row.status] = Number(row.cnt || 0);
@@ -483,6 +564,19 @@ const Admin_Home = () => {
                 daily={visitDaily}
                 loading={visitDailyLoading}
             />
+
+            <br/>
+            {/* 서버 디스크 용량 표시 */}
+            {disk && (
+                <div className="mb-6 rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
+                    <DiskRing
+                        usedPercent={disk.usedPercent}
+                        freePercent={disk.freePercent}
+                        freeHuman={disk.freeHuman}
+                        totalHuman={disk.totalHuman}
+                    />
+                </div>
+            )}
         </div>
     );
 };

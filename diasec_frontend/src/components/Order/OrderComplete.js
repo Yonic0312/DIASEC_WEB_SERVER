@@ -32,6 +32,9 @@ const OrderComplete = () => {
     const [guestPassword] = useState(fromState.guestPassword);
     const [isGuestOrder, setIsGuestOrder] = useState(!!fromState.guestPassword);
     const [bankTransferInfo, setBankTransferInfo] = useState(fromState.bankTransferInfo);
+    const [memberId, setMemberId] = useState(
+        fromState.memberId != null ? String(fromState.memberId) : ''
+    );
     const [loading, setLoading] = useState(!!oidFromQuery && !fromState.oid);
     const [fetchError, setFetchError] = useState(false);
 
@@ -66,6 +69,7 @@ const OrderComplete = () => {
                 setFinalPrice(o.finalPrice);
                 setAddress([o.address, o.detailAddress].filter(Boolean).join(' '));
                 setIsGuestOrder(isGuestOrderRow(o));
+                setMemberId(o.id != null ? String(o.id).trim() : '');
                 if (o.paymentMethod === '가상계좌' && (o.vbankAccount || o.vbankName)) {
                     setBankTransferInfo({
                         bankName: o.vbankName || '',
@@ -81,6 +85,33 @@ const OrderComplete = () => {
             .catch(() => setFetchError(true))
             .finally(() => setLoading(false));
     }, [oidFromQuery, fromState.oid, fromState.guestPassword, guestPassword]);
+
+    // Smartlog 주문 전환 (금액) - oid·금액 확정 후 1회만
+    useEffect(() => {
+        if (loading || fetchError || errorFromQuery === '1' || !oid) return;
+        if (finalPrice == null || Number.isNaN(Number(finalPrice))) return;
+
+        const key = `smartlog_order_${oid}`;
+        try {
+            if (sessionStorage.getItem(key)) return;
+            sessionStorage.setItem(key, '1');
+        } catch (_) {
+            // ignore
+        }
+
+        window.hpt_info = { _account: 'UHPT-300697', _server: 'a300' };
+        window.hpt_trace_info = {
+            _mode: 'order',
+            _memid: memberId || '',
+            _total_price: String(Math.round(Number(finalPrice) || 0)),
+        };
+
+        const s = document.createElement('script');
+        s.src = 'https://cdn.smlog.co.kr/core/smart_renew.js';
+        s.charset = 'utf-8';
+        s.async = true;
+        document.body.appendChild(s);
+    }, [loading, fetchError, errorFromQuery, oid, finalPrice, memberId]);
 
     if (errorFromQuery === '1') {
         return (

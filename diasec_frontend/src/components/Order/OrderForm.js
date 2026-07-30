@@ -810,6 +810,7 @@ const OrderForm = () => {
                         finalPrice: orderFinalPrice,
                         address: `${address} ${detailAddress}`,
                         guestPassword: isGuest ? guestPassword : null,
+                        memberId: member?.id || '',
 
                         // 무통장일 때 보여줄 정보
                         bankTransferInfo: finalPaymentMethod === "가상계좌" ? {
