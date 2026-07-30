@@ -21,11 +21,13 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.diasec.diasec_backend.service.AdminOrderService;
 import com.diasec.diasec_backend.service.CreditService;
 import com.diasec.diasec_backend.service.OrderService;
 import com.diasec.diasec_backend.service.ReviewService;
 import com.diasec.diasec_backend.util.ImageUtil;
 import com.diasec.diasec_backend.vo.CreditVo;
+import com.diasec.diasec_backend.vo.OrderItemsVo;
 import com.diasec.diasec_backend.vo.OrderVo;
 import com.diasec.diasec_backend.vo.ReviewVo;
 
@@ -45,6 +47,9 @@ public class ReviewController {
     private OrderService orderService;
 
     @Autowired
+    private AdminOrderService adminOrderService;
+
+    @Autowired
     private ImageUtil imageUtil;
 
     @Autowired
@@ -56,13 +61,63 @@ public class ReviewController {
     @Value("${file.access.url}")
     private String accessUrl;
 
+    /** 후기 작성 가능 상태 확인 + 배송중이면 배송완료로 전환 */
+    private ResponseEntity<?> prepareItemForReview(int itemId, Long expectedOid, String memberId) {
+        OrderItemsVo item = orderService.selectOrderItemById((long) itemId);
+        if (item == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(Map.of("success", false, "message", "주문 상품을 찾으 수 없습니다."));
+        }
+
+        Long oid = item.getOid();
+        if (expectedOid != null && !expectedOid.equals(oid)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                .body(Map.of("success", false, "message", "주문 정보가 일치하지 않습니다."));
+        }
+
+        OrderVo order = orderService.selectOrderByOid(oid);
+        if (order == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(Map.of("success", false, "message", "주문을 찾을 수 없습니다."));
+        }
+
+        if (memberId != null) {
+            if (order.getId() == null || !memberId.equals(order.getId())) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(Map.of("success", false, "message", "본인 주문만 리뷰를 작성할 수 있습니다."));
+            }
+        }
+
+        String status = item.getOrderStatus();
+        if (!"배송중".equals(status) && !"배송완료".equals(status) && !"교환완료".equals(status)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                .body(Map.of("success", false, "message", "리뷰를 작성할 수 있는 주문 상태가 아닙니다."));
+        }
+
+        if ("배송중".equals(status)) {
+            Map<String, Object> updated = adminOrderService.updateStatusWithSideEffects(
+                item.getItemId(),
+                "배송완료",
+                order.getId(),
+                0,
+                oid
+            );
+            if (!Boolean.TRUE.equals(updated.get("success"))) {
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("success", false, "message", "배송완료 처리에 실패했습니다."));
+            }
+        }
+
+        return null;
+    }
+
     // 리뷰 작성 부분 목록 가져오기
     @GetMapping("/eligible")
     public List<ReviewVo> getEligible(@RequestParam String id) {
         return reviewService.getEligibleReviews(id);
     }
 
-    // 비회원: 주문번호 + 주문조회 비밀번호로 작성 가능한 배송완료, 교환완료 상품 목록 가져오기
+    // 비회원: 주문번호 + 주문조회 비밀번호로 작성 가능한 배송중·배송완료·교환완료 상품 목록
     @PostMapping("/guest-eligible")
     public ResponseEntity<?> getGuestEligible(@RequestBody Map<String, String> req) {
         try {
@@ -108,6 +163,9 @@ public class ReviewController {
                 return ResponseEntity.status(HttpStatus.CONFLICT)
                     .body(Map.of("success", false, "message", "이미 작성된 리뷰입니다."));
             }
+
+            ResponseEntity<?> prepError = prepareItemForReview(itemId, null, id);
+            if (prepError != null) return prepError;
 
             // 1. 후기 저장
             ReviewVo review = new ReviewVo();
@@ -174,15 +232,13 @@ public class ReviewController {
                     .body(Map.of("success", false, "message", "비밀번호가 일치하지 않습니다."));
             }
 
-            if (!reviewService.isGuestItemReviewable(oid, itemId, pid)) {
-                return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                    .body(Map.of("success", false, "message", "리뷰를 작성할 수 있는 주문 상태가 아닙니다."));
-            }
-
             if (reviewService.existsReviewByItemId(itemId)) {
                 return ResponseEntity.status(HttpStatus.CONFLICT)
                     .body(Map.of("success", false, "message", "이미 작성된 리뷰입니다."));
             }
+
+            ResponseEntity<?> prepError = prepareItemForReview(itemId, oid, null);
+            if (prepError != null) return prepError;
 
              ReviewVo review = new ReviewVo();
              review.setPid(pid);

@@ -18,6 +18,8 @@ public class ReviewVo {
     private String size;
     private int item_id;
     private String thumbnail;
+    // 후기 작성 가능 목록용 주문상태 (배송중/배송완료/교환완료)
+    private String orderStatus;
 
     // 1이면 공개 목록에서 숨김 (악성후기 등)
     private boolean hidden;

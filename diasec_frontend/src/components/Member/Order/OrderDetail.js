@@ -8,7 +8,7 @@ import { toast } from 'react-toastify';
 import { MemberContext } from '../../../context/MemberContext';
 import thumbCustom from '../../../assets/CustomFrames/customFrames.png';
 
-const REVIEWABLE_ORDER_STATUSES = ['배송완료', '교환완료'];
+const REVIEWABLE_ORDER_STATUSES = ['배송중', '배송완료', '교환완료'];
 
 const OrderDetail = () => {
     const API = process.env.REACT_APP_API_BASE;

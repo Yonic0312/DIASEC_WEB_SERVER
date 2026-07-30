@@ -190,6 +190,10 @@ public class OrderService {
         return orderMapper.selectOidByItemId(itemId);
     }
 
+    public OrderItemsVo selectOrderItemById(Long itemId) {
+        return orderMapper.selectOrderItemById(itemId);
+    }
+
     /** 나이스페이 orderId로 이미 저장된 주문의 oid 조회 (U112 중복 승인 시 리다이렉트용) */
     public Long getOidByNicepayOrderId(String nicepayOrderId) {
         if (nicepayOrderId == null || nicepayOrderId.isBlank()) return null;

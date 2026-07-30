@@ -5,24 +5,26 @@
   <mapper namespace="com.diasec.diasec_backend.dao.ReviewMapper">
     <!-- 리뷰 작성 부분 목록 가져오기 -->
     <select id="getEligibleReviews" resultType="com.diasec.diasec_backend.vo.ReviewVo">
-        SELECT oi.item_id, oi.pid, oi.title, oi.size, COALESCE(oi.thumbnail_preview, oi.thumbnail) AS thumbnail
+        SELECT oi.item_id, oi.pid, oi.title, oi.size, oi.order_status AS orderStatus,
+            COALESCE(oi.thumbnail_preview, oi.thumbnail) AS thumbnail
         FROM order_items oi
         JOIN orders o ON oi.oid = o.oid
         LEFT JOIN reviews r ON r.item_id = oi.item_id
         WHERE o.id = #{id}
-            AND oi.order_status IN ('배송완료', '교환완료')
+            AND oi.order_status IN ('배송중', '배송완료', '교환완료')
             AND r.rid IS NULL
     </select>
 
     <select id="getEligibleReviewsByGuestOid" resultType="com.diasec.diasec_backend.vo.ReviewVo">
-        SELECT oi.item_id, oi.pid, oi.title, oi.size, COALESCE(oi.thumbnail_preview, oi.thumbnail) AS thumbnail
+        SELECT oi.item_id, oi.pid, oi.title, oi.size, oi.order_status AS orderStatus,
+            COALESCE(oi.thumbnail_preview, oi.thumbnail) AS thumbnail
         FROM order_items oi
         JOIN orders o ON oi.oid = o.oid
         LEFT JOIN reviews r ON r.item_id = oi.item_id
         WHERE o.oid = #{oid}
             AND o.guest_password IS NOT NULL AND o.guest_password != ''
             AND (o.id IS NULL OR TRIM(IFNULL(o.id, '')) = '')
-            AND oi.order_status IN ('배송완료', '교환완료')
+            AND oi.order_status IN ('배송중', '배송완료', '교환완료')
             AND r.rid IS NULL
     </select>
 
@@ -36,7 +38,7 @@
             AND oi.pid = #{pid}
             AND o.guest_password IS NOT NULL AND o.guest_password != ''
             AND (o.id IS NULL OR TRIM(IFNULL(o.id,'')) = '')
-            AND oi.order_status IN ('배송완료', '교환완료')
+            AND oi.order_status IN ('배송중', '배송완료', '교환완료')
             AND r.rid IS NULL
     </select>
 

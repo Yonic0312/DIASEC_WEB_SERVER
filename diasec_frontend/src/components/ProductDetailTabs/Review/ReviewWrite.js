@@ -142,6 +142,15 @@ const ReviewWrite = () => {
             return;
         }
 
+        const selectedForSubmit = eligibleProducts.find((item) => item.item_id === selectedItemId);
+        const isShipping = selectedForSubmit?.orderStatus === '배송중';
+        if (isShipping) {
+            const ok = window.confirm(
+                '선택한 상품이 배송중 상태입니다.\n배송완료로 변경한 뒤 후기를 제출하시겠습니까?'
+            );
+            if (!ok) return;
+        }
+
         setSubmitting(true);
         let compressedFiles;
         try {
@@ -286,6 +295,7 @@ const ReviewWrite = () => {
                         {eligibleProducts.map(item => (
                             <option key={item.item_id} value={item.item_id}>
                                 {item.title} / {item.size}
+                                {item.orderStatus === '배송중' ? ' (배송중)' : ''}
                             </option>
                         ))}
                     </select>

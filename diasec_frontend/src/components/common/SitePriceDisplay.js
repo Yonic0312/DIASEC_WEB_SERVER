@@ -10,7 +10,7 @@ export const SITE_PRICE_STRIKE_TEXT =
     'text-[12px]';
 
 const DISCOUNT_PCT_CLASS =
-    'text-[11px] md:text-[12px] font-bold text-[#45b035] leading-none';
+    ' font-bold text-[#6B7280] leading-none';
 
 export function SitePriceRow({
     unitPrice,
