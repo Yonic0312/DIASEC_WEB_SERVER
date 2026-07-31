@@ -186,6 +186,7 @@ const ReviewWrite = () => {
                 headers: { 'Content-Type' : 'multipart/form-data' }
             });
             const rewardAmount = Number(res?.data?.rewardAmount || 0);
+            // [종료된 이벤트] 후기 작성 시 5000P 지급 - rewardAmount > 0 일 때만 아래 토스트 노출
             if (rewardAmount > 0) {
                 toast.success(`리뷰가 등록되었습니다. 이벤트 적립금 ${rewardAmount.toLocaleString()}원이 지급되었어요.`);
             } else {
@@ -242,9 +243,14 @@ const ReviewWrite = () => {
                 </h2>
                 {isGuestReview && (
                     <p className="text-center text-sm text-gray-600 mt-2">
-                        비회원 리뷰는 적립금 이벤트 대상에서 제외됩니다.
+                        비회원 주문 리뷰 작성입니다.
                     </p>
                 )}
+                {/**
+                 [종료된 이벤트] 후기 작성 시 5000P 지급
+                 - 재개 시 아래 문구 복구 가능:
+                 비회원 리뷰는 이벤트 대상에서 제외됩니다.
+                 */}
 
                 { /* 상품 미리보기*/}
                 {selectedProduct && (

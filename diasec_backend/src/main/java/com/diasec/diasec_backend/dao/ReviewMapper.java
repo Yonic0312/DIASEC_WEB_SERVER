@@ -1,6 +1,7 @@
 package com.diasec.diasec_backend.dao;
 
 import java.util.List;
+import java.util.Map;
 
 import org.apache.ibatis.annotations.Param;
 
@@ -33,6 +34,9 @@ public interface ReviewMapper {
 
     // 리뷰 한 페이지씩 불러오기
     List<ReviewVo> getRecentReviews(int limit);
+
+    // 공개 리뷰 전체 건수·평균 별점 (숨김 제외) */
+    Map<String, Object> getPublicReviewStats();
 
     int updateReviewHidden(@Param("rid") Long rid, @Param("hidden") boolean hidden);
 

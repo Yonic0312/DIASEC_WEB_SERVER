@@ -344,6 +344,7 @@ const Main = () => {
 
     // [리뷰] 상단 리뷰 슬라이더
     const [topThumbnailReviews, setTopThumbnailReviews] = useState([]);
+    const [reviewStats, setReviewStats] = useState({ count: 0, avgRating: null });
     const [selectedReview, setSelectedReview] = useState(null);
 
     // 화면 데이터에 맞게 reviewIndex 범위 클렘프
@@ -404,6 +405,33 @@ const Main = () => {
                 if (err?.name === "CanceledError") return;
                 console.error("리뷰 로딩 실패:", err);
                 setTopThumbnailReviews([]);
+            }
+        })();
+
+        return () => controller.abort();
+    }, [API]);
+
+    // 공개 리뷰 전체 건수·평균 별점
+    useEffect(() => {
+        const controller = new AbortController();
+
+        (async () => {
+            try {
+                const data = await getData(API, "/review/stats", {
+                    withCredentials: true,
+                    signal: controller.signal,
+                });
+                const count = Number(data?.count ?? data?.COUNT ?? 0);
+                const avgRaw = data?.avgRating ?? data?.AVGRATING;
+                const avgRating = avgRaw == null ? null : Number(avgRaw);
+                setReviewStats({
+                    count: Number.isFinite(count) ? count : 0,
+                    avgRating: Number.isFinite(avgRating) ? avgRating : null,
+                });
+            } catch (err) {
+                if (err?.name === "CanceledError") return;
+                console.error("리뷰 통계 로딩 실패:", err);
+                setReviewStats({ count: 0, avgRating: null });
             }
         })();
 
@@ -507,8 +535,11 @@ const Main = () => {
                     ))}
                 </div>
                 {/* 신뢰 요약 바 */}
-                {topThumbnailReviews.length > 0 && (() => {
-                    const avgRating = (topThumbnailReviews.reduce((s, r) => s + (r.rating || 5), 0) / topThumbnailReviews.length).toFixed(1);
+                {reviewStats.count > 0 && (() => {
+                    const avgRating = (reviewStats.avgRating != null
+                        ? Number(reviewStats.avgRating)
+                        : (topThumbnailReviews.reduce((s, r) => s + (r.rating || 5), 0) / Math.max(1, topThumbnailReviews.length))
+                    ).toFixed(1);
                     return (
                         <div className="w-full px-4">
                             <div className="
@@ -524,7 +555,7 @@ const Main = () => {
                                 >
                                     <Star className="w-3.5 h-3.5 text-orange-400 fill-orange-400" />
                                     <span className="font-semibold text-gray-900">{avgRating}</span>
-                                    <span className="underline underline-offset-2">리뷰 {topThumbnailReviews.length}건</span>
+                                    <span className="underline underline-offset-2">리뷰 {reviewStats.count.toLocaleString()}건</span>
                                 </span>
                                 <span className="inline-flex items-center gap-1">
                                     <Truck className="w-3.5 h-3.5 text-[#d0ac88]" />

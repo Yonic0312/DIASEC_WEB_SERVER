@@ -22,11 +22,12 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.diasec.diasec_backend.service.AdminOrderService;
-import com.diasec.diasec_backend.service.CreditService;
+// [종료된 이벤트] 후기 작성 시 5000P 지급 - 재개 시 CreditService / CreditVo import 복구
+// import com.diasec.diasec_backend.service.CreditService;
 import com.diasec.diasec_backend.service.OrderService;
 import com.diasec.diasec_backend.service.ReviewService;
 import com.diasec.diasec_backend.util.ImageUtil;
-import com.diasec.diasec_backend.vo.CreditVo;
+// import com.diasec.diasec_backend.vo.CreditVo;
 import com.diasec.diasec_backend.vo.OrderItemsVo;
 import com.diasec.diasec_backend.vo.OrderVo;
 import com.diasec.diasec_backend.vo.ReviewVo;
@@ -40,8 +41,9 @@ public class ReviewController {
     @Autowired
     private ReviewService reviewService;
 
-    @Autowired
-    private CreditService creditService;
+    // [종료된 이벤트] 후기 작성 시 5000P 지급 - 재개 시 아래 주입 복구
+    // @Autowired
+    // private CreditService creditService;
 
     @Autowired
     private OrderService orderService;
@@ -188,15 +190,20 @@ public class ReviewController {
                 }
             }
 
-            // 3. 리뷰 작성 이벤트 적립금 지급
-            final int rewardAmount = 5000;
-            CreditVo rewardCredit = new CreditVo();
-            rewardCredit.setId(id);
-            rewardCredit.setType("적립");
-            rewardCredit.setAmount(rewardAmount);
-            rewardCredit.setDescription("리뷰 작성 이벤트");
-            rewardCredit.setOid(orderService.getOidByItemId((long) itemId));
-            creditService.insertCreditHistory(rewardCredit);
+            // ============================================================
+            // [종료된 이벤트] 후기 작성 시 5000P 지급
+            // - 재개 시 아래 블록 주석 해제 + rewardAmount를 5000으로 되돌리면 됨
+            // ============================================================
+            // final int rewardAmount = 5000;
+            // CreditVo rewardCredit = new CreditVo();
+            // rewardCredit.setId(id);
+            // rewardCredit.setType("적립");
+            // rewardCredit.setAmount(rewardAmount);
+            // rewardCredit.setDescription("리뷰 작성 이벤트");
+            // rewardCredit.setOid(orderService.getOidByItemId((long) itemId));
+            // creditService.insertCreditHistory(rewardCredit);
+
+            final int rewardAmount = 0;
 
             return ResponseEntity.ok().body(Map.of(
                 "success", true,
@@ -290,6 +297,12 @@ public class ReviewController {
     @GetMapping("/recent")
     public ResponseEntity<List<ReviewVo>> getRecentReviews(@RequestParam(defaultValue = "10") int limit) {
         return ResponseEntity.ok(reviewService.getRecentReviews(limit));
+    }
+
+    // 공개 리뷰 전체 건수·평균 별점
+    @GetMapping("/stats")
+    public ResponseEntity<?> getPublicReviewStats() {
+        return ResponseEntity.ok(reviewService.getPublicReviewStats());
     }
 
     // 관리자: 후기 숨김/표시

@@ -64,6 +64,14 @@ public class ReviewService {
         return reviewMapper.getRecentReviews(limit);
     }
 
+    public java.util.Map<String, Object> getPublicReviewStats() {
+        java.util.Map<String, Object> stats = reviewMapper.getPublicReviewStats();
+        if (stats == null) {
+            return java.util.Map.of("count", 0, "avgRating", 0);
+        }
+        return stats;
+    }
+
     public void setReviewHidden(Long rid, boolean hidden) {
         reviewMapper.updateReviewHidden(rid, hidden);
     }

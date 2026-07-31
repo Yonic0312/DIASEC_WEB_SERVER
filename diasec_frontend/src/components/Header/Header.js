@@ -306,6 +306,14 @@ const Header = () => {
 
                                     <button
                                         type="button"
+                                        onClick={() => { navigate("/bulkOrderDiscount"); setSupportOpen(false);}}
+                                        className="w-full text-left px-4 py-2 text-[13px] text-gray-700 bg-white hover:bg-[#ecd2af]/35 transition"
+                                    >
+                                        대량주문할인
+                                    </button>
+
+                                    <button
+                                        type="button"
                                         onClick={() => { navigate("/bizConsult"); setSupportOpen(false);}}
                                         className="w-full text-left px-4 py-2 text-[13px] text-gray-700 bg-white hover:bg-[#ecd2af]/35 transition"
                                     >

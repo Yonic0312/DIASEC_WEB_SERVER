@@ -56,6 +56,7 @@ import SupportMyInquiryList from './components/Support/MyInquiryList'
 import FaqMain from './components/Support/FaqMain'
 import NoticeList from './components/Support/NoticeList'
 import ReviewBoard from './components/Support/ReviewBoard'
+import BulkOrderDiscount from './components/Support/BulkOrderDiscount'
 import CustomFrames from './components/Main/Main_CustomFrames'
 import BizOrderBoard from './components/Biz/BizOrderBoard'
 import Biz_OrderWrite from './components/Biz/Biz_OrderWrite'
@@ -548,6 +549,7 @@ function App() {
                         <Route path="/faqMain" element={<FaqMain />} />
                         <Route path="/noticeList" element={<NoticeList />} />
                         <Route path="/reviewBoard" element={<ReviewBoard />} />
+                        <Route path="/bulkOrderDiscount" element={<BulkOrderDiscount />} />
                         <Route path="/customFrames" element={<CustomFrames />} />
                         <Route path="/bizOrderBoard" element={<BizOrderBoard />} />
                         <Route path="/biz_OrderWrite" element={<Biz_OrderWrite />} />

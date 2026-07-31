@@ -108,6 +108,14 @@
         LIMIT #{limit}
     </select>
 
+    <!-- 공개 리뷰 전체 건수·평균 별점 (숨김 제외, 이미지 유무 무관) -->
+    <select id="getPublicReviewStats" resultType="map">
+        SELECT COUNT(*) AS count,
+            ROUND(AVG(rating), 1) AS avgRating
+        FROM reviews
+        WHERE IFNULL(hidden, 0) = 0
+    </select>
+
     <update id="updateReviewHidden">
         UPDATE reviews
         SET hidden = #{hidden}
