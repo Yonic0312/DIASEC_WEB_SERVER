@@ -272,12 +272,6 @@ const Main_CompanyProfile = () => {
                 <img src={p0} />
             </div>
 
-            <span className="
-                md:text-[10px] text-[clamp(7px,1.303vw,10px)]
-                text-right opacity-50">
-                    *위 사진은 이해를 돕기 위한 이미지입니다.
-            </span>
-
             <h2 className="
                 text-[clamp(26px,6.258vw,48px)] md:text-5xl
                 text-center text-[#b19376] 

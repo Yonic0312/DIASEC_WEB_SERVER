@@ -40,7 +40,7 @@ const Biz_PartnerMain = () => {
 
                 {/* 프로세스 */}
                 <div className="text-center text-sm md:text-base text-gray-700">
-                    신청접수 → 신청내용 검토 (관리자) → 등급 적용
+                    신청접수 → 신청내용 검토 (담당자) → 등급 적용
                 </div>
 
                 {/* 소개 */}

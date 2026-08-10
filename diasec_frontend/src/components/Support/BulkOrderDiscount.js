@@ -26,7 +26,7 @@ const BulkOrderDiscount = () => {
     const handleSelect = (option) => {
         setSelectedId(option.id);
         const total = Math.min(100, sitePct + option.bulkPct);
-        const sitePart = sitePct > 0 ? `사이트 ${sitePct}% + 대량 ${option.bulkPct}%` : `대량주문 ${option.bulkPct}%`;
+        const sitePart = sitePct > 0 ? `오픈기념 ${sitePct}% + 대량 ${option.bulkPct}%` : `대량주문 ${option.bulkPct}%`;
         window.alert(
             `${option.label}\n대량주문 할인: ${option.bulkPct}%\n적용 예상 할인율: ${total}%\n(${sitePart})`
         );
@@ -41,8 +41,9 @@ const BulkOrderDiscount = () => {
                     </h1>
                     <div className="space-y-1 text-sm md:text-base leading-relaxed">
                         <p>대량 주문 시 주문 금액에 따라 추가 할인 혜택을 제공합니다.</p>
-                        <p>현재 사이트에서 진행 중인 할인과 중복 적용됩니다.</p>
-                        <p>단, 업무제휴 할인이 적용된 경우에는 대량 주문 할인과 비교하여 더 높은 할인율만 적용됩니다.</p>
+                        {/* <p>현재 사이트에서 진행 중인 할인과 중복 적용됩니다.</p> */}
+                        <p>아래와 같이 주문 금액에 따라 할인이 적용되며 사이트 오픈기념할인 20%와 중복할인이 적용됩니다.</p>
+                        <p>제휴 할인과는 중복되지 않으며, 두가지 중 높은 할인율이 적용됩니다.</p>
                     </div>
                 </header>
 
@@ -86,11 +87,20 @@ const BulkOrderDiscount = () => {
                         </div>
                     </div>
 
-                    <p className="text-sm md:text-base">
-                        {totalPct == null
-                            ? `할인율 : 예산을 설정해 주세요 (사이트 ${sitePct}% + 대량할인 0%)`
-                            : `할인율 : ${totalPct}% (사이트 ${sitePct}% + 대량 ${selected.bulkPct}%)`}
-                    </p>
+                    <div>
+                        <p className="text-sm md:text-base">
+                            {totalPct == null
+                                ? `할인율 : 구매 예정 금액을 체크해 주세요 (오픈기념 ${sitePct}% + 대량할인 0%)`
+                                : `할인율 : ${totalPct}% (오픈기념 ${sitePct}% + 대량 ${selected.bulkPct}%)`
+                            }
+                        </p>
+                        <p className="text-sm md:text-base text-gray-500">
+                            {totalPct == null
+                                ? `구매 예정 금액을 선택하면 예상 할인율이 표시됩니다`
+                                : ``
+                            }
+                        </p>
+                    </div>
                 </section>
 
                 <section className="space-y-8 text-sm md:text-base leading-relaxed">
@@ -107,7 +117,7 @@ const BulkOrderDiscount = () => {
                             <span><img src={B3} alt="대량 주문 이용 방법 3" className="w-full max-w-sm md:max-w-2xl h-auto rounded border border-gray-200" /></span>
                             <span><img src={B4} alt="대량 주문 이용 방법 4" className="w-full max-w-sm md:max-w-lg h-auto rounded border border-gray-200" /></span>
                             <br/>
-                            <span>4. 관리자가 주문 확인 및 대량 할인 금액을 적용한 후, <strong className="font-semibold text-gray-900">수정된 입금 계좌와 금액을 문자</strong>로 안내드립니다.</span>
+                            <span>4. 담당자가 주문 확인 후, <strong className="font-semibold text-gray-900">할인이 적용된 최종 결제 금액과 입금 계좌를 </strong>문자로 안내해 드립니다.</span>
                             <span>5. <strong className="font-semibold text-gray-900">입금 확인 후</strong> 제작이 진행됩니다.</span>
                         </div>
                     </div>

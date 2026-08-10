@@ -1,11 +1,11 @@
 package com.diasec.diasec_backend.util;
 
 public class PartnerGradeUtil {
-    private static final long THRESHOLD_SILVER = 10_000_000L;
-    private static final long THRESHOLD_GOLD = 50_000_000L;
-    private static final long THRESHOLD_PLATINUM = 100_000_000L;
-    private static final long THRESHOLD_DIAMOND = 300_000_000L;
-    private static final long THRESHOLD_BLACK = 500_000_000L;
+    private static final long THRESHOLD_SILVER = 5_000_000L;
+    private static final long THRESHOLD_GOLD = 20_000_000L;
+    private static final long THRESHOLD_PLATINUM = 50_000_000L;
+    private static final long THRESHOLD_DIAMOND = 100_000_000L;
+    private static final long THRESHOLD_BLACK = 300_000_000L;
 
     public static String resolveGrade(long amount) {
         if (amount >= THRESHOLD_BLACK) return "블랙";

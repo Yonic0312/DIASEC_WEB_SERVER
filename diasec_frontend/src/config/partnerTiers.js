@@ -1,10 +1,10 @@
 export const PARTNER_TIERS = [
     { grade: '신규 파트너', condition: '가입 시 적용', discount: 5, minAmount: 0 },
-    { grade: '실버 파트너', condition: '누적 1천만원 이상', discount: 10, minAmount: 10_000_000 },
-    { grade: '골드 파트너', condition: '누적 5천만원 이상', discount: 15, minAmount: 50_000_000 },
-    { grade: '플래티넘 파트너', condition: '누적 1억원 이상', discount: 20, minAmount: 100_000_000 },
-    { grade: '다이아 파트너', condition: '누적 3억원 이상', discount: 25, minAmount: 300_000_000 },
-    { grade: '블랙 파트너', condition: '누적 5억원 이상', discount: 30, minAmount: 500_000_000 },
+    { grade: '실버 파트너', condition: '누적 500만원 이상', discount: 10, minAmount: 5_000_000 },
+    { grade: '골드 파트너', condition: '누적 2000만원 이상', discount: 15, minAmount: 20_000_000 },
+    { grade: '플래티넘 파트너', condition: '누적 5000만원 이상', discount: 20, minAmount: 50_000_000 },
+    { grade: '다이아 파트너', condition: '누적 1억원 이상', discount: 25, minAmount: 100_000_000 },
+    { grade: '블랙 파트너', condition: '누적 3억원 이상', discount: 30, minAmount: 300_000_000 },
 ];
 
 export const CONTRACT_TEXT = `제1조 (거래 방식)
