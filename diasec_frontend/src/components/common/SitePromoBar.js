@@ -57,7 +57,7 @@ const SitePromoBar = () => {
                 </div>
                 <button
                     type="button"
-                    onClick={() => setDismissed(false)}
+                    onClick={() => setDismissed(true)}
                     aria-label="프로모션 바 닫기"
                     className="
                         absolute right-2 top-1/2 -translate-y-1/2

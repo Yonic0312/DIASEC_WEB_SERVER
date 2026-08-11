@@ -6,6 +6,7 @@ import { toast } from 'react-toastify';
 import { ChevronDown, X, Menu as MenuIcon } from 'lucide-react';
 import diasec1 from '../../assets/dropDownMenu/diasec/1.jpg'; import diasec2 from '../../assets/dropDownMenu/diasec/2.jpg';
 import logo from '../../assets/images/logo.png'
+import HeaderSearch from './HeaderSearch';
 
 const Header = () => {
     const API = process.env.REACT_APP_API_BASE;
@@ -194,7 +195,7 @@ const Header = () => {
                         onClick={() => window.location.href = '/'} 
                         className="h-full font-bold text-lg flex items-center-end pb-px"
                     >
-                        <img className="w-auto h-[75%] md:h-full" src={logo} />
+                        <img className="w-auto h-[75%] my-auto md:h-full" src={logo} />
                     </button>
 
                     <span className='ml-[1%] lg:text-[14.5px] md:text-[clamp(11px,1.4173vw,14.5px)] text-[11px]'>
@@ -332,14 +333,17 @@ const Header = () => {
                         </div>
                     </div>
                 </div>
-
-                <button
-                    className="md:hidden p-2 -ml-2"
-                    aria-label="메뉴 열기"
-                    onClick={() => setDrawerOpen(true)}
-                >
-                    <MenuIcon size={22} />
-                </button>
+                
+                <div className="md:hidden flex items-center">
+                    <HeaderSearch variant="mobileIcon" />
+                    <button
+                        className="p-2"
+                        aria-label="메뉴 열기"
+                        onClick={() => setDrawerOpen(true)}
+                    >
+                        <MenuIcon size={22} />
+                    </button>
+                </div>
             </div>
 
             <button
