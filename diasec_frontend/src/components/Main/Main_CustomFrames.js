@@ -79,7 +79,7 @@ const Main_CustomFrames = () => {
     const [defaultCfg, setDefaultCfg] = useState(null);
 
     useEffect(() => {
-        setWidthInput(String(Math.floor(width)));
+        setWidthInput(String(Math.round(width)));
     }, [width]);
 
     // 모바일 구매버튼 바텀에 스티키
@@ -122,8 +122,8 @@ const Main_CustomFrames = () => {
     const [adminQuoteApplyPartnerDiscount, setAdminQuoteApplyPartnerDiscount] = useState(false);
 
     const openAdminQuoteModal = () => {
-        setAdminQuoteW(String(Math.floor(width)));
-        setAdminQuoteH(String(Math.floor(height)));
+        setAdminQuoteW(String(Math.round(width)));
+        setAdminQuoteH(String(Math.round(height)));
         setAdminQuoteApplyPartnerDiscount(false)
         setAdminQuoteModalOpen(true);
     };
@@ -137,8 +137,8 @@ const Main_CustomFrames = () => {
         const w = landscape ? paper.h : paper.w;
         const h = landscape ? paper.w : paper.h;
 
-        setAdminQuoteW(String(Math.floor(w)));
-        setAdminQuoteH(String(Math.floor(h)));
+        setAdminQuoteW(String(Math.round(w)));
+        setAdminQuoteH(String(Math.round(h)));
     }
 
     // 사이즈 조절하기 아래 이미지 사진 상품 리스트
@@ -203,7 +203,7 @@ const Main_CustomFrames = () => {
             setImageSrc(null);
             setSelectedItemId(null);
 
-            setWidthInput(String(Math.floor(cfg.width)));
+            setWidthInput(String(Math.round(cfg.width)));
         };
         // 이미지 src를 설정하여 로딩 시작
         img.src = initialExampleImage;
@@ -222,7 +222,7 @@ const Main_CustomFrames = () => {
         setMaxWidth(defaultCfg.maxWidth);
         setMaxHeight(defaultCfg.maxHeight);
 
-        setWidthInput(String(Math.floor(defaultCfg.width)));
+        setWidthInput(String(Math.round(defaultCfg.width)));
 
     };
 
@@ -236,7 +236,7 @@ const Main_CustomFrames = () => {
         setAspectRatio(selectedItem.aspectRatio);
         setMaxWidth(selectedItem.maxWidth);
         setMaxHeight(selectedItem.maxHeight);
-        setWidthInput(String(Math.floor(selectedItem.width)));
+        setWidthInput(String(Math.round(selectedItem.width)));
     }, [selectedItemId, selectedItem?.isUploading]);
 
     const prevSelectedItemIdRef = useRef(selectedItemId);
@@ -251,8 +251,8 @@ const Main_CustomFrames = () => {
         if (width <= 0 || height <= 0) return;
         const newArea = getPriceAreaCm(width, height);
         const newPrice = calculateCumulativePrice(newArea);
-        const nextW = Math.floor(width);
-        const nextH = Math.floor(height);
+        const nextW = Math.round(width);
+        const nextH = Math.round(height);
         setCustomItems(prev =>
             prev.map(item =>
                 item.id === selectedItemId
@@ -404,8 +404,8 @@ const Main_CustomFrames = () => {
                         thumbnailPreviewFile: preview150File,
                         file,
                         aspectRatio: ratio,
-                        width: Math.floor(width),
-                        height: Math.floor(height),
+                        width: Math.round(width),
+                        height: Math.round(height),
                         maxWidth,
                         maxHeight,
                         price,
@@ -442,10 +442,10 @@ const Main_CustomFrames = () => {
     }
 
     // 입력 완료 후 반영(딜레이 입력)
-    const [widthInput, setWidthInput] = useState(String(Math.floor(width)));
-    const [heightInput, setHeightInput] = useState(String(Math.floor(height)));
+    const [widthInput, setWidthInput] = useState(String(Math.round(width)));
+    const [heightInput, setHeightInput] = useState(String(Math.round(height)));
     useEffect(() => {
-        setHeightInput(String(Math.floor(height)));
+        setHeightInput(String(Math.round(height)));
     }, [height]);
 
     const sizeHintConsumedRef = useRef(false);
@@ -478,10 +478,10 @@ const Main_CustomFrames = () => {
         const minWidth = getActualMinWidth();
 
         if (value < minWidth) {
-            showToastOnce(`최소 넓이는 ${Math.floor(minWidth)}cm입니다.`);
+            showToastOnce(`최소 넓이는 ${Math.round(minWidth)}cm입니다.`);
             value = minWidth;
         } else if (value > actualMaxWidth) {
-            showToastOnce(`최대 넓이는 ${Math.floor(actualMaxWidth)}cm입니다.`);
+            showToastOnce(`최대 넓이는 ${Math.round(actualMaxWidth)}cm입니다.`);
             value = actualMaxWidth;
         }
 
@@ -502,13 +502,13 @@ const Main_CustomFrames = () => {
                 value = parseFloat((newHeight * aspectRatio).toFixed(1));
             }
             
-            setWidth(Math.floor(value));
-            setHeight(Math.floor(newHeight));
+            setWidth(Math.round(value));
+            setHeight(Math.round(newHeight));
         } else {
-            setWidth(Math.floor(value));
+            setWidth(Math.round(value));
         }
 
-        setWidthInput(String(Math.floor(value)));
+        setWidthInput(String(Math.round(value)));
     }
 
     const handleHeightChange = (e) => {
@@ -517,10 +517,10 @@ const Main_CustomFrames = () => {
         if (isNaN(value)) return;
     
         if (value < MIN_HEIGHT) {
-            showToastOnce(`최소 높이는 ${Math.floor(MIN_HEIGHT)}cm입니다.`);
+            showToastOnce(`최소 높이는 ${MIN_HEIGHT}cm입니다.`);
             value = MIN_HEIGHT;
         } else if (value > actualMaxHeight) {
-            showToastOnce(`최대 높이는 ${Math.floor(actualMaxHeight)}cm입니다.`);
+            showToastOnce(`최대 높이는 ${Math.round(actualMaxHeight)}cm입니다.`);
             value = actualMaxHeight;
         }
     
@@ -541,13 +541,13 @@ const Main_CustomFrames = () => {
                 value = parseFloat((newWidth / aspectRatio).toFixed(1));
             }
     
-            setWidth(Math.floor(newWidth));
-            setHeight(Math.floor(value));
+            setWidth(Math.round(newWidth));
+            setHeight(Math.round(value));
         } else {
-            setHeight(Math.floor(value));
+            setHeight(Math.round(value));
         }
     
-        setHeightInput(String(Math.floor(value)));
+        setHeightInput(String(Math.round(value)));
     };
 
     const toInchSize = (wCm, hCm) => {
@@ -628,7 +628,7 @@ const Main_CustomFrames = () => {
     // A3 ~ A0 오버레이 //
 
     // 화면에 보이는 cm(내림) 기준으로 면적, 가격 통일
-    const getPriceAreaCm = (w, h) => Math.floor(Number(w) || 0) * Math.floor(Number(h) || 0);
+    const getPriceAreaCm = (w, h) => Math.round(Number(w) || 0) * Math.round(Number(h) || 0);
 
     // 계산
     const calculateCumulativePrice = (area) => {
@@ -718,8 +718,8 @@ const Main_CustomFrames = () => {
         }
 
         return {
-            width: Math.floor(width),
-            height: Math.floor(height),
+            width: Math.round(width),
+            height: Math.round(height),
         };
     };
 
@@ -744,11 +744,11 @@ const Main_CustomFrames = () => {
         const clamped = clampSizeToLimits(raw.width, raw.height, aspectRatio);
 
         if (
-            clamped.width !== Math.floor(raw.width) ||
-            clamped.height !== Math.floor(raw.height)
+            clamped.width !== Math.round(raw.width) ||
+            clamped.height !== Math.round(raw.height)
         ) {
-            const rawW = Math.floor(raw.width);
-            const rawH = Math.floor(raw.height);
+            const rawW = Math.round(raw.width);
+            const rawH = Math.round(raw.height);
             const belowMin = rawW < actualMinWidth || rawH < MIN_HEIGHT;
 
             if (belowMin) {
@@ -1031,7 +1031,7 @@ const Main_CustomFrames = () => {
             return;
         }
         handleWidthChange({ target: { value: w } });
-        setWidthInput(String(Math.floor(w)));
+        setWidthInput(String(Math.round(w)));
     };
 
     const toggleFinishType = (itemId) => {
@@ -1359,7 +1359,7 @@ const Main_CustomFrames = () => {
                                     onBlur={() => {
                                         const v = parseFloat(widthInput);
                                         if (isNaN(v)) {
-                                        setWidthInput(String(Math.floor(width)));
+                                        setWidthInput(String(Math.round(width)));
                                         return;
                                         }
                                         handleWidthChange({ target: { value: v } });
@@ -1398,7 +1398,7 @@ const Main_CustomFrames = () => {
                                     onBlur={() => {
                                         const v = parseFloat(heightInput);
                                         if (isNaN(v)) {
-                                            setHeightInput(String(Math.floor(height)));
+                                            setHeightInput(String(Math.round(height)));
                                             return;
                                         }
                                         handleHeightChange({ target: { value: v } });
@@ -1429,7 +1429,7 @@ const Main_CustomFrames = () => {
                                 className="mt-[2px] md:w-[44%] w-[47%] accent-[#D0AC88]"
                             />
                             <span className=" text-xs text-right text-gray-600">
-                                    (약 { Math.floor(width / 2.54) } x { Math.floor(height / 2.54) } inch)
+                                    (약 { Math.round(width / 2.54) } x { Math.round(height / 2.54) } inch)
                             </span>
                         </div>
                         <span 
@@ -1502,7 +1502,7 @@ const Main_CustomFrames = () => {
                                                         ) : (
                                                             <>
                                                                 <p className='text-[12.5px] font-semibold text-gray-800'>
-                                                                    {Math.floor(item.width)} x {Math.floor(item.height)}cm
+                                                                    {Math.round(item.width)} x {Math.round(item.height)}cm
                                                                 </p>
                                                                 <p className="mt-[-4px] mb-[4px]">
                                                                     <SitePriceRow
@@ -1589,7 +1589,7 @@ const Main_CustomFrames = () => {
                                                                     setMaxWidth(first.maxWidth);
                                                                     setMaxHeight(first.maxHeight);
 
-                                                                    setWidthInput(String(Math.floor(first.width)));
+                                                                    setWidthInput(String(Math.round(first.width)));
 
                                                                     // if (newItems.length > 0) {
                                                                     //     setSelectedItemId(newItems[0].id);
@@ -2126,8 +2126,8 @@ const Main_CustomFrames = () => {
 
                         <div className="rounded-lg bg-gray-50 border border-gray-200 p-4 mb-3 min-h-[88px]">
                             {(() => {
-                                const pw = Math.floor(parseFloat(String(adminQuoteW).replace(/[^\d.]/g, '')) || 0);
-                                const ph = Math.floor(parseFloat(String(adminQuoteH).replace(/[^\d.]/g, '')) || 0);
+                                const pw = Math.round(parseFloat(String(adminQuoteW).replace(/[^\d.]/g, '')) || 0);
+                                const ph = Math.round(parseFloat(String(adminQuoteH).replace(/[^\d.]/g, '')) || 0);
                                 if (pw <= 0 || ph <= 0) {
                                     return (
                                         <p className="text-sm text-gray-500">가로·세로에 숫자를 입력하면 견적이 표시됩니다.</p>

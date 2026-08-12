@@ -1487,6 +1487,7 @@ const OrderForm = () => {
                         className="w-full border-[1px] h-8 px-2" 
                         value={buyerRequest}
                         onChange={(e) => setBuyerRequest(e.target.value)}
+                        placeholder="(뒷면 와이어 설치, 뒷면 프레임 없이 제작, 대량주문 등)"
                     />
                 </div>
                 <hr/>
