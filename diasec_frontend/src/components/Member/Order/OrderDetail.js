@@ -1109,6 +1109,14 @@ const OrderDetail = () => {
                             <span className="font-medium">주소:</span>{order.address}<br />
                             {order.detailAddress}({order.postcode})
                         </div>
+                        <div className="sm:col-span-2">
+                            <span className="font-medium">배송 메시지:</span>{' '}
+                            {order.deliveryMessage?.trim() ? order.deliveryMessage : '-'}
+                        </div>
+                        <div className="sm:col-span-2">
+                            <span className="font-medium">구매자 요청사항:</span>{' '}
+                            {order.buyerRequest?.trim() ? order.buyerRequest : '-'}
+                        </div>
                     </div>
                 </div>
 

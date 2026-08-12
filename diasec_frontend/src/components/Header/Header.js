@@ -32,9 +32,18 @@ const Header = () => {
         { key:'fengShui',            label:'풍수',                         link:'/main_Items?type=fengShui' },
         { key:'customFrame',         label:'맞춤액자/사진보정',               link:'/customFrames' },
         { key:'event',               label:'이벤트',                        link:'/mainEvent' },
-        { key: 'bizConsult',         label:'기업컨설팅',                     link:'/bizConsult' },
-        { key: 'bizPartner',         label:'업무제휴',                       link:'bizPartner' },
     ]), []);
+
+    // PC 고객센터 드롭다운과 동일 (모바일 드로어용)
+    const supportLinks = useMemo(() => ([
+        { label: '자주 묻는 질문', link: '/faqMain' },
+        { label: '1:1문의', link: '/supportMyInquiryList' },
+        { label: '공지사항', link: '/noticeList' },
+        { label: '후기게시판', link: '/reviewBoard' },
+        { label: '대량주문할인', link: '/bulkOrderDiscount' },
+        { label: '기업컨설팅', link: '/bizConsult' },
+        { label: '업무제휴', link: '/bizPartner' },
+    ]))
 
     // 무한 스크롤
     const PAGE_SIZE = 10;
@@ -438,6 +447,62 @@ const Header = () => {
                                 </li>
                             )
                         })}
+
+                        {/* 이벤트 아래: 고객센터 (다른 메뉴와 구분) */}
+                        <li className="mt-2 mb-1">
+                            <div
+                                className={`
+                                    rounded-xl overflow-hidden
+                                    transition
+                                    ${openSections === 'support' ? 'ring-1 ring-[#d0ac88]/40' : ''} 
+                                `}
+                            >
+                                <button
+                                    type="button"
+                                    className="w-full flex items-center gap-2 px-3 py-3.5"
+                                    onClick={() => toggleSection('support')}
+                                >
+                                    <svg className="w-[18px] h-[18px] text-[#a67a3e] shrink-0" viewBox="0 0 24 24" aria-hidden>
+                                        <path fill="currentColor" d="M12 3a9 9 0 00-9 9a9 9 0 0012.74 8.26L21 21l-0.74-5.26A9 9 0 0012 3m1 14h-2v-2h2v2m0-4h-2V7h2v6z"/>
+                                    </svg>
+                                    <span className="text-[15px] font-semibold text-[#5c4630]">고객센터</span>
+                                    <ChevronDown
+                                        className={`ml-auto w-5 h-5 text-[#a67a3e] transition-transform duration-300 ${
+                                            openSections === 'support' ? 'rotate-180' : ''
+                                        }`}
+                                    />
+                                </button>
+
+                                <div
+                                    className={`
+                                        overflow-hidden transition-all duration-300 ease-out
+                                        ${openSections === 'support' ? 'max-h-[420px] opacity-100' : 'max-h-0 opacity-0'}
+                                    `}
+                                >
+                                    <div className="px-2 pb-3 space-y-1 border-t border-[#d0ac88]/30 bg-white/60">
+                                        {supportLinks.map((item) => (
+                                            <button
+                                                key={item.link}
+                                                type="button"
+                                                className="
+                                                    w-full text-left px-3 py-2.5 rounded-lg
+                                                    text-[14px] text-gray-700
+                                                    hover:bg-[#ecd2af]/40 hover:text-[#5c4630]
+                                                    transition
+                                                "
+                                                onClick={() => {
+                                                    navigate(item.link);
+                                                    setDrawerOpen(false);
+                                                    setOpenSections(null);
+                                                }}
+                                            >
+                                                {item.label}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+                        </li>
                     </ul>
                 </div>
                 {/* ── [모바일] 회원 패널 (하단 고정 + 디자인 강화) ───────────────── */}
@@ -515,18 +580,6 @@ const Header = () => {
                             </li>
                             </>
                         )}
-                        {/* 공통 */}
-                        <li>
-                            <button
-                            onClick={() => { navigate('/supportMain'); setDrawerOpen(false); }}
-                            className="flex items-center gap-2 w-full px-4 py-3 text-[14px] text-gray-700 hover:bg-gray-100 transition"
-                            >
-                            <svg className="w-5 h-5 text-gray-500" viewBox="0 0 24 24">
-                                <path fill="currentColor" d="M12 3a9 9 0 00-9 9a9 9 0 0012.74 8.26L21 21l-0.74-5.26A9 9 0 0012 3m1 14h-2v-2h2v2m0-4h-2V7h2v6z"/>
-                            </svg>
-                            고객센터
-                            </button>
-                        </li>
                         </ul>
                     </div>
                 </div>

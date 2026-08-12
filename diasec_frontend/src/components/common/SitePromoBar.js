@@ -24,6 +24,9 @@ const SitePromoBar = () => {
         if (dismissed) return undefined;
 
         const onScroll = () => {
+            // 모달이 body를 fixed로 잠그면 scrollY가 0으로 리셋되어 바가 다시 내려옴
+            if (document.body.style.position === 'fixed') return;
+
             const y = window.scrollY || window.pageYOffset || 0;
             const threshold = Math.max(barHeightRef.current, 1);
 

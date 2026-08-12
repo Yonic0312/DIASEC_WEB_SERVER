@@ -1755,7 +1755,7 @@ const Main_CustomFrames = () => {
             
             {/* 여기부터 모달창 */}
             {showGuestChoice && (
-                <div 
+                <div
                     className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-[10000] overscroll-none"
                     onTouchMove={(e) => {
                         if (e.target === e.currentTarget) e.preventDefault();
@@ -1767,7 +1767,44 @@ const Main_CustomFrames = () => {
                     ">
                     <p className="
                         md:text-lg text-[clamp(14px,2.3455vw,18px)]
-                        mb-6 font-bold">구매 방식을 선택해주세요</p>
+                        mb-6 font-bold">구매 방식을 선택해주세요
+                    </p>
+
+                    <button
+                        onClick={() => {
+                        setShowGuestChoice(false);
+                        const orderData = customItems.map(item => {
+                            const enabledVal = item.retouch?.enabled ? 1 : 0;
+                            const typesStr = item.retouch?.types?.join(', ') ?? '';
+                            const noteStr = item.retouch?.note ?? '';
+
+                            return {
+                            pid: '-3',
+                            title: '맞춤 액자',
+                            price: item.price,
+                            thumbnail: item.imageSrc,
+                            thumbnailPreview: item.thumbnailPreview,
+                            thumbnailFile: item.thumbnailFile,
+                            thumbnailPreviewFile: item.thumbnailPreviewFile,
+                            size: toInchSize(item.width, item.height),
+                            category:'customFrames',
+                            quantity: String(item.quantity ?? 1),
+                            finishType: item.finishType ?? 'glossy',
+
+                            retouchEnabled: enabledVal,
+                            retouchTypes: enabledVal ? typesStr : null,
+                            retouchNote: enabledVal ? noteStr : null,
+                            };
+                        });
+
+                        navigate('/orderForm', { state : { orderItems: orderData, isGuest: true } });
+                        }}
+                        className="
+                            md:text-base text-[clamp(12px,2.085vw,16px)]
+                            w-full py-3 bg-[#D0AC88] text-white rounded-md "
+                    >
+                        비회원으로 구매하기
+                    </button>
 
                     <button
                         onClick={() => {
@@ -1804,45 +1841,9 @@ const Main_CustomFrames = () => {
                         }}
                         className="
                             md:text-base text-[clamp(12px,2.085vw,16px)]
-                            w-full py-3 mb-3 bg-[#D0AC88] text-white rounded-md"
+                            w-full py-3 mt-3 bg-gray-200 rounded-md"
                     >
                         로그인 후 구매하기
-                    </button>
-
-                    <button
-                        onClick={() => {
-                        setShowGuestChoice(false);
-                        const orderData = customItems.map(item => {
-                            const enabledVal = item.retouch?.enabled ? 1 : 0;
-                            const typesStr = item.retouch?.types?.join(', ') ?? '';
-                            const noteStr = item.retouch?.note ?? '';
-
-                            return {
-                            pid: '-3',
-                            title: '맞춤 액자',
-                            price: item.price,
-                            thumbnail: item.imageSrc,
-                            thumbnailPreview: item.thumbnailPreview,
-                            thumbnailFile: item.thumbnailFile,
-                            thumbnailPreviewFile: item.thumbnailPreviewFile,
-                            size: toInchSize(item.width, item.height),
-                            category:'customFrames',
-                            quantity: String(item.quantity ?? 1),
-                            finishType: item.finishType ?? 'glossy',
-
-                            retouchEnabled: enabledVal,
-                            retouchTypes: enabledVal ? typesStr : null,
-                            retouchNote: enabledVal ? noteStr : null,
-                            };
-                        });
-
-                        navigate('/orderForm', { state : { orderItems: orderData, isGuest: true } });
-                        }}
-                        className="
-                            md:text-base text-[clamp(12px,2.085vw,16px)]
-                            w-full py-3 bg-gray-200 rounded-md "
-                    >
-                        비회원으로 구매하기
                     </button>
 
                     <button

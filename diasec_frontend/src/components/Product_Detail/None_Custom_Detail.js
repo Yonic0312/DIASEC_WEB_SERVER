@@ -1406,36 +1406,8 @@ const None_Custom_Detail = () => {
                 ">
                 <p className="
                     md:text-lg text-[clamp(14px,2.3455vw,18px)]
-                    mb-6 font-bold">구매 방식을 선택해주세요</p>
-
-                <button
-                    onClick={() => {
-                        const pendingOrderItems = customItems.map((it) => ({
-                            pid: parseInt(pid),
-                            title: product.title,
-                            author: product.author,
-                            price: it.price,
-                            thumbnail: it.imageSrc,
-                            size: toInchSize(it.width, it.height),
-                            category: `${category}`,
-                            quantity: it.quantity ?? 1,
-                            cid: null,
-                            finishType: it.finishType ?? 'glossy',
-                        }));
-
-                        navigate('/userLogin', {
-                            state: {
-                                pendingOrderItems,
-                                returnTo: `${location.pathname}${location.search}`,
-                            },
-                        });
-                    }}
-                    className="
-                        md:text-base text-[clamp(12px,2.085vw,16px)]
-                        w-full py-3 mb-3 bg-[#D0AC88] text-white rounded-md"
-                >
-                    로그인 후 구매하기
-                </button>
+                    mb-6 font-bold">구매 방식을 선택해주세요
+                </p>
 
                 <button
                     onClick={() => {
@@ -1449,7 +1421,7 @@ const None_Custom_Detail = () => {
                         thumbnail: it.imageSrc,
                         size: toInchSize(it.width, it.height),
                         category: `${category}`,
-                        quantity: it.quantity ?? 1,
+                        quantity: 1,
                         cid: null,
                         finishType: it.finishType ?? 'glossy',
                     }));
@@ -1458,9 +1430,38 @@ const None_Custom_Detail = () => {
                     }}
                     className="
                         md:text-base text-[clamp(12px,2.085vw,16px)]
-                        w-full py-3 bg-gray-200 rounded-md "
+                        w-full py-3 bg-[#D0AC88] text-white rounded-md "
                 >
                     비회원으로 구매하기
+                </button>
+
+                <button
+                    onClick={() => {
+                        const pendingOrderItems = customItems.map((it) => ({
+                            pid: parseInt(pid),
+                            title: product.title,
+                            author: product.author,
+                            price: it.price,
+                            thumbnail: it.imageSrc,
+                            size: toInchSize(it.width, it.height),
+                            category: `${category}`,
+                            quantity: 1,
+                            cid: null,
+                            finishType: it.finishType ?? 'glossy',
+                        }));
+
+                        navigate('/userLogin', {
+                            state: {
+                                pendingOrderItems,
+                                returnTo: `${location.pathname}${location.search}`,
+                            },
+                        });
+                    }}
+                    className="
+                        md:text-base text-[clamp(12px,2.085vw,16px)]
+                        w-full py-3 mt-3 bg-gray-200 rounded-md"
+                >
+                    로그인 후 구매하기
                 </button>
 
                 <button
