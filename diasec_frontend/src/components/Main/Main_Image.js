@@ -65,11 +65,13 @@ const Main_Image = () => {
         // 슬라이드 바뀔 때마다 다시 시작
         setDarkOpacity(0);
 
-        const raf = requestAnimationFrame(() => {
-            setDarkOpacity(DARKEN_MAX);
-        });
+        const timer = setTimeout(() => {
+            requestAnimationFrame(() => {
+                setDarkOpacity(DARKEN_MAX);
+            });
+        }, TRANSITION_MS);
 
-        return () => cancelAnimationFrame(raf);
+        return () => clearTimeout(timer);
     }, [currentIndex]);
 
     // 2번 이미지 바뀔때 이미지 등장 타이머 관리
