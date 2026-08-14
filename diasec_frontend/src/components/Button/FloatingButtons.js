@@ -12,7 +12,7 @@ const FloatingButtons = () => {
     const isCartPage = pathname === '/cart';
 
     return (
-        <div className="fixed bottom-10 right-8 flex flex-col gap-3 z-[100]">
+        <div className="fixed bottom-28 md:bottom-10 right-3 md:right-8 flex flex-col gap-3 z-[100]">
             {!isCartPage && (
                 <button
                     type="button"

@@ -289,7 +289,7 @@ const Login = () => {
                     </div>
                     <div className="flex flex-row justify-center mt-3">
                         <button className=
-                            "border-[1px] w-full h-[48px] sm:text-sm text-[12px]" onClick={() => navigate('/GuestOrderSearch')} type="button">
+                            "border-[1px] w-full h-[48px] sm:text-sm text-[12px]" onClick={() => navigate('/guestOrderSearch')} type="button">
                             비회원 주문조회 
                         </button>
                     </div>
