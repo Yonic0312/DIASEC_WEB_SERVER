@@ -1,8 +1,8 @@
 import { useNavigate } from 'react-router-dom';
 import { useEffect, useState, useMemo, useRef } from 'react'
-
 import axios from 'axios';
 import HeaderSearch from './HeaderSearch';
+import { useMember } from '../../context/MemberContext';
 
 import diasec1 from '../../assets/dropDownMenu/diasec/1.jpg'; 
 import diasec2 from '../../assets/dropDownMenu/diasec/2.jpg';
@@ -21,6 +21,8 @@ import custom10 from '../../assets/dropDownMenu/customFrame/c10.jpg';
 const Header_Menu = () => {
     const API = process.env.REACT_APP_API_BASE;
     const navigate = useNavigate();
+    const { member } = useMember();
+    const isAdmin = member?.role === 'ADMIN';
 
     const [hovered, setHovered] = useState(null); // 드롭다운 상태 (PC)
 
@@ -57,7 +59,11 @@ const Header_Menu = () => {
 
     // 드롭다운/드로어에 쓸 하위 항목 (서버 데이터)
     const [dropdown, setDropdown] = useState({
-        diasec: [{ label: '회사소개', img: diasec1, link: '/main_CompanyProfile'}, { label: '디아섹이란', img: diasec2, link: '/introduce'}], 
+        diasec: [
+            { label: '회사소개', img: diasec1, link: '/main_CompanyProfile'},
+            { label: '디아섹이란', img: diasec2, link: '/introduce'},
+            { label: '가격정책', img: null, link: '/pricePolicy'},
+        ], 
         masterPiece: [], 
         koreanPainting: [], 
         photoIllustration: [], 
@@ -245,7 +251,14 @@ const Header_Menu = () => {
 
     const activeKey = hovered;
     const showDropdown = !!hovered && isDropdownMenu(hovered);
-    const currentItems = hovered ? (dropdown[hovered] || []): [];
+    const currentItems = useMemo(() => {
+        if (!hovered) return [];
+        const items = dropdown[hovered] || [];
+        if (hovered === 'diasec' && !isAdmin) {
+            return items.filter((item) => item.link !== '/pricePolicy');
+        }
+        return items;
+    }, [hovered, dropdown, isAdmin]);
 
     // 메뉴 즉시 닫기 금지
     const closeTimerRef = useRef(null);
@@ -339,8 +352,15 @@ const Header_Menu = () => {
                                     flex flex-col h-auto items-center border-[1.5px] border-gray-400 rounded-xl cursor-pointer overflow-hidden hover:opacity-80 hover:shadow-lg
                                 `}
                             >
-                                <img 
-                                    src={item.img || item.imageUrl} className='w-full aspect-[220/220] object-cover border-gray-400 border-b-[1.5px]' alt={item.label} />
+                                {item.img || item.imageUrl ? (
+                                    <img
+                                        src={item.img || item.imageUrl}
+                                        className='w-full aspect-[220/220] object-cover border-gray-400 border-b-[1.5px]'
+                                        alt={item.label}
+                                    />
+                                ) : (
+                                    <div className='w-full aspect-[220/220] bg-gray-200 border-gray-400 border-b-[1.5px]' />
+                                )}
                                 <span className="
                                     xl:text-[14.5px] lg:text-[11px] md:text-[9.5px]
                                     py-2 font-[700] text-center">{item.label}</span>

@@ -27,6 +27,7 @@ import Find_Pwd_success from './components/Login/Find_Pwd_success'
 import Main from './components/Main/Main'
 import Main_Items from './components/Main/Main_Items'
 import Main_Introduce from './components/Main/Main_Introduce'
+import Main_PricePolicy from './components/Main/Main_PricePolicy'
 import Main_Event from './components/Main/Main_Event'
 import Main_EventDetail from './components/Main/Main_EventDetail'
 import None_Custom_Detail from './components/Product_Detail/None_Custom_Detail'
@@ -312,6 +313,13 @@ function SeoMetaManager() {
                     '디아섹코리아의 디아섹 액자를 소개합니다. 선명한 발색과 고급스러운 마감의 아크릴 액자를 확인해보세요.',
                 canonical: `${origin}/introduce`,
             };
+        } else if (path === '/pricePolicy') {
+            seo = {
+                title: `가격정책 | 디아섹코리아${promoTitle}`,
+                description:
+                    '디아섹코리아의 가격 정책. 정통 디아섹 공법과 검증된 자재, 10년 품질 보증을 바탕으로 한 품질 기준을 안내합니다.',
+                canonical: `${origin}/pricePolicy`,
+            };
         } else if (path === '/main_CompanyProfile') {
             seo = {
                 title: `회사소개 | 디아섹코리아${promoTitle}`,
@@ -545,6 +553,7 @@ function App() {
                         <Route path="/orderForm" element={<OrderForm/>} />
                         <Route path="/orderComplete" element={<OrderComplete/>} />
                         <Route path="/introduce" element={<Main_Introduce/>} />
+                        <Route path="/pricePolicy" element={<AdminRoute><Main_PricePolicy/></AdminRoute>} />
                         <Route path="/mainEvent" element={<Main_Event/>} />
                         <Route path="/mainEventDetail/:id" element={<Main_EventDetail/>} />
                         <Route path="/reviewWrite" element={<ReviewWrite/>} />
