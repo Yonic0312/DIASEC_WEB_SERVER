@@ -30,4 +30,54 @@
         <select id="selectMinVisitDate" resultType="java.time.LocalDate">
             SELECT MIN(visit_date) FROM visit_log
         </select>
+
+        <insert id="upsertPageView">
+            INSERT INTO page_view_daily (view_date, path, view_count)
+            VALUES (#{viewDate}, #{path}, 1)
+            ON DUPLICATE KEY UPDATE view_count = view_count + 1
+        </insert>
+
+        <select id="selectPageViewsByDate" resultType="map">
+            SELECT path, view_count AS viewCount
+            FROM page_view_daily
+            WHERE view_date = #{viewDate}
+            ORDER BY view_count DESC, path ASC
+        </select>
+
+        <select id="selectPageViewTotalByDate" resultType="int">
+            SELECT COALESCE(SUM(view_count), 0)
+            FROM page_view_daily
+            WHERE view_date = #{viewDate}
+        </select>
+
+        <select id="selectPageViewsByDateRange" resultType="map">
+            SELECT path, SUM(view_count) AS viewCount
+            FROM page_view_daily
+            WHERE view_date &gt;= #{startDate, jdbcType=DATE}
+                AND view_date  &lt;= #{endDate, jdbcType=DATE}
+            GROUP BY path
+            ORDER BY SUM(view_count) DESC, path ASC
+        </select>
+
+        <select id="selectPageViewTotalByDateRange" resultType="int">
+            SELECT COALESCE(SUM(view_count), 0)
+            FROM page_view_daily
+            WHERE view_date &gt;= #{startDate, jdbcType=DATE}
+            AND view_date &lt;= #{endDate, jdbcType=DATE}
+        </select>
+
+        <select id="selectPageViewDailyByDateRange" resultType="map">
+            SELECT
+                DATE_FORMAT(view_date, '%Y-%m-%d') AS viewDate,
+                SUM(view_count) AS viewCount
+            FROM page_view_daily
+            WHERE view_date &gt;= #{startDate, jdbcType=DATE}
+            AND  view_date &lt;= #{endDate, jdbcType=DATE}
+            GROUP BY view_date
+            ORDER BY view_date ASC
+        </select>
+
+        <select id="selectMinPageViewDate" resultType="java.time.LocalDate">
+            SELECT MIN(view_date) FROM page_view_daily
+        </select>
     </mapper>

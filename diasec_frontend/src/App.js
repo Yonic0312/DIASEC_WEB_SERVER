@@ -100,6 +100,7 @@ import Admin_BizView from './components/Admin/Admin_BizView'
 import Admin_AuthorManager from './components/Admin/AuthorManager'
 import Admin_RetouchList from './components/Admin/AdminRetouchList'
 import Admin_Home from './components/Admin/Admin_Home'
+import Admin_PageView from './components/Admin/Admin_PageView'
 
 
 import Footer from './components/Footer/Footer'
@@ -396,6 +397,14 @@ function Layout() {
     }, [API]);
 
     useEffect(() => {
+        if (path.startsWith('/admin')) return;
+
+        const pagePath = `${location.pathname}${location.search || ''}`;
+        axios.post(`${API}/visit/page`, { path: pagePath }, { withCredentials: true })
+            .catch(() => {});
+    }, [API, path, location.pathname, location.search]);
+
+    useEffect(() => {
         const handler = async (e) => {
             if (e.origin !== window.location.origin) return;
 
@@ -595,6 +604,7 @@ function App() {
                         <Route path="/admin_CollectionManager" element={<AdminRoute><Admin_CollectionManager /></AdminRoute>} />
                         <Route path="/admin_EventManager" element={<AdminRoute><Admin_EventManager /></AdminRoute>} />
                         <Route path="/admin_SiteDiscount" element={<AdminRoute><Admin_SiteDiscount /></AdminRoute>} />
+                        <Route path="/admin_PageView" element={<AdminRoute><Admin_PageView /></AdminRoute>} />
                         
                     </Route>
                 </Routes>

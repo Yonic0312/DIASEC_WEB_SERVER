@@ -277,16 +277,6 @@ function VisitDailyModal({ open, onClose, days, setDays, daily, loading }) {
                         </>
                     )}
                 </div>
-
-                <div className="px-5 py-3 border-t border-gray-100 flex justify-end">
-                    <button
-                        type="button"
-                        onClick={onClose}
-                        className="px-4 py-2 rounded-lg border border-gray-300 text-sm font-medium text-gray-700 hover:bg-gray-50"
-                    >
-
-                    </button>
-                </div>
             </div>
         </div>
     );
@@ -422,6 +412,7 @@ const Admin_Home = () => {
             { label: '상품 수정', path: '/admin_ProductManager' },
             { label: '회원 관리', path: '/admin_MemberManager' },
             { label: '회원 매출 순위', path: '/admin_MemberSalesRanking' },
+            { label: '페이지 접속 통계', path: '/admin_PageView' },
             { label: '고객 문의', path: '/admin_InquiryList' },
             { label: '기업컨설팅', path: '/admin_BizConsultList' },
             { label: '업무제휴', path: '/admin_BizPartnerList' },

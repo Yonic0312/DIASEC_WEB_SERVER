@@ -14,6 +14,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import com.diasec.diasec_backend.dao.VisitMapper;
@@ -26,10 +28,14 @@ public class VisitService {
     private static final ZoneId KOREA = ZoneId.of("Asia/Seoul");
     // 마지막 허트비트 이후 이 시간(ms)이 지나면 오프라인으로 간주
     private static final long ONLINE_TTL_MS = 60_000L;
+    // 관리자 IP로 기억한 뒤 이 시간 동안 페이지 접속 집계에서 제외 (마지막 접속 기준 갱신)
+    private static final long ADMIN_IP_TTL_MS = 14 * 24 * 60 * 60 * 1000L;
 
     private final VisitMapper visitMapper;
     // visitorKey ->  presence (ip + lastSeen)
     private final ConcurrentHashMap<String, Presence> activeVisitors = new ConcurrentHashMap<>();
+    // 관리자 페이지를 사용한 IP -> 마지막 시각
+    private final ConcurrentHashMap<String, Long> adminIps = new ConcurrentHashMap<>();
 
     private record Presence(String ip, long lastSeen) {}
     
@@ -103,6 +109,102 @@ public class VisitService {
         return result;
     }
 
+    public void rememberAdminIp(String ip) {
+        String n = normalizeIp(ip);
+        if (n.isBlank()) return;
+        adminIps.put(n, System.currentTimeMillis());
+    }
+
+    public void trackPageView(String path, String ip) {
+        String normalized = normalizePath(path);
+        if (normalized == null) return;
+
+        String normalizedIp = normalizeIp(ip);
+        if (isCurrentUserAdmin()) {
+            rememberAdminIp(normalizedIp);
+            return;
+        }
+        if (isExcludeAdminIp(normalizedIp)) return;
+
+        visitMapper.upsertPageView(LocalDate.now(KOREA), normalized);
+    }
+
+    public Map<String, Object> getPageViews(Integer days, String startDateStr, String endDateStr) {
+        LocalDate today = LocalDate.now(KOREA);
+        LocalDate start = parseIsoDate(startDateStr);
+        LocalDate end = parseIsoDate(endDateStr);
+
+        if (start != null && end != null) {
+            if (start.isAfter(end)) {
+                LocalDate tmp = start;
+                start = end;
+                end = tmp;
+            }
+        } else if (days != null && days > 0) {
+            int safeDays = Math.min(365, Math.max(1, days));
+            end = today;
+            start = end.minusDays(safeDays - 1L);
+        } else {
+            end = today;
+            LocalDate minDate = visitMapper.selectMinPageViewDate();
+            if (minDate == null) {
+                Map<String, Object> empty = new LinkedHashMap<>();
+                empty.put("startDate", today.toString());
+                empty.put("endDate", today.toString());
+                empty.put("total", 0);
+                empty.put("pages", List.of());
+                empty.put("daily", List.of());
+                return empty;
+            }
+            start = minDate;
+        }
+
+        String startS = start.toString();
+        String endS = end.toString();
+        List<Map<String, Object>> rows = visitMapper.selectPageViewsByDateRange(startS, endS);
+        int total = visitMapper.selectPageViewTotalByDateRange(startS, endS);
+        List<Map<String, Object>> daily = visitMapper.selectPageViewDailyByDateRange(startS, endS);
+
+        Map<String, Object> result = new LinkedHashMap<>();
+        result.put("startDate", startS);
+        result.put("endDate", endS);
+        result.put("total", total);
+        result.put("pages", rows);
+        result.put("daily", rows);
+        result.put("daily", daily);
+        return result;
+    }
+
+    private static LocalDate parseIsoDate(String value) {
+        if (value == null || value.isBlank()) return null;
+        try {
+            return LocalDate.parse(value.trim().substring(0, Math.min(10, value.trim().length())));
+        } catch (Exception ignored) {
+            return null;
+        }
+    }
+
+    private static String normalizePath(String path) {
+        if (path == null) return null;
+        String v = path.trim();
+        if (v.isEmpty()) return null;
+
+        try {
+            if (v.startsWith("http://") || v.startsWith("https://")) {
+                java.net.URI uri = java.net.URI.create(v);
+                String query = uri.getRawQuery();
+                v = uri.getPath() + (query != null ? "?" + query : "");
+            }
+        } catch (Exception ignored) {
+            return null;
+        }
+
+        if (!v.startsWith("/")) v = "/" + v;
+        if (v.startsWith("/admin")) return null;
+        if (v.length() > 255) v = v.substring(0, 255);
+        return v;
+    }
+
     public static String clientIp(String xff, String remoteAddr) {
         if (xff != null && !xff.isBlank()) {
             return normalizeIp(xff.split(",")[0].trim());
@@ -124,6 +226,23 @@ public class VisitService {
             return "127.0.0.1";
         }
         return v;
+    }
+
+    private boolean isExcludeAdminIp(String ip) {
+        long cutoff = System.currentTimeMillis() - ADMIN_IP_TTL_MS;
+        adminIps.entrySet().removeIf(e -> e.getValue() < cutoff) ;
+        String n = normalizeIp(ip);
+        return !n.isBlank() && adminIps.containsKey(n);
+    }
+
+    private static boolean isCurrentUserAdmin() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()
+                || "anonymousUser".equals(authentication.getPrincipal())) {
+            return false;
+        }
+        return authentication.getAuthorities().stream()
+                .anyMatch(a -> "ROLE_ADMIN".equals(a.getAuthority()));
     }
 
     private static boolean sameClientIp(String a, String b) {
