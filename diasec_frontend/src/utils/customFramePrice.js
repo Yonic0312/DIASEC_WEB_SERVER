@@ -1,4 +1,4 @@
-export const MIN_WIDTH = 35.6;
+export const MIN_WIDTH = 28;
 
 export const priceTiers = [
     { maxArea: 993.4, unitPrice: 38.3 },

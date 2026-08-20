@@ -91,7 +91,25 @@ const PRINT_ORDER_STYLES = `
         word-break: break-all;
     }
     .print-wrap .print-size-line {
+        font-size: 16px;
         white-space: pre;
+    }
+    .print-wrap .print-size-line .print-size-base,
+    .print-wrap .print-size-line .print-size-c,
+    .print-wrap .print-size-line .print-size-p,
+    .print-wrap .print-size-line .print-size-b {
+        font-weight: 700;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+    .print-wrap .print-size-line .print-size-c {
+        color: #2563eb;
+    }
+    .print-wrap .print-size-line .print-size-p {
+        color: #dc2626;
+    }
+    .print-wrap .print-size-line .print-size-b {
+        color: #16a34a;
     }
     @media print {
         @page {
@@ -122,6 +140,23 @@ const PRINT_ORDER_STYLES = `
         .print-wrap .print-size-line {
             font-size: 16px;
             white-space: pre;
+        }
+        .print-wrap .print-size-line .print-size-base,
+        .print-wrap .print-size-line .print-size-c,
+        .print-wrap .print-size-line .print-size-p,
+        .print-wrap .print-size-line .print-size-b {
+            font-weight: 700;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+        .print-wrap .print-size-line .print-size-c {
+            color: #2563eb !important;
+        }
+        .print-wrap .print-size-line .print-size-p {
+            color: #dc2626 !important;
+        }
+        .print-wrap .print-size-line .print-size-b {
+            color: #16a34a !important;
         }
     }
 `;
@@ -617,8 +652,8 @@ const Order_Detail = () => {
             }
         }
     }
-    // 인치 -> cm 변환 + P/C 규격 표시
-    const convertInchToCm = (size) => {
+    
+    const renderPrintSize = (size) => {
         if (!size || typeof size !== "string") return size;
 
         const match = size.match(/([\d.]+)\s*[xX]\s*([\d.]+)/);
@@ -638,7 +673,20 @@ const Order_Detail = () => {
         const cW = Math.max(0, wCm + 3);
         const cH = Math.max(0, hCm + 3);
 
-        return `${wCm} x ${hCm} cm\u00A0\u00A0|\u00A0\u00A0C: ${cW} x ${cH}\u00A0\u00A0|\u00A0\u00A0P: ${pW} x ${pH}\u00A0\u00A0|\u00A0\u00A0B: ${wCm + 5} x ${hCm + 5}`;
+        const bW = wCm + 5;
+        const bH = wCm + 5;
+
+        return (
+            <>
+                <span className="print-size-base">{wCm} x {hCm} cm</span>
+                {'  |  '}
+                <span className="print-size-c">C: {cW} x {cH} cm</span>
+                {'  |  '}
+                <span className="print-size-p">P: {cW} x {cH} cm</span>
+                {'  |  '}
+                <span className="print-size-p">B: {bW} x {bH} cm</span>
+            </>
+        );
     }
 
     const convertCategoryName = (category) => {
@@ -1029,7 +1077,7 @@ const Order_Detail = () => {
 
                             <div className="print-size-line whitespace-pre">
                                 <span className="print-label">사이즈:</span>
-                                {convertInchToCm(order.items[0].size)}
+                                {renderPrintSize(order.items[0].size)}
                             </div>            
 
                             {/* {order.items[0].category === 'customFrames' && hasCustomUploadImage && (

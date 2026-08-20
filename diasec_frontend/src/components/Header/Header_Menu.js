@@ -35,7 +35,6 @@ const Header_Menu = () => {
         { key : 'fengShui',          label: '풍수그림',           link:'/main_Items?type=fengShui'},
         { key : 'customFrame',       label: '맞춤액자 / 사진보정',  link: '/customFrames' },
         { key : 'event',             label: '이벤트',             link: '/mainEvent'},
-        // { key : 'companyOrder',      label: '기업주문',           link: '/bizOrderBoard' },
         // { key : 'registerAuthor',    label: '작가등록',           link: '/authorRegisterIntro' },
         // { key : 'Contemporary', label:'현대작가', link:'' },
         // { key : 'authorCollection',  label: '작가갤러리',          link:'/main_Items?type=authorCollection'},
