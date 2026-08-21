@@ -135,7 +135,7 @@
     </select>
 
     <select id="selectInquiryOwnerAndStatus" resultType="com.diasec.diasec_backend.vo.InquiryVo">
-        SELECT iid, id, status
+        SELECT iid, id, title, pid, status
         FROM inquiries
         WHERE iid = #{iid}
     </select>

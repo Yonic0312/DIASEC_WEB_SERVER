@@ -51,17 +51,9 @@ const Admin_InquiryList = () => {
         }
     };
 
-    // 날짜 검색
-    const [startDate, setStartDate] = useState(() => {
-        const oneMonthAgo = new Date();
-        oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
-        return oneMonthAgo.toISOString().split('T')[0];
-    });
-
-    const [endDate, setEndDate] = useState(() => {
-        const today = new Date();
-        return today.toISOString().split('T')[0];
-    });
+    // 날짜 검색 (기본: 전체)
+    const [startDate, setStartDate] = useState('');
+    const [endDate, setEndDate] = useState('');
 
     // 페이징
     const [currentPage, setCurrentPage] = useState(1);
@@ -83,7 +75,9 @@ const Admin_InquiryList = () => {
         true;
 
         const createdDate = inq.createdAt?.slice(0, 10);
-        const dateMatch = createdDate >= startDate && createdDate <= endDate;
+        const dateMatch = 
+            (!startDate || createdDate >= startDate) &&
+            (!endDate || createdDate <= endDate);
     
         return keywordMatch && categoryMatch && answerMatch && dateMatch;
     });
@@ -99,18 +93,26 @@ const Admin_InquiryList = () => {
     const [editContent, setEditContent] = useState('');
 
     // 날짜 범위 버튼
+    const handleAllPeriod = () => {
+        setStartDate('');
+        setEndDate('');
+        setCurrentPage(1);
+    };
+    
     const handleRangeClick = (months) => {
         const end = new Date();
         const newStart = new Date(end);
         newStart.setMonth(end.getMonth() - months);
         setStartDate(newStart.toISOString().split('T')[0]);
         setEndDate(end.toISOString().split('T')[0]);
+        setCurrentPage(1);
     };
 
     const handleToday = () => {
         const today = new Date().toISOString().split('T')[0];
         setStartDate(today);
         setEndDate(today);
+        setCurrentPage(1);
     }
 
     // 이미지 확대
@@ -156,13 +158,14 @@ const Admin_InquiryList = () => {
                     
                     {/* 날짜 */}
                     <div>
-                        <button className="w-[65px] h-[32px] border bg-whtie text-sm" onClick={handleToday}>오늘</button>
-                        <button className="w-[65px] h-[32px] border bg-whtie text-sm" onClick={() => handleRangeClick(1)}>1개월</button>
-                        <button className="w-[65px] h-[32px] border bg-whtie text-sm" onClick={() => handleRangeClick(3)}>3개월</button>
+                        <button className="w-[52px] h-[32px] border bg-whtie text-sm" onClick={handleAllPeriod}>전체</button>
+                        <button className="w-[52px] h-[32px] border bg-whtie text-sm" onClick={handleToday}>오늘</button>
+                        <button className="w-[52px] h-[32px] border bg-whtie text-sm" onClick={() => handleRangeClick(1)}>1개월</button>
+                        <button className="w-[52px] h-[32px] border bg-whtie text-sm" onClick={() => handleRangeClick(3)}>3개월</button>
 
-                        <input type="date" className='w-[130px] h-[32px] border text-center text-sm' value={startDate} onChange={(e) => setStartDate(e.target.value)}/>
+                        <input type="date" className='w-[130px] h-[32px] border text-center text-sm' value={startDate} onChange={(e) => { setStartDate(e.target.value); setCurrentPage(1); }}/>
                         <span className="mx-2">~</span>
-                        <input type="date" className='w-[130px] h-[32px] border text-center text-sm' value={endDate} onChange={(e) => setEndDate(e.target.value)}/>
+                        <input type="date" className='w-[130px] h-[32px] border text-center text-sm' value={endDate} onChange={(e) => { setEndDate(e.target.value); setCurrentPage(1); }}/>
                     </div>
                     
                     <div>

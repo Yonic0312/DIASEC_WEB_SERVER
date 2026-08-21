@@ -409,8 +409,14 @@ const Order_Status = () => {
                                         className="hover:bg-gray-100 border-b cursor-pointer text-center"
                                         onClick={() => {
                                             const qs = searchParams.toString();
+                                            const siblingItemIds = orderList
+                                                .filter((row) => row.oid === item.oid)
+                                                .map((row) => row.itemId);
                                             navigate(`/admin/order_Detail/${item.itemId}?${qs}`, { 
-                                                state: { orderCount: item.orderCount } 
+                                                state: {
+                                                    orderCount: item.orderCount,
+                                                    siblingItemIds,
+                                                }
                                             });
                                         }}
                                     >

@@ -469,7 +469,7 @@ const MyRetouchList = () => {
 
             {rejectOpen && (
                 <div 
-                    className="fixed inset-0 bg-black/40 flex items-center justify-center z-50"
+                    className="fixed inset-0 bg-black/40 flex items-center justify-center z-[10000]"
                     onClick={() => { if (!acting) setRejectOpen(false); }}
                 >
                     <div 
@@ -531,7 +531,7 @@ const MyRetouchList = () => {
             )}
 
             {editOpen && (
-                <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50" onClick={() => setEditOpen(false)}>
+                <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-[10000]" onClick={() => setEditOpen(false)}>
                     <div className="bg-white w-[520px] max-w-[92vw] rounded-lg shadow-lg p-5 relative" onClick={(e) => e.stopPropagation()}>
                     <h3 className="text-lg font-bold mb-2">보정 요청</h3>
                     <p className="text-sm text-gray-500 mb-3">

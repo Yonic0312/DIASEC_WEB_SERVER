@@ -13,6 +13,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.diasec.diasec_backend.dao.InquiryMapper;
 import com.diasec.diasec_backend.util.ImageUtil;
 import com.diasec.diasec_backend.vo.InquiryVo;
+import com.diasec.diasec_backend.vo.MemberVo;
 
 import lombok.RequiredArgsConstructor;
 
@@ -22,6 +23,8 @@ public class InquiryService {
     
     private final InquiryMapper inquiryMapper;
     private final ImageUtil imageUtil;
+    private final MemberService memberService;
+    private final SolapiService solapiService;
 
     // 문의사항 등록 ( 상품별 문의 )
     public void insertInquiry (InquiryVo vo) {
@@ -49,6 +52,37 @@ public class InquiryService {
         // 문의 상태만 업데이트
         inquiryMapper.updateInquiryStatus(iid, "답변완료");
 
+        // 고객 안내 문자 (실패해도 답변 등록은 유지)
+        try {
+            sendAnswerNotifySms(iid);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void sendAnswerNotifySms(Long iid) {
+        InquiryVo inquiry = inquiryMapper.selectInquiryOwnerAndStatus(iid);
+        if (inquiry == null || inquiry.getId() == null || inquiry.getId().isBlank()) {
+            return;
+        }
+
+        MemberVo member = memberService.selectMemberById(inquiry.getId());
+        if (member == null || member.getPhone() == null || member.getPhone().isBlank()) {
+            return;
+        }
+
+        String inquiryType = 
+            (inquiry.getPid() != null && inquiry.getPid() > 0) ? "상품문의" : "1:1 문의";
+        String title = inquiry.getTitle() != null ? inquiry.getTitle() : "";
+
+        String msg =
+            "[DIASEC KOREA]\n"
+            + "문의에 답변이 등록되었습니다.\n"
+            + "카테고리=" + inquiryType + "\n"
+            + "제목=" + title + "\n"
+            + "마이페이지 > 문의내역에서 확인해 주세요.";
+
+        solapiService.send(member.getPhone(), msg);
     }
 
     // 문의 답변 수정

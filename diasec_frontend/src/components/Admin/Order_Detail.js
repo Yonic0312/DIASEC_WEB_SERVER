@@ -169,8 +169,10 @@ const Order_Detail = () => {
     const location = useLocation();
     const backQuery = location.search;
     const orderCountFromState = location.state?.orderCount || 1;
+    const siblingItemIdsFromState = location.state?.siblingItemIds || [];
     const { itemId } = useParams();
     const [order, setOrder] = useState(null);
+    const [siblingItemIds, setSiblingItemIds] = useState(siblingItemIdsFromState);
 
     // 리스 정보 수정
     const [showLeaseModal, setShowLeaseModal] = useState(false);
@@ -429,6 +431,43 @@ const Order_Detail = () => {
             .catch(err => console.error("주문 상세 불러오기 실패", err));
     }
 
+    useEffect(() => {
+        if (location.state?.siblingItemIds?.length) {
+            setSiblingItemIds(location.state.siblingItemIds);
+        }
+    }, [location.state]);
+
+    useEffect(() => {
+        if (!order?.oid || siblingItemIds.length > 0) return;
+
+        axios.get(`${API}/admin/order/detail/oid/${order.oid}`)
+            .then((res) => {
+                const ids = (res.data.items || []).map((it) => it.itemId);
+                if (ids.length > 0) setSiblingItemIds(ids);
+            })
+            .catch(() => {});
+    }, [order?.oid, siblingItemIds.length, API]);
+
+    const currentItemIndex = siblingItemIds.findIndex(
+        (id) => String(id) === String(itemId)
+    );
+    const prevItemId = currentItemIndex > 0 ? siblingItemIds[currentItemIndex - 1] : null;
+    const nextItemId =
+        currentItemIndex >= 0 && currentItemIndex < siblingItemIds.length - 1 
+            ? siblingItemIds[currentItemIndex + 1]
+            : null;
+    const orderItemCount = siblingItemIds.length || orderCountFromState;
+
+    const goToSiblingItem = (targetItemId) => {
+        if (!targetItemId) return;
+        navigate(`/admin/order_Detail/${targetItemId}${backQuery}`, {
+            state: {
+                orderCount: orderItemCount,
+                siblingItemIds,
+            },
+        });
+    };
+
     const [shippingDraft, setShippingDraft] = useState({
         ordererName: '',
         ordererPhone: '',
@@ -674,17 +713,17 @@ const Order_Detail = () => {
         const cH = Math.max(0, hCm + 3);
 
         const bW = wCm + 5;
-        const bH = wCm + 5;
+        const bH = hCm + 5;
 
         return (
             <>
                 <span className="print-size-base">{wCm} x {hCm} cm</span>
                 {'  |  '}
-                <span className="print-size-c">C: {cW} x {cH} cm</span>
+                <span className="print-size-c">C: {cW} x {cH}</span>
                 {'  |  '}
-                <span className="print-size-p">P: {cW} x {cH} cm</span>
+                <span className="print-size-p">P: {pW} x {pH}</span>
                 {'  |  '}
-                <span className="print-size-p">B: {bW} x {bH} cm</span>
+                <span className="print-size-b">B: {bW} x {bH}</span>
             </>
         );
     }
@@ -910,6 +949,31 @@ const Order_Detail = () => {
             <div className="print-sheet-main">
             {/* Title */}
             <div>
+                <div className="flex justify-end">
+                    {orderItemCount > 1 && (
+                        <div className="no-print mt-3 flex items-center gap-2 text-sm">
+                            <button
+                                type="button"
+                                disabled={!prevItemId}
+                                onClick={() => goToSiblingItem(prevItemId)}
+                                className="px-3 py-1 border rounded disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-50"
+                            >
+                                이전
+                            </button>
+                            <span className="px-3 py-1 text-black border font-medium min-w-[3rem] text-center">
+                                {currentItemIndex >= 0 ? currentItemIndex + 1 : '?'} / {orderItemCount}
+                            </span>
+                            <button
+                                type="button"
+                                disabled={!nextItemId}
+                                onClick={() => goToSiblingItem(nextItemId)}
+                                className="px-3 py-1 border rounded disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-50"
+                            >
+                                다음
+                            </button>
+                        </div>
+                    )}
+                </div>
                 <div className='flex items-center justify-between'>
                     <div>
                         <h2 className="print-title text-2xl font-bold mb-2">주문 상세 내역</h2>
@@ -1134,7 +1198,7 @@ const Order_Detail = () => {
                             </div>
 
                             <div className="print-note-box">
-                                {item.retouchNote || '없음'}
+                                {item.retouchNote || ''}
                             </div>
                         </div>
                     </div>
@@ -1423,7 +1487,7 @@ const Order_Detail = () => {
                     <div>
                         <span className="print-label">최종 결제금액:</span> 
                         {order.finalPrice.toLocaleString()}원 
-                        {orderCountFromState > 1 ? ` (외 ${orderCountFromState - 1}개 상품 포함)` : ''}
+                        {orderItemCount > 1 ? ` (외 ${orderItemCount - 1}개 상품 포함)` : ''}
                     </div>
                 </div>
             </div>

@@ -1,5 +1,3 @@
-// 가상계좌쪽 서버코드가 다름 복붙 금지
-
 import { useEffect, useState, useContext } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
@@ -50,6 +48,7 @@ const OrderDetail = () => {
         types: [],
         note: '',
     });
+
 
     // 보정 미리보기 관련
     const [previewOpen, setPreviewOpen] = useState(false);
@@ -515,9 +514,9 @@ const OrderDetail = () => {
                             )}
 
                             {order.items.some(
-                                (it) => 
+                                (it) =>
                                     REVIEWABLE_ORDER_STATUSES.includes(it.orderStatus) &&
-                                    !it.reviewed 
+                                    !it.reviewed
                             ) && (
                                 member ? (
                                     <button
@@ -869,32 +868,14 @@ const OrderDetail = () => {
                         <div >
                             <span 
                                 className="
-                                    text-black mb-2">결제 수단: <span className="font-normal">
-                                        {order.paymentMethod}
-                                        {order.paymentMethod === '카드결제' && order.cardName
-                                            ? ` (${order.cardName})`
-                                            : ''}
-                            </span></span>
+                                    text-black mb-2">결제 수단: <span className="font-normal">{order.paymentMethod}</span></span>
                         </div>
-                        {order.paymentMethod === '가상계좌' && (order.vbankAccount || order.vbankName) && (
-                            <div className="rounded border border-[#D0AC88] bg-[#fffaf3] p-3 space-y-1">
-                                {order.vbankName && (
-                                    <div><span className="text-black">입금 은행:</span> {order.vbankName}</div>
-                                )}
-                                {order.vbankAccount && (
-                                    <div>
-                                        <span className="text-black">입금 계좌:</span>{' '}
-                                        <span className="font-semibold">{order.vbankAccount}</span>
-                                    </div>
-                                )}
-                                {order.vbankHolder && (
-                                    <div><span className="text-black">예금주:</span> {order.vbankHolder}</div>
-                                )}
-                                {order.vbankDueDate && (
-                                    <div className="text-xs text-gray-600">입금기한: {order.vbankDueDate}</div>
-                                )}
-                            </div>
-                        )}
+                        {/* { order.paymentMethod === '무통장입금' && (
+                            <>
+                                <div><span className="text-black mb-2">입금자명:</span> {order.depositor}</div>
+                                <div><span className="text-black mb-2">입금 계좌:</span> {order.bankAccount}</div>
+                            </>
+                        )} */}
                         <div><span className="text-black mb-2">총 상품금액:</span> {order.totalPrice.toLocaleString()}원</div>
                         <div><span className="text-black mb-2">적립금 사용:</span> {order.usedCredit.toLocaleString()}원</div>
                         <div><span className="text-black mb-2">배송비:</span> {order.deliveryFee.toLocaleString()}원</div>
@@ -1119,99 +1100,11 @@ const OrderDetail = () => {
                         </div>
                     </div>
                 </div>
-
-                {/* 보정 요청/수정 모달 */}
-                {retouchModalOpen && (
-                <div
-                    className="fixed inset-0 bg-black/50 z-[60] flex items-center justify-center px-4"
-                    onClick={closeRetouchModal}
-                >
+            </div>
+            {/* 반려 사유 모달 */}
+            {rejectOpen && (
                     <div
-                    className="w-full max-w-lg bg-white rounded-2xl shadow-xl p-5"
-                    onClick={(e) => e.stopPropagation()}
-                    >
-                    <div className="flex items-start justify-between">
-                        <div>
-                        <h3 className="text-lg font-bold text-gray-800">보정 요청</h3>
-                        <p className="text-sm text-gray-500 mt-1">
-                            원하는 보정 항목을 선택하고 요청사항을 적어주세요.
-                        </p>
-                        </div>
-
-                        <button
-                        className="w-9 h-9 rounded-full hover:bg-gray-100 text-gray-600"
-                        onClick={closeRetouchModal}
-                        >
-                        ✕
-                        </button>
-                    </div>
-
-                    <div className="mt-4">
-                        <div className={"mt-4"}>
-                        <div className="text-sm font-semibold text-gray-700 mb-2">보정 항목 선택</div>
-
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                            {retouchOptions.map(opt => {
-                            const checked = retouchDraft.types.includes(opt);
-                            return (
-                                <button
-                                key={opt}
-                                type="button"
-                                className={`text-sm px-3 py-2 rounded-xl border transition text-left
-                                    ${checked ? 'border-[#D0AC88] bg-[#fffaf3] text-[#a67a3e]' : 'border-gray-200 hover:bg-gray-50 text-gray-700'}
-                                `}
-                                onClick={() => {
-                                    setRetouchDraft(d => {
-                                    const on = d.types.includes(opt);
-                                    const next = on ? d.types.filter(t => t !== opt) : [...d.types, opt];
-                                    return { ...d, types: next };
-                                    });
-                                }}
-                                >
-                                {opt}
-                                </button>
-                            );
-                            })}
-                        </div>
-
-                        <div className="mt-4">
-                            <div className="text-sm font-semibold text-gray-700 mb-2">요청사항</div>
-                            <textarea
-                            rows={4}
-                            value={retouchDraft.note}
-                            onChange={(e) => setRetouchDraft(d => ({ ...d, note: e.target.value }))}
-                            placeholder="예) 잡티 제거, 피부톤 자연스럽게, 배경 흰색으로, 역광 완화 등"
-                            className="w-full border border-gray-200 rounded-xl p-3 text-sm outline-none focus:ring-2 focus:ring-[#D0AC88]"
-                            />
-                            <p className="text-xs text-gray-500 mt-2">
-                            ※ 난이도가 높은 보정은 상담 후 추가 비용이 발생할 수 있습니다
-                            </p>
-                        </div>
-                        </div>
-                    </div>
-
-                    <div className="mt-5 flex gap-2">
-                        <button
-                        className="flex-1 h-[46px] rounded-xl border border-gray-200 hover:bg-gray-50 text-gray-700"
-                        onClick={closeRetouchModal}
-                        >
-                        취소
-                        </button>
-                        <button
-                        className="flex-1 h-[46px] rounded-xl bg-[#D0AC88] text-white hover:opacity-90"
-                        onClick={saveRetouch}
-                        >
-                        저장
-                        </button>
-                    </div>
-                    </div>
-                </div>
-                )}
-
-                {/* 반려 사유 모달 */}
-                {rejectOpen && (
-                    <div
-                        className="fixed inset-0 bg-black/40 flex items-center justify-center z-50"
+                        className="fixed inset-0 bg-black/40 flex items-center justify-center z-[10000]"
                         onClick={() => { if (!acting) setRejectOpen(false); }}
                     >
                         <div className="bg-white w-[420px] max-w-[92vw] rounded-lg shadow-lg p-5 relative" onClick={(e) => e.stopPropagation()}>
@@ -1247,7 +1140,6 @@ const OrderDetail = () => {
                         </div>
                     </div>
                 )}
-            </div>
             {/* 미리보기 모달 */}
             {previewOpen && (
                 <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-[10000]" onClick={() => setPreviewOpen(false)}>
@@ -1257,6 +1149,93 @@ const OrderDetail = () => {
                             <button className="text-gray-500 hover:text-black" onClick={() => setPreviewOpen(false)}>✕</button>
                         </div>
                         <img src={previewImg} alt="preview-large" className="max-w-[70vw] max-h-[80vh] object-contain rounded" />
+                    </div>
+                </div>
+            )}
+            {/* 보정 요청/수정 모달 */}
+            {retouchModalOpen && (
+                    <div
+                        className="fixed inset-0 bg-black/50 z-[10000] flex items-center justify-center"
+                        onClick={closeRetouchModal}
+                    >
+                        <div
+                        className="w-full max-w-lg bg-white rounded-2xl shadow-xl p-5"
+                        onClick={(e) => e.stopPropagation()}
+                        >
+                        <div className="flex items-start justify-between">
+                            <div>
+                            <h3 className="text-lg font-bold text-gray-800">보정 요청</h3>
+                            <p className="text-sm text-gray-500 mt-1">
+                                원하는 보정 항목을 선택하고 요청사항을 적어주세요.
+                            </p>
+                            </div>
+
+                            <button
+                            className="w-9 h-9 rounded-full hover:bg-gray-100 text-gray-600"
+                            onClick={closeRetouchModal}
+                            >
+                            ✕
+                            </button>
+                        </div>
+
+                        <div className="mt-4">
+                            <div className={"mt-4"}>
+                            <div className="text-sm font-semibold text-gray-700 mb-2">보정 항목 선택</div>
+
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                {retouchOptions.map(opt => {
+                                const checked = retouchDraft.types.includes(opt);
+                                return (
+                                    <button
+                                    key={opt}
+                                    type="button"
+                                    className={`text-sm px-3 py-2 rounded-xl border transition text-left
+                                        ${checked ? 'border-[#D0AC88] bg-[#fffaf3] text-[#a67a3e]' : 'border-gray-200 hover:bg-gray-50 text-gray-700'}
+                                    `}
+                                    onClick={() => {
+                                        setRetouchDraft(d => {
+                                        const on = d.types.includes(opt);
+                                        const next = on ? d.types.filter(t => t !== opt) : [...d.types, opt];
+                                        return { ...d, types: next };
+                                        });
+                                    }}
+                                    >
+                                    {opt}
+                                    </button>
+                                );
+                                })}
+                            </div>
+
+                            <div className="mt-4">
+                                <div className="text-sm font-semibold text-gray-700 mb-2">요청사항</div>
+                                <textarea
+                                rows={4}
+                                value={retouchDraft.note}
+                                onChange={(e) => setRetouchDraft(d => ({ ...d, note: e.target.value }))}
+                                placeholder="예) 잡티 제거, 피부톤 자연스럽게, 배경 흰색으로, 역광 완화 등"
+                                className="w-full border border-gray-200 rounded-xl p-3 text-sm outline-none focus:ring-2 focus:ring-[#D0AC88]"
+                                />
+                                <p className="text-xs text-gray-500 mt-2">
+                                ※ 난이도가 높은 보정은 상담 후 추가 비용이 발생할 수 있습니다
+                                </p>
+                            </div>
+                            </div>
+                        </div>
+
+                        <div className="mt-5 flex gap-2">
+                            <button
+                            className="flex-1 h-[46px] rounded-xl border border-gray-200 hover:bg-gray-50 text-gray-700"
+                            onClick={closeRetouchModal}
+                            >
+                            취소
+                            </button>
+                            <button
+                            className="flex-1 h-[46px] rounded-xl bg-[#D0AC88] text-white hover:opacity-90"
+                            onClick={saveRetouch}
+                            >
+                            저장
+                            </button>
+                        </div>
                     </div>
                 </div>
             )}

@@ -92,7 +92,6 @@ public class InquiryController {
                         solapiService.send(phone, msg);
                     }
                 }
-                solapiService.send(adminNotifyPhone, msg);
             } catch (Exception ex) {
                 ex.printStackTrace();
             }
