@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import SupportHeader from './SupportHeader';
 import { MemberContext } from '../../context/MemberContext';
 import { toast } from 'react-toastify';
+import ReviewHoverZoomImage from '../common/ReviewHoverZoomImage';
 
 const ReviewBoard = () => {
     const API = process.env.REACT_APP_API_BASE;
@@ -42,10 +43,12 @@ const ReviewBoard = () => {
 
     // 리뷰상세 페이지 이미지 슬라이드
     const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+    const [imageZoomOpen, setImageZoomOpen] = useState(false);
 
     const closeReviewModal = () => {
         setSelectedReview(null);
         setSelectedImageIndex(0);
+        setImageZoomOpen(false);
     };
 
     // 리뷰 모달 열림 시 배경 스크롤 잠금
@@ -241,13 +244,15 @@ const ReviewBoard = () => {
 
                         <div className="min-h-0 flex-1 overflow-y-auto px-3 pb-3 md:px-5 md:pb-5">
                             {/* 메인 이미지 */}
-                            <div className="w-full aspect-[4/3] rounded-xl border border-gray-200 bg-gray-50 flex items-center justify-center overflow-hidden">
-                                <img
-                                    src={selectedReview.images?.[selectedImageIndex]}
-                                    alt={`상세 이미지 ${selectedImageIndex + 1}`}
-                                    className="max-w-full max-h-full object-contain"
-                                />
-                            </div>
+                            <ReviewHoverZoomImage
+                                src={selectedReview.images?.[selectedImageIndex]}
+                                alt={`상세 이미지 ${selectedImageIndex + 1}`}
+                                onOpenFull={() => {
+                                    if (selectedReview.images?.[selectedImageIndex]) {
+                                        setImageZoomOpen(true);
+                                    }
+                                }}
+                            />
 
                             {/* 썸네일 */}
                             <div className="mt-2 md:mt-3 flex flex-wrap justify-center gap-2">
@@ -303,6 +308,58 @@ const ReviewBoard = () => {
                 </div>
             )}
             {/* 리뷰 선택 모달창 */}
+
+            {imageZoomOpen && selectedReview?.images?.[selectedImageIndex] && (
+                <div
+                    className="fixed inset-0 z-[10001] bg-black/85 flex items-center justify-center px-3 py-10"
+                    onClick={() => setImageZoomOpen(false)}
+                >
+                    <button
+                        type="button"
+                        aria-label="확대 닫기"
+                        className="absolute top-4 right-4 w-9 h-9 rounded-full bg-white/15 text-white text-xl hover:bg-white/30"
+                        onClick={() => setImageZoomOpen(false)}
+                    >
+                        ✕
+                    </button>
+
+                    {selectedReview.images.length > 1 && (
+                        <>
+                            <button
+                                type="button"
+                                className="absolute left-3 md:left-6 w-10 h-10 rounded-full bg-white/15 text-white text-2xl hover:bg-white/30"
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    setSelectedImageIndex((prev) =>
+                                        prev === 0 ? selectedReview.images.length - 1 : prev - 1
+                                    );
+                                }}
+                            >
+                                ‹
+                            </button>
+                            <button
+                                type="button"
+                                className="absolute right-3 md:right-6 w-10 h-10 rounded-full bg-white/15 text-white text-2xl hover:bg-white/30"
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    setSelectedImageIndex((prev) =>
+                                        prev === selectedReview.images.length - 1 ? 0 : prev + 1
+                                    );
+                                }}
+                            >
+                                ›
+                            </button>
+                        </>
+                    )}
+
+                    <img
+                        src={selectedReview.images[selectedImageIndex]}
+                        alt={`확대 이미지 ${selectedImageIndex + 1}`}
+                        className="max-w-[95vw] max-h-[90vh] object-contain"
+                        onClick={(e) => e.stopPropagation()}
+                    />
+                </div>
+            )}
 
             {/* 페이징 (InquiryList와 동일 패턴) */}
             <div className="flex justify-center gap-2 mt-4 md:mt-8 text-sm">

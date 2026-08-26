@@ -4,7 +4,7 @@ import axios from "axios";
 import { usePartner } from '../../../context/PartnerContext';
 import { toast } from "react-toastify";
 import { MemberContext } from "../../../context/MemberContext";
-import { getDiscountedUnitPrice } from "../../../utils/siteDiscount";
+import { getDiscountedUnitPrice, getEffectiveExtraPercent } from "../../../utils/siteDiscount";
 import {
     SitePriceRow,
     SitePriceTotal,
@@ -200,19 +200,21 @@ const Cart = () => {
         navigate("/orderForm", { state: { orderItems: orderData } });
     };
 
-    const originalCartTotal = useMemo(() => {
-        return items.reduce(
+    const selectedOriginalTotal = useMemo(() => {
+        return selectedItems.reduce(
             (sum, it) => sum + (Number(it.price) || 0) * (Number(it.quantity) || 1),
             0
         );
-    }, [items]);
+    }, [selectedItems]);
 
-    const totalPrice = useMemo(() => {
-        return items.reduce((sum, it) => {
-            const unit = getDiscountedUnitPrice(it.price, partnerDiscount);
+    const selectedTotalPrice = useMemo(() => {
+        const extra = getEffectiveExtraPercent(partnerDiscount, selectedOriginalTotal);
+        return selectedItems.reduce((sum, it) => {
+            const extra = getEffectiveExtraPercent(partnerDiscount, selectedOriginalTotal);
+            const unit = getDiscountedUnitPrice(it.price, extra);
             return sum + unit * (Number(it.quantity) || 1);
         }, 0);
-    }, [items, partnerDiscount]);
+    }, [selectedItems, partnerDiscount, selectedOriginalTotal]);
 
     if (loading) return <div className="text-center py-20 text-gray-500">로딩 중...</div>;
 
@@ -432,6 +434,7 @@ const Cart = () => {
                                                     <SitePriceRow
                                                         unitPrice={it.price}
                                                         quantity={Number(it.quantity) || 1}
+                                                        originalOrderTotal={selectedOriginalTotal}
                                                         neutralClassName={`${SITE_PRICE_TEXT} text-gray-700 font-semibold`}
                                                     />
                                                 </div>
@@ -447,10 +450,15 @@ const Cart = () => {
                         <div className="text-right">
                             <div className="text-sm text-gray-500">총 결제금액</div>
                             <div className={`${SITE_PRICE_TEXT} font-bold`}>
-                                <SitePriceTotal
-                                    original={originalCartTotal}
-                                    discounted={totalPrice}
-                                />
+                                {selectedItems.length === 0 ? (
+                                    <span>0원</span>
+                                ) : (
+                                    <SitePriceTotal
+                                        original={selectedOriginalTotal}
+                                        discounted={selectedTotalPrice}
+                                        originalOrderTotal={selectedOriginalTotal} 
+                                    />
+                                )}
                             </div>
                         </div>
                     </div>

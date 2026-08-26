@@ -496,12 +496,13 @@ const Main_CompanyProfile = () => {
                 <h2 className="
                     text-[clamp(19px,4.693vw,36px)] md:text-4xl
                     font-bold break-keep">
-                    오직 디아섹액자만을 위한 최선의 노력으로
+                    받는 순간의 만족보다, 
+                    
                 </h2>
                 <h2 className="
                     text-[clamp(19px,4.693vw,36px)] md:text-4xl 
                     break-keep md:mt-3 mt-[2px] text-3xl font-bold">
-                        고객에 만족을 드리고자 합니다
+                    시간이 지나도 만족스러운 액자를 만들겠습니다
                 </h2>
             </div>
             

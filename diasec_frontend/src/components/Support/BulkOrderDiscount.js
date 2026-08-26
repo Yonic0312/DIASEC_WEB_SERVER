@@ -8,8 +8,8 @@ import B5 from '../../assets/bulk/B5.jpg';
 
 const BUDGET_OPTIONS = [
     { id: 'under100', label: '100만원 이하', bulkPct: 0 },
-    { id: 'over100', label: '100만원 이상', bulkPct: 10 },
-    { id: 'over300', label: '300만원 이상', bulkPct: 15 },
+    { id: 'over100', label: '100만원 이상', bulkPct: 5 },
+    { id: 'over300', label: '300만원 이상', bulkPct: 10 },
     { id: 'over1000', label: '1000만원 이상', bulkPct: 20 },
     { id: 'over2000', label: '2000만원 이상', bulkPct: 25 },
     { id: 'over5000', label: '5000만원 이상', bulkPct: 30 },

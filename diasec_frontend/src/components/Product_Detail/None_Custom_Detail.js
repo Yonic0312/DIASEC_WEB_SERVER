@@ -5,7 +5,7 @@ import { MemberContext } from '../../context/MemberContext';
 import ProductDetailTabs from '../ProductDetailTabs/ProductDetailTabs';
 import { toast } from 'react-toastify';
 import { usePartner } from '../../context/PartnerContext';
-import { getDiscountedUnitPrice, getSiteDiscountPercent } from '../../utils/siteDiscount';
+import { getDiscountedUnitPrice, getSiteDiscountPercent, getEffectiveExtraPercent, getBulkDiscountPercent } from '../../utils/siteDiscount';
 import {
     SitePriceRow,
     SitePriceTotal,
@@ -113,7 +113,7 @@ const None_Custom_Detail = () => {
     const [maxHeight, setMaxHeight] = useState(101.6); // 초기값: 세로 최대
 
     // const disableDelete = customItems.length <= 1;
-    const MAX_CUSTOM_ORDER_ITEMS = 30;
+    const MAX_CUSTOM_ORDER_ITEMS = 100;
     const canDeleteItem = customItems.length > 1;
     const isCustomOrderFull = customItems.length >= MAX_CUSTOM_ORDER_ITEMS;
 
@@ -425,7 +425,7 @@ const None_Custom_Detail = () => {
             remainingArea -= tierArea;
             lastMax = tier.maxArea;
         }
-        return Math.floor(Math.round(totalPrice) / 1000) * 1000;
+        return Math.max(20000, Math.floor(Math.round(totalPrice) / 1000) * 1000);
     }
 
     // 사이즈 조정바 최대 width 계산
@@ -549,18 +549,17 @@ const None_Custom_Detail = () => {
 
     // 최종 비용 계산(배송비 없음 - 전 구간 무료배송)
     const totalPriceWithoutShipping = customItems.reduce((acc, item) => {
-        const area = getPriceAreaCm(item.width, item.height);
         const qty = item.quantity ?? 1;
-        return acc + calculateCumulativePrice(area) * qty;
+        return acc + (Number(item.price) || 0) * qty;
     }, 0);
 
-    const totalPriceWithoutShippingDiscounted = customItems.reduce(
-        (acc, item) => {
-            const qty = item.quantity ?? 1;
-            return acc + getDiscountedUnitPrice(item.price, partnerDiscount) * qty;
-        },
-        0
-    );
+    const extraDiscountPercent = getEffectiveExtraPercent(partnerDiscount, totalPriceWithoutShipping);
+    const bulkDiscountPercent = getBulkDiscountPercent(totalPriceWithoutShipping);
+
+    const totalPriceWithoutShippingDiscounted = customItems.reduce((acc, item) => {
+        const qty = item.quantity ?? 1;
+        return acc + getDiscountedUnitPrice(item.price, extraDiscountPercent) * qty;
+    }, 0);
 
     useEffect(() => {
         if (pid) {
@@ -1202,6 +1201,7 @@ const None_Custom_Detail = () => {
                                                         <p className="mt-[-4px] mb-[4px]">
                                                             <SitePriceRow
                                                                 unitPrice={item.price}
+                                                                originalOrderTotal={totalPriceWithoutShipping}
                                                                 quantity={item.quantity ?? 1}
                                                                 neutralClassName={`${SITE_PRICE_TEXT} text-gray-800`}
                                                             />
@@ -1339,15 +1339,21 @@ const None_Custom_Detail = () => {
                                 주문 후 평균 2~5일 내 수령
                             </div>
                             <span className="text-base font-semibold text-gray-700">
-                                총 결제금액 :{' '}
+                                결제금액 :{' '}
                                 <span className=" text-[#a57647]">
                                 <SitePriceTotal
                                     original={totalPriceWithoutShipping}
                                     discounted={totalPriceWithoutShippingDiscounted}
+                                    originalOrderTotal={totalPriceWithoutShipping}
                                     className={`${SITE_PRICE_TEXT} font-semibold text-[#a57647]`}
                                 />
                                 </span>
                             </span>
+                            {bulkDiscountPercent > 0 && bulkDiscountPercent >= Number(partnerDiscount || 0) && (
+                                <span className="text-[11px] font-medium text-[#45b035]">
+                                    대량주문할인 {bulkDiscountPercent}% 적용
+                                </span>
+                            )}
                         </div>
                         <div className="text-right">
                             {/* <div className="text-[13px] font-semibold text-[#a57647]">
@@ -1597,21 +1603,23 @@ const None_Custom_Detail = () => {
                                 }
                                 const area = pw * ph;
                                 const original = calculateCumulativePrice(area);
-                                const effectivePartnerDiscount = adminQuoteApplyPartnerDiscount ? partnerDiscount : 0;
-                                const discounted = getDiscountedUnitPrice(original, effectivePartnerDiscount);
+                                const extraPercent = getEffectiveExtraPercent(
+                                    adminQuoteApplyPartnerDiscount ? partnerDiscount : 0,
+                                    original
+                                );
+                                const discounted = getDiscountedUnitPrice(original, extraPercent);
                                 const sitePct = getSiteDiscountPercent();
-                                const partnerPct = Math.max(0, Number(effectivePartnerDiscount) || 0);
+                                const bulkPct = getBulkDiscountPercent(original);
+                                const partnerPct = adminQuoteApplyPartnerDiscount
+                                    ? Math.max(0, Number(partnerDiscount) || 0)
+                                    : 0;
                                 const hasDiscount = discounted < original;
                                 const discountLabel = (() => {
-                                    if (sitePct > 0 && partnerPct > 0) {
-                                        return `사이트 ${sitePct}% + 파트너 ${partnerPct}% 할인 적용`;
-                                    }
-                                    if (sitePct > 0 && partnerPct > 0) {
-                                        return `사이트 ${sitePct}% + 파트너 ${partnerPct}% 할인 적용`;
-                                    }
-                                    if (sitePct > 0) return `사이트 ${sitePct}% 할인 적용`;
-                                    if (partnerPct > 0) return `파트너 ${partnerPct}% 할인 적용`;
-                                    return '';
+                                    const parts = [];
+                                    if (sitePct > 0) parts.push(`사이트 ${sitePct}%`);
+                                    if (bulkPct > 0 && bulkPct >= partnerPct) parts.push(`대량 ${bulkPct}`);
+                                    else if (partnerPct > 0) parts.push(`파트너 ${partnerPct}`);
+                                    return parts.length ? `${parts.join(' + ')} 할인 적용` : '';
                                 })();
                                 return (
                                     <div className="space-y-2">

@@ -16,7 +16,7 @@ import icon_kakao from '../../assets/button/icon_kakao.png';
 import icon_naver from '../../assets/button/icon_naver.png';
 import mainPage from '../../assets/CustomFrames/상세페이지.jpg';
 import ProductDetailTabs from '../ProductDetailTabs/ProductDetailTabs.js';
-import { getDiscountedUnitPrice, getSiteDiscountPercent } from '../../utils/siteDiscount';
+import { getDiscountedUnitPrice, getSiteDiscountPercent, getEffectiveExtraPercent, getBulkDiscountPercent } from '../../utils/siteDiscount';
 import {
     SitePriceRow,
     SitePriceTotal,
@@ -271,7 +271,7 @@ const Main_CustomFrames = () => {
     const [maxHeight, setMaxHeight] = useState(101.6);
 
     const MAX_SIZE = 50 * 1024 * 1024; // 이미지 업로드 50MB
-    const MAX_CUSTOM_ORDER_ITEMS = 30;
+    const MAX_CUSTOM_ORDER_ITEMS = 100;
     const PREVIEW_MAX_SIDE_PX = 800;
     const ORDER_THUMB_MAX_SIDE_PX = 150;
 
@@ -684,7 +684,7 @@ const Main_CustomFrames = () => {
             remainingArea -= tierArea;
             lastMax = tier.maxArea;
         }
-        return Math.floor(Math.round(totalPrice) / 1000) * 1000;
+        return Math.max(20000, Math.floor(Math.round(totalPrice) / 1000) * 1000);
     }
 
     // 사이즈 조정바 최대 width 계산
@@ -842,6 +842,9 @@ const Main_CustomFrames = () => {
                 return acc + calculateCumulativePrice(area) * qty;
             }, 0)
             : examplePreviewPrice;
+
+    const extraDiscountPercent = getEffectiveExtraPercent(partnerDiscount, totalPriceWithoutShipping);
+    const bulkDiscountPercent = getBulkDiscountPercent(totalPriceWithoutShipping);
 
     const totalPriceWithoutShippingDiscounted =
         customItems.length > 0
@@ -1546,6 +1549,7 @@ const Main_CustomFrames = () => {
                                                                     <SitePriceRow
                                                                         unitPrice={item.price}
                                                                         quantity={item.quantity ?? 1}
+                                                                        originalOrderTotal={totalPriceWithoutShipping}
                                                                         neutralClassName={`${SITE_PRICE_TEXT} text-gray-800`}
                                                                     />
                                                                 </p>
@@ -1735,16 +1739,22 @@ const Main_CustomFrames = () => {
                                 {/* 제작 1~3일 배송 1~2일 (주문후 2~5일 수령) */}
                                 주문 후 평균 2~5일 내 수령
                             </div>
-                            <span className="text-base font-semibold text-gray-700">
-                                총 결제금액 :{' '}
+                            <span className="text-[14px] font-semibold text-gray-700">
+                                결제금액 :{' '}
                                 <span>
                                     <SitePriceTotal
                                         original={totalPriceWithoutShipping}
                                         discounted={totalPriceWithoutShippingDiscounted}
+                                        originalOrderTotal={totalPriceWithoutShipping}
                                         className={`${SITE_PRICE_TEXT} font-semibold`}
                                     />
                                 </span>
                             </span>
+                            {bulkDiscountPercent > 0 && bulkDiscountPercent >= Number(partnerDiscount || 0) && (
+                                <span className="text-[11px] font-medium text-[#45b035]">
+                                    대량주문할인 {bulkDiscountPercent}% 적용
+                                </span>
+                            )}
                         </div>
                         <div className="text-right">
                             <div className="text-[11px] text-gray-500">
@@ -2183,21 +2193,23 @@ const Main_CustomFrames = () => {
                                 }
                                 const area = pw * ph;
                                 const original = calculateCumulativePrice(area);
-                                const effectivePartnerDiscount = adminQuoteApplyPartnerDiscount ? partnerDiscount : 0;
-                                const discounted = getDiscountedUnitPrice(original, effectivePartnerDiscount);
+                                const extraPercent = getEffectiveExtraPercent(
+                                    adminQuoteApplyPartnerDiscount ? partnerDiscount : 0,
+                                    original
+                                );
+                                const discounted = getDiscountedUnitPrice(original, extraPercent);
                                 const sitePct = getSiteDiscountPercent();
-                                const partnerPct = Math.max(0, Number(effectivePartnerDiscount) || 0);
+                                const bulkPct = getBulkDiscountPercent(original);
+                                const partnerPct = adminQuoteApplyPartnerDiscount
+                                    ? Math.max(0, Number(partnerDiscount) || 0)
+                                    : 0;
                                 const hasDiscount = discounted < original;
                                 const discountLabel = (() => {
-                                    if (sitePct > 0 && partnerPct > 0) {
-                                        return `사이트 ${sitePct}% + 파트너 ${partnerPct}% 할인 적용`;
-                                    }
-                                    if (sitePct > 0 && partnerPct > 0) {
-                                        return `사이트 ${sitePct}% + 파트너 ${partnerPct}% 할인 적용`;
-                                    }
-                                    if (sitePct > 0) return `사이트 ${sitePct}% 할인 적용`;
-                                    if (partnerPct > 0) return `파트너 ${partnerPct}% 할인 적용`;
-                                    return '';
+                                    const parts = [];
+                                    if (sitePct > 0) parts.push(`사이트 ${sitePct}%`);
+                                    if (bulkPct > 0 && bulkPct >= partnerPct) parts.push(`대량 ${bulkPct}%`);
+                                    else if (partnerPct > 0) parts.push(`파트너 ${partnerPct}%`);
+                                    return parts.length ? `${parts.join(' + ')} 할인 적용` : '';
                                 })();
                                 return (
                                     <div className="space-y-2">

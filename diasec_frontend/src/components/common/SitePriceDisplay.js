@@ -1,20 +1,21 @@
 import { usePartner } from '../../context/PartnerContext';
-import { getDiscountedUnitPrice, getTotalDiscountPercent } from '../../utils/siteDiscount';
+import { getDiscountedUnitPrice, getTotalDiscountPercent, getEffectiveExtraPercent } from '../../utils/siteDiscount';
 
 /** 공통 가격 텍스트 크기 — import 해서 neutralClassName 등에 재사용 */
 export const SITE_PRICE_TEXT =
-    'lg:text-[14.5px] text-[clamp(13px,1.417vw,14.5px)]';
+    'lg:text-[14px] text-[clamp(13px,1.417vw,14.5px)]';
 
 /** 취소선 정가 — 할인가보다 약 1~2pt(≈2px) 작게 */
 export const SITE_PRICE_STRIKE_TEXT =
-    'text-[12px]';
+    'text-[11.5px]';
 
 const DISCOUNT_PCT_CLASS =
-    ' font-bold text-[#6B7280] leading-none';
+    'text-[14px] font-bold text-[#6B7280] leading-none';
 
 export function SitePriceRow({
     unitPrice,
     quantity = 1,
+    originalOrderTotal,
     suffix = '',
     className = '',
     showDiscountPercent = true,
@@ -27,7 +28,11 @@ export function SitePriceRow({
     const originalU = Math.round(Number(unitPrice) || 0);
     const qty = Math.max(0, Number(quantity) || 0);
     const originalTotal = originalU * qty;
-    const pct = getTotalDiscountPercent(partnerDiscount);
+    const extraPercent =
+        originalOrderTotal != null
+            ? getEffectiveExtraPercent(partnerDiscount, originalOrderTotal)
+            : partnerDiscount;
+    const pct = getTotalDiscountPercent(extraPercent);
 
     if (pct <= 0) {
         return (
@@ -37,19 +42,21 @@ export function SitePriceRow({
         );
     }
 
-    const saleTotal = getDiscountedUnitPrice(originalU, partnerDiscount) * qty;
+    const saleTotal = getDiscountedUnitPrice(originalU, extraPercent) * qty;
 
     return (
-        <span className={`inline-flex items-baseline gap-1 flex-wrap ${className}`.trim()}>
+        <span className={`flex flex-col flex-wrap ${className}`.trim()}>
             <span className={strikeClassName}>
                 {originalTotal.toLocaleString()}원{suffix}
             </span>
-            <span className={saleClassName}>
-                {saleTotal.toLocaleString()}원{suffix}
-            </span>
-            {showDiscountPercent && (
-                <span className={discountPercentClassName}>{pct}%</span>
-            )}
+            <div className="flex items-center gap-1">
+                <span className={saleClassName}>
+                    {saleTotal.toLocaleString()}원{suffix}
+                </span>
+                {showDiscountPercent && (
+                    <span className={discountPercentClassName}>{pct}%</span>
+                )}
+            </div>
         </span>
     );
 }
@@ -57,6 +64,7 @@ export function SitePriceRow({
 export function SitePriceTotal({
     original,
     discounted,
+    originalOrderTotal,
     className = '',
     showDiscountPercent = true,
     strikeClassName = `${SITE_PRICE_STRIKE_TEXT} text-gray-500 line-through`,
@@ -65,14 +73,18 @@ export function SitePriceTotal({
 }) {
     const { partnerDiscount } = usePartner();
     const o = Math.round(Number(original) || 0);
-    const pct = getTotalDiscountPercent(partnerDiscount);
+    const extraPercent =
+        originalOrderTotal != null
+            ? getEffectiveExtraPercent(partnerDiscount, originalOrderTotal)
+            : partnerDiscount;
+    const pct = getTotalDiscountPercent(extraPercent);
     if (pct <= 0) {
         return <span className={className}>{o.toLocaleString()}원</span>;
     }
     const s =
         discounted != null ? Math.round(Number(discounted) || 0) : o;
     return (
-        <span className={`inline-flex items-baseline gap-2 flex-wrap ${className}`.trim()}>
+        <span className={`inline-flex items-baseline gap-[2px] flex-wrap ${className}`.trim()}>
             <span className={strikeClassName}>{o.toLocaleString()}원</span>
             <span className={saleClassName}>{s.toLocaleString()}원</span>
             {showDiscountPercent && (

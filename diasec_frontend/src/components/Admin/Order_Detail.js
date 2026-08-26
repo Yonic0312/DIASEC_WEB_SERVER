@@ -23,7 +23,7 @@ const PRINT_ORDER_STYLES = `
     }
     .print-wrap .print-section {
         margin-top: 14px;
-        border: 1px solid #d9d9d9;
+        border: 1px solid #5D5D5D;
         padding: 12px;
         border-radius: 8px;
         page-break-inside: avoid;
@@ -111,6 +111,13 @@ const PRINT_ORDER_STYLES = `
     .print-wrap .print-size-line .print-size-b {
         color: #16a34a;
     }
+    .print-wrap .print-note-label {
+        color: #2563eb;
+        font-weight: 700;
+        font-size: 14px;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
     @media print {
         @page {
             size: A4;
@@ -157,6 +164,12 @@ const PRINT_ORDER_STYLES = `
         }
         .print-wrap .print-size-line .print-size-b {
             color: #16a34a !important;
+        }
+        .print-wrap .print-note-label {
+            color: #2563eb !important;
+            font-weight: 400;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
         }
     }
 `;
@@ -258,18 +271,6 @@ const Order_Detail = () => {
         const ok = window.confirm(`주문 상태를 "${newStatus}"(으)로 변경할까요?`);
         if (!ok) return;
 
-        // 상세 화면: 환불완료 시 나이스페이 PG 환불은 하지 않음 (목록 order_Status와 구분)
-        if (newStatus === '환불완료') {
-            const okRefund = window.confirm(
-                `적립금이 사용된 경우 자동 반환됩니다. \n\n` +
-                `※ 카드·가상계좌 결제 환불은 이 화면에서 자동 처리되지 않습니다.\n` +
-                `나이스페이 관리자에서 수동으로 환불해 주세요. \n\n` +
-                `(목록의 "주문 상태 변경"에서는 나이스페이 환불이 자동으로 진행됩니다.)\n\n` +
-                `계속할까요?`
-            );
-            if (!okRefund) return;
-        }
-
         const hasClaimFiles = item?.claimFiles?.length > 0;
         const willDeleteClaimFiles = 
             hasClaimFiles && SHOULD_DELETE_CLAIM_FILES_STATUS.has(newStatus);
@@ -298,20 +299,13 @@ const Order_Detail = () => {
             method: 'POST',
             headers: { 'Content-Type': 'application/json'},
             credentials: "include",
-            body: JSON.stringify({ 
-                itemId, 
-                orderStatus: newStatus, 
-                id, 
-                usedCredit, 
-                oid,
-                skipPgRefund: true, // Order Detail만 PG 생략
-            })
+            body: JSON.stringify({ itemId, orderStatus: newStatus, id, usedCredit, oid})
         });
         
         const data = await res.json();
 
         if (!data.success) {
-            toast.error(data.message || "상태 변경 실패");
+            toast.error("상태 변경 실패");
             return;
         }
 
@@ -440,7 +434,7 @@ const Order_Detail = () => {
     useEffect(() => {
         if (!order?.oid || siblingItemIds.length > 0) return;
 
-        axios.get(`${API}/admin/order/detail/oid/${order.oid}`)
+        axios.get(`${API}/order/detail/oid/${order.oid}`)
             .then((res) => {
                 const ids = (res.data.items || []).map((it) => it.itemId);
                 if (ids.length > 0) setSiblingItemIds(ids);
@@ -453,7 +447,7 @@ const Order_Detail = () => {
     );
     const prevItemId = currentItemIndex > 0 ? siblingItemIds[currentItemIndex - 1] : null;
     const nextItemId =
-        currentItemIndex >= 0 && currentItemIndex < siblingItemIds.length - 1 
+        currentItemIndex >= 0 && currentItemIndex < siblingItemIds.length - 1
             ? siblingItemIds[currentItemIndex + 1]
             : null;
     const orderItemCount = siblingItemIds.length || orderCountFromState;
@@ -569,7 +563,7 @@ const Order_Detail = () => {
                 itemId: order.items[0].itemId,
                 trackingCompany: finalTrackingCompany,
                 trackingNumber,
-                applyToSameOrder
+                applyToSameOrder,
             }),
         })
         .then(res => res.json())
@@ -691,9 +685,8 @@ const Order_Detail = () => {
             }
         }
     }
-    
     const renderPrintSize = (size) => {
-        if (!size || typeof size !== "string") return size;
+        if (!size || typeof size !== 'string') return size;
 
         const match = size.match(/([\d.]+)\s*[xX]\s*([\d.]+)/);
         if (!match) return size;
@@ -726,7 +719,7 @@ const Order_Detail = () => {
                 <span className="print-size-b">B: {bW} x {bH}</span>
             </>
         );
-    }
+    };
 
     const convertCategoryName = (category) => {
         if (category === "masterPiece") {
@@ -1054,7 +1047,6 @@ const Order_Detail = () => {
                                     setBankName(bankName || '');
                                     setAccountNumber(accountNumber || '');
                                     setAccountHolder(accountHolder || '');
-
                                     setApplyToSameOrder(true);
                                     setShowModal(true);
                             }}> 
@@ -1088,13 +1080,7 @@ const Order_Detail = () => {
                     <div><span className="print-label font-medium">주문번호:</span> {order.oid}</div>
                     <div><span className="print-label font-medium">주문상태:</span> {order.items[0].orderStatus}</div>
                     <div><span className="print-label font-medium">주문일시:</span> {order.createdAt?.slice(0, 16)}</div>
-                    <div>
-                        <span className="print-label font-medium">주문수단:</span>{" "}
-                        {order.paymentMethod}
-                        {order.paymentMethod === "카드결제" && order.cardName
-                            ? ` (${order.cardName})`
-                            : ""}
-                    </div>
+                    <div><span className="print-label font-medium">주문수단:</span> {order.paymentMethod}</div>
                     <div><span className="print-label font-medium">주문자명:</span> {order.ordererName}</div>
                     <div><span className="print-label font-medium">주문자 연락처:</span> {order.ordererPhone}</div>
                 </div>
@@ -1204,6 +1190,17 @@ const Order_Detail = () => {
                     </div>
                 );
             })()}
+
+            <div className="print-section">
+                {/* <h3 className="print-section-title font-semibold text-lg">배송지 정보</h3> */}
+                <div>
+                    <span className="print-note-label">구매자 요청:</span> {order.buyerRequest}
+                </div>
+
+                <div>
+                    <span className="print-note-label">배송 메시지:</span> {order.deliveryMessage}
+                </div>
+            </div>
                     
             {/* 반품 입력창 */}
             {showReturnForm && order.items[0].orderStatus !== '반품신청' && (
@@ -1429,11 +1426,7 @@ const Order_Detail = () => {
                 {/* <h3 className="print-section-title font-semibold text-lg">결제 정보</h3> */}
                 <div className="print-grid-2 text-sm leading-6">
                     <div>
-                        <span className="print-label">결제 수단:</span>{" "}
-                        {order.paymentMethod}
-                        {order.paymentMethod === '카드결제' && order.cardName
-                            ? ` (${order.cardName})`
-                            : ""}
+                        <span className="print-label">결제 수단:</span> {order.paymentMethod}
                     </div>
 
                     { order.paymentMethod === '무통장입금' && (
@@ -1444,31 +1437,6 @@ const Order_Detail = () => {
                             <div>
                                 <span className="print-label">입금 계좌:</span> {order.bankAccount}
                             </div>
-                        </>
-                    )}
-
-                    {order.paymentMethod === '가상계좌' && (order.vbankAccount || order.vbankName) && (
-                        <>
-                            {order.vbankName && (
-                                <div>
-                                    <span className="print-label">입금 은행:</span> {order.vbankName}
-                                </div>
-                            )}
-                            {order.vbankAccount && (
-                                <div>
-                                    <span className="print-label">입금 계좌:</span> {order.vbankAccount}
-                                </div>
-                            )}
-                            {order.vbankHolder && (
-                                <div>
-                                    <span className="print-label">예금주:</span> {order.vbankHolder}
-                                </div>
-                            )}
-                            {order.vbankDueDate && (
-                                <div>
-                                    <span className="print-label">입금기한:</span> {order.vbankDueDate}
-                                </div>
-                            )}
                         </>
                     )}
 
@@ -1522,16 +1490,6 @@ const Order_Detail = () => {
                                 {order.detailAddress}
                             </>
                     </div>
-
-                    <div>
-                        <span className="font-bold">구매자 요청:</span> {order.buyerRequest}
-                    </div>
-
-                    <div>
-                        <span className="font-bold">배송 메시지:</span> {order.deliveryMessage}
-                    </div>
-
-                    
                 </div>
 
                 <div className="no-print mt-4 border border-dashed border-gray-300 rounded-lg p-4 bg-gray-50">
@@ -1695,7 +1653,7 @@ const Order_Detail = () => {
                         ) : null}
 
                         <label className="flex items-center gap-2 mb-3 text-sm text-gray-800 cursor-pointer select-none">
-                            <input 
+                            <input
                                 type="checkbox"
                                 checked={applyToSameOrder}
                                 onChange={(e) => setApplyToSameOrder(e.target.checked)}
@@ -1703,7 +1661,7 @@ const Order_Detail = () => {
                             <span className="font-medium">같은 주문 전체적용</span>
                         </label>
 
-                        <button
+                        <button 
                             onClick={handleSave}
                             className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700">
                             저장
