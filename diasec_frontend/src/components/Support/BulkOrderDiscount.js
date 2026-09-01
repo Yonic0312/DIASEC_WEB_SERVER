@@ -1,10 +1,5 @@
 import { useState } from 'react';
 import { useSitePromo } from '../../context/SitePromoContext';
-import B1 from '../../assets/bulk/B1.jpg';
-import B2 from '../../assets/bulk/B2.jpg';
-import B3 from '../../assets/bulk/B3.jpg';
-import B4 from '../../assets/bulk/B4.jpg';
-import B5 from '../../assets/bulk/B5.jpg';
 
 const BUDGET_OPTIONS = [
     { id: 'under100', label: '100만원 이하', bulkPct: 0 },
@@ -86,7 +81,7 @@ const BulkOrderDiscount = () => {
                             })}
                         </div>
                     </div>
-
+                    
                     <div>
                         <p className="text-sm md:text-base">
                             {totalPct == null
@@ -99,36 +94,6 @@ const BulkOrderDiscount = () => {
                                 ? `구매 예정 금액을 선택하면 예상 할인율이 표시됩니다`
                                 : ``
                             }
-                        </p>
-                    </div>
-                </section>
-
-                <section className="space-y-8 text-sm md:text-base leading-relaxed">
-                    <div className="space-y-2">
-                        <h2 className="text-base md:text-lg font-bold">대량 주문 이용 방법</h2>
-                        <div className="flex flex-col pl-5 space-y-1">
-                            <span>1. 원하시는 상품을 <strong className="font-semibold text-gray-900">장바구니</strong>에 담아 <strong className="font-semibold text-gray-900">주문서</strong>를 작성합니다.</span>
-                            <span><img src={B1} alt="대량 주문 이용 방법 1" className="w-full max-w-sm md:max-w-2xl h-auto rounded border border-gray-200" /></span>
-                            <br/>
-                            <span>2. <strong className="font-semibold text-gray-900">구매자 요청사항</strong>에 <strong className="font-semibold text-gray-900">“대량주문”</strong>을 기재해 주세요.</span>
-                            <span><img src={B2} alt="대량 주문 이용 방법 2" className="w-full max-w-sm md:max-w-2xl h-auto rounded border border-gray-200" /></span>
-                            <br/>
-                            <span>3. 결제수단은 <strong className="font-semibold text-gray-900">가상계좌</strong>를 선택하고, <strong className="font-semibold text-red-600">입금은 하지 말아 주세요.</strong></span>
-                            <span><img src={B3} alt="대량 주문 이용 방법 3" className="w-full max-w-sm md:max-w-2xl h-auto rounded border border-gray-200" /></span>
-                            <span><img src={B4} alt="대량 주문 이용 방법 4" className="w-full max-w-sm md:max-w-lg h-auto rounded border border-gray-200" /></span>
-                            <br/>
-                            <span>4. 담당자가 주문 확인 후, <strong className="font-semibold text-gray-900">할인이 적용된 최종 결제 금액과 입금 계좌를 </strong>문자로 안내해 드립니다.</span>
-                            <span>5. <strong className="font-semibold text-gray-900">입금 확인 후</strong> 제작이 진행됩니다.</span>
-                        </div>
-                    </div>
-                    <div className="space-y-2">
-                        <h2 className="text-base md:text-lg font-bold">맞춤액자 주문 안내</h2>
-                        <p>
-                            맞춤액자와 다른 카테고리 상품은 <strong className="font-semibold text-gray-900">별도로 주문</strong>해 주세요.
-                        </p>
-                        <p>
-                            각 주문서의 구매자 요청사항에 <strong className="font-semibold text-gray-900">대량주문</strong>을 기재해 주시면,
-                            주문 금액을 <strong className="font-semibold text-gray-900">합산하여 할인 적용</strong> 후 결제 금액을 안내드립니다.
                         </p>
                     </div>
                 </section>

@@ -16,6 +16,7 @@ const Admin_Sidebar = () => {
 
     const [inquiryUnanswered, setInquiryUnanswered] = useState(0);
     const [bizConsultCount, setBizConsultCount] = useState(0);
+    const [retouchPendingCount, setRetouchPendingCount] = useState(0);
     const [orderCounts, setOrderCounts] = useState({});
 
     // 토글 상태
@@ -86,6 +87,12 @@ const Admin_Sidebar = () => {
             .catch((err) => console.error('기업컨설팅 건수 불러오기 실패', err));
     }, [API]);
 
+    useEffect(() => {
+        axios.get(`${API}/admin/retouch/count`, { withCredentials: true })
+            .then((res) => setRetouchPendingCount(Number(res.data) || 0))
+            .catch((err) => console.error('보정 요청 건수 불러오기 실패', err));
+    }, [API]);
+
     return (
         <div className="flex flex-col items-start w-[200px] mr-4 gap-3 mb-20">
             <div className="mb-6 w-full">
@@ -136,7 +143,7 @@ const Admin_Sidebar = () => {
             <button className="text-sm opacity-65"
                 onClick={() => navigate(`/admin_AdminRetouchList`)}
             >
-                보정 요청사항
+                보정 요청사항({retouchPendingCount}건)
             </button>
 
             <span className="text-lg font-bold mt-10">정보 관리</span>
@@ -156,6 +163,7 @@ const Admin_Sidebar = () => {
             <button className="text-sm opacity-65" onClick={() => navigate('/admin_ReviewManager')}>후기 관리</button>
             <button className="text-sm opacity-65" onClick={() => navigate('/admin_EventManager')}>이벤트 관리</button>
             <button className="text-sm opacity-65" onClick={() => navigate('/admin_SiteDiscount')}>사이트 할인율 관리</button>
+            <button className="text-sm opacity-65" onClick={() => navigate('/admin_MainBlog')}>메인 홈 블로그 관리</button>
         </div>
     )
 }

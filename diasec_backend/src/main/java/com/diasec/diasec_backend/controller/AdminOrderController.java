@@ -7,6 +7,7 @@ import java.util.Map;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -224,6 +225,12 @@ public class AdminOrderController {
             "success", true,
             "list", orderMapper.selectAdminRetouchList(startDate, endDate, keyword, status)
         ));
+    }
+
+    // 관리자 사이드바: 처리 필요 보정 건수 (미업로드 + 반려)
+    @GetMapping("/retouch/count")
+    public ResponseEntity<Integer> adminRetouchCount() {
+        return ResponseEntity.ok(orderMapper.countAdminRetouchPending());
     }
 
     @PostMapping(value = "/order/retouch/preview-upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)

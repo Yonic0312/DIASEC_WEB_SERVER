@@ -1,5 +1,6 @@
 package com.diasec.diasec_backend.controller;
 
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.http.ResponseEntity;
@@ -11,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.diasec.diasec_backend.service.SiteSettingService;
+import com.diasec.diasec_backend.vo.MainBlogItemVo;
 
 import lombok.RequiredArgsConstructor;
 
@@ -63,4 +65,20 @@ public class SiteSettingController {
         ));
     }
 
+    // 공개: 메인 홈 블로그 목록
+    @GetMapping("/site-setting/main-blogs")
+    public ResponseEntity<List<MainBlogItemVo>> getMainBlogs() {
+        return ResponseEntity.ok(siteSettingService.getMainHomeBlogs());
+    }
+
+    // 관리자: 메인 홈 블로그 목록 저장
+    @PostMapping("/admin/site-setting/main-blogs")
+    public ResponseEntity<Map<String, Object>> updateMainBlogs(@RequestBody Map<String, List<MainBlogItemVo>> body) {
+        List<MainBlogItemVo> items = body != null ? body.get("items") : null;
+        List<MainBlogItemVo> saved = siteSettingService.updateMainHomeBlogs(items);
+        return ResponseEntity.ok(Map.of(
+            "success", true,
+            "items", saved
+        ));
+    }
 }

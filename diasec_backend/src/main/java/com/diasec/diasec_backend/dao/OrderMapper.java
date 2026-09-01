@@ -119,6 +119,8 @@ public interface OrderMapper {
         @Param("status") String status
     );
 
+    int countAdminRetouchPending();
+
     void softDeleteLatestFile(Long itemId, String role);
 
     int scheduleRetouchPreviewDelete(@Param("itemId") long itemId);

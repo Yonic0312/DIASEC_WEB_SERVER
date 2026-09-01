@@ -58,17 +58,20 @@ const Main = () => {
     const [categoryList, setCategoryList] = useState([]);
     const [bestPriceMap, setBestPriceMap] = useState({});
     const [newPriceMap, setNewPriceMap] = useState({});
+    const [mainHomeBlogs, setMainHomeBlogs] = useState([]);
     
 
     // 올라오는 효과
     const [hasScrolled, setHasScrolled] = useState(false);
     const newSectionRef = useRef(null);
     const reviewSectionRef = useRef(null);
+    const blogSectionRef = useRef(null);
     const aboutSectionRef = useRef(null);
 
     const [visibleSections, setVisibleSections] = useState({
         new: false,
         review: false,
+        blog: false,
         about: false,
     });
 
@@ -88,6 +91,7 @@ const Main = () => {
         const refs = [
             { key: 'new', ref: newSectionRef },
             { key: 'review', ref: reviewSectionRef },
+            { key: 'blog', ref: blogSectionRef },
             { key: 'about', ref: aboutSectionRef },
         ];
 
@@ -126,11 +130,12 @@ const Main = () => {
         });
 
         return () => observer.disconnect();
-    }, [hasScrolled]);
+    }, [hasScrolled, mainHomeBlogs.length]);
 
     useEffect(() => {
         const sectionMap = [
             { key: 'review', ref: reviewSectionRef },
+            { key: 'blog', ref: blogSectionRef },
             { key: 'about', ref: aboutSectionRef },
         ];
 
@@ -161,6 +166,7 @@ const Main = () => {
     // 작가 카테고리는 빼기
     const filteredCategoryList = categoryList.filter(c => c.name !== 'authorCollection');
     const [reviewIndex, setReviewIndex] = useState(0); // 리뷰 슬라이드
+    const [blogIndex, setBlogIndex] = useState(0);
 
     const [reviewVisibleCount, setReviewVisibleCount] = useState(3);
     useEffect(() => {
@@ -233,6 +239,7 @@ const Main = () => {
 
         return () => controller.abort();
     }, [API]);
+
 
     // 이미지 실제 크기 읽는 함수
     const loadImageSize = (src) => {
@@ -354,6 +361,12 @@ const Main = () => {
         setReviewIndex((prev) => Math.min(prev, maxIndex));
     }, [reviewVisibleCount, topThumbnailReviews.length]);
 
+    // 화면 데이터에 맞게 blogIndex 범위 클렘프
+    useEffect(() => {
+        const maxIndex = Math.max(0, mainHomeBlogs.length - reviewVisibleCount);
+        setBlogIndex((prev) => Math.min(prev, maxIndex));
+    }, [reviewVisibleCount, mainHomeBlogs.length]);
+
     // 리뷰 상세 페이지 이미지 슬라이드
     const [selectedImageIndex, setSelectedImageIndex] = useState(0);
     const [imageZoomOpen, setImageZoomOpen] = useState(false);
@@ -413,6 +426,26 @@ const Main = () => {
 
         return () => controller.abort();
     }, [API]);
+
+    // 메인 홈 블로그 목록
+    useEffect(() => {
+        const controller = new AbortController();
+
+        (async () => {
+            try {
+                const data = await getData(API, '/site-setting/main-blogs', {
+                    signal: controller.signal,
+                });
+                setMainHomeBlogs(Array.isArray(data) ? data : []);
+            } catch (err) {
+                if (err?.name === 'CanceledError') return;
+                console.error('메인 블로그 로딩 실패:', err);
+                setMainHomeBlogs([]);
+            }
+        })();
+
+        return () => controller.abort();
+    }, [API])
 
     // 공개 리뷰 전체 건수·평균 별점
     useEffect(() => {
@@ -996,6 +1029,100 @@ const Main = () => {
                 </div>
             )}
             {/* /🔶 리뷰 썸네일 슬라이더 영역 */}
+
+            {mainHomeBlogs.length > 0 && (
+                <div
+                    ref={blogSectionRef}
+                    className={`w-full mt-10 md:mt-14 transition-all duration-700 ease-out break-keep ${
+                        visibleSections.blog
+                            ? 'opacity-100 translate-y-0'
+                            : 'opacity-0 translate-y-6'
+                    }`}
+                >
+                    <h2 className="
+                        md:text-[30px] sm:text-[clamp(24px,3.911vw,30px)] text-[clamp(18px,3.755vw,24px)]
+                        font-bold mb-2 text-center">블로그</h2>
+                    <p className="
+                        md:text-base text-[clamp(11px,2.086vw,16px)]
+                        text-center text-gray-600 mb-4">
+                        공간에 어울리는 작품과 액자 이야기를 만나보세요.
+                    </p>
+
+                    <div className="relative overflow-hidden mt-3">
+                        <div 
+                            className="flex transition-transform duration-500 ease-in-out"
+                            style={{ transform: `translateX(-${blogIndex * (100 / reviewVisibleCount)}%)` }}
+                        >
+                            {mainHomeBlogs.map((post, i) => (
+                                <a
+                                    key={`${post.linkUrl}-${i}`}
+                                    href={post.linkUrl}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="group w-1/2 md:w-1/3 flex-shrink-0 px-3"
+                                >
+                                    <div className="relative overflow-hidden rounded-xl border border-gray-100 shadow-sm aspect-square">
+                                        <img 
+                                            src={post.imageUrl}
+                                            alt={post.title}
+                                            referrerPolicy="no-referrer"
+                                            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
+                                        />
+                                        <div className="
+                                            absolute inset-0 flex items-center justify-center p-4
+                                            bg-black/60 opacity-0 group-hover:opacity-100
+                                            transition-opacity duration-300
+                                        ">
+                                            <p className="
+                                                text-white text-center font-semibold leading-snug
+                                                md:text-base text-[clamp(13px,2.085vw,16px)]
+                                                line-clamp-4
+                                            ">
+                                                {post.title}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </a>
+                            ))}
+                        </div>
+
+                        {mainHomeBlogs.length > reviewVisibleCount && (
+                            <div className="absolute top-1/2 -translate-y-1/2 w-full flex justify-between px-2 z-10">
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        const maxIndex = Math.max(0, mainHomeBlogs.length - reviewVisibleCount);
+                                        setBlogIndex((prev) => (prev === 0 ? maxIndex : prev - 1));
+                                    }}
+                                    className="
+                                        xl:w-10 lg:w-9 md:w-8 w-7
+                                        xl:h-10 lg:h-9 md:h-8 h-7
+                                        text-[12px]
+                                        bg-white shadow-md rounded-full
+                                        flex justify-center items-center font-bold hover:bg-gray-100"
+                                >
+                                    <ChevronLeft className="w-full h-full" />
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        const maxIndex = Math.max(0, mainHomeBlogs.length - reviewVisibleCount);
+                                        setBlogIndex((prev) => (prev === maxIndex ? 0 : prev + 1));
+                                    }}
+                                    className="
+                                        xl:w-10 lg:w-9 md:w-8 w-7
+                                        xl:h-10 lg:h-9 md:h-8 h-7
+                                        text-[12px]
+                                        bg-white shadow-md rounded-full
+                                        flex justify-center items-center font-bold hover:bg-gray-100"
+                                >
+                                    <ChevronRight className="w-full h-full" />
+                                </button>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            )}
 
             {imageZoomOpen && selectedReview?.images?.[selectedImageIndex] && (
                 <div

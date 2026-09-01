@@ -504,6 +504,22 @@
         ORDER BY oi.item_id DESC
     </select>
 
+    <!-- 관리자 사이드바: 미업로드 + 고객 반려(재처리 필요) -->
+    <select id="countAdminRetouchPending" resultType="int">
+        SELECT COUNT(*)
+        FROM order_items oi
+        JOIN orders o ON o.oid = oi.oid
+        LEFT JOIN order_item_file f
+            ON f.item_id = oi.item_id
+            AND f.role = 'RETOUCH_PREVIEW'
+            AND f.deleted_at IS NULL
+        WHERE oi.retouch_enabled = 1
+            AND (
+                f.file_id IS NULL
+                OR f.status = 'REJECTED'
+            )
+    </select>
+
     <update id="softDeleteLatestFile">
         UPDATE order_item_file
         SET deleted_at = NOW()

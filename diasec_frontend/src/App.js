@@ -91,6 +91,7 @@ import Admin_CollectionManager from './components/Admin/Admin_CollectionManager'
 import Admin_Order_Detail from './components/Admin/Order_Detail'
 import Admin_EventManager from './components/Admin/Admin_EventManager'
 import Admin_SiteDiscount from './components/Admin/Admin_SiteDiscount'
+import Admin_MainBlog from './components/Admin/Admin_MainBlog'
 import Admin_BizConsultList from './components/Admin/Admin_BizConsultList'
 import Admin_BizConsultView from './components/Admin/Admin_BizConsultView'
 // import Admin_Lease_Status from './components/Admin/Lease_Status'
@@ -601,6 +602,7 @@ function App() {
                         <Route path="/admin_CollectionManager" element={<AdminRoute><Admin_CollectionManager /></AdminRoute>} />
                         <Route path="/admin_EventManager" element={<AdminRoute><Admin_EventManager /></AdminRoute>} />
                         <Route path="/admin_SiteDiscount" element={<AdminRoute><Admin_SiteDiscount /></AdminRoute>} />
+                        <Route path="/admin_MainBlog" element={<AdminRoute><Admin_MainBlog /></AdminRoute>} />
                         <Route path="/admin_PageView" element={<AdminRoute><Admin_PageView /></AdminRoute>} />
                         
                     </Route>
