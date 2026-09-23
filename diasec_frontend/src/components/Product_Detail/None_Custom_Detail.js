@@ -121,8 +121,8 @@ const None_Custom_Detail = () => {
     const [width, setWidth] = useState(35.6);
     const [height, setHeight] = useState(27.9);
 
-    const MIN_WIDTH = 28;
-    const MIN_HEIGHT = 28;
+    const MIN_WIDTH = 12;
+    const MIN_HEIGHT = 12;
 
     const [aspectRatio, setAspectRatio] = useState(null);
     const [toastCooldown, setToastCooldown] = useState(false);
@@ -425,7 +425,7 @@ const None_Custom_Detail = () => {
             remainingArea -= tierArea;
             lastMax = tier.maxArea;
         }
-        return Math.max(20000, Math.floor(Math.round(totalPrice) / 1000) * 1000);
+        return Math.max(25000, Math.floor(Math.round(totalPrice) / 1000) * 1000);
     }
 
     // 사이즈 조정바 최대 width 계산

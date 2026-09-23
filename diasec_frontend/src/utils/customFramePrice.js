@@ -1,4 +1,4 @@
-export const MIN_WIDTH = 28;
+export const MIN_WIDTH = 12;
 
 export const priceTiers = [
     { maxArea: 993.4, unitPrice: 38.3 },
@@ -52,7 +52,7 @@ export const calculateCumulativePrice = (area) => {
         lastMax = tier.maxArea;
     }
 
-    return Math.max(20000, Math.floor(Math.round(totalPrice) / 1000) * 1000);
+    return Math.max(25000, Math.floor(Math.round(totalPrice) / 1000) * 1000);
 };
 
 export const getMinFrameConfigByRatio = (ratio) => {

@@ -145,8 +145,8 @@ const Main_CustomFrames = () => {
     const [selectedItemId, setSelectedItemId] = useState(null);
     const selectedItem = customItems.find(item => item.id === selectedItemId);
 
-    const MIN_WIDTH = 28;
-    const MIN_HEIGHT = 28;
+    const MIN_WIDTH = 12;
+    const MIN_HEIGHT = 12;
 
     // 중간 가져오기
     const getMidWidth = (minW, maxW, maxH, ratio) => {
@@ -684,7 +684,7 @@ const Main_CustomFrames = () => {
             remainingArea -= tierArea;
             lastMax = tier.maxArea;
         }
-        return Math.max(20000, Math.floor(Math.round(totalPrice) / 1000) * 1000);
+        return Math.max(25000, Math.floor(Math.round(totalPrice) / 1000) * 1000);
     }
 
     // 사이즈 조정바 최대 width 계산
