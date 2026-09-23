@@ -202,6 +202,12 @@ public class AdminOrderService {
         adminOrderMapper.updateLeasePeriod(itemId, leaseStart, leaseEnd);
     }
 
+    // 관리자: 사이즈(인치 문자열) 수정
+    public boolean updateOrderItemSize(Long itemId, String size) {
+        if (itemId == null || size == null || size.isBlank()) return false;
+        return adminOrderMapper.updateOrderItemSize(itemId, size.trim()) > 0;
+    }
+
     // 어드민페이지 맞춤액자 이미지 삭제
     public boolean deleteCustomImage(Long itemId) {
         // itemId로 thumbnail 조회

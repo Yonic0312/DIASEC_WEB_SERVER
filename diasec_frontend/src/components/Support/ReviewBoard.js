@@ -14,6 +14,13 @@ const ReviewBoard = () => {
     const [selectedReview, setSelectedReview] = useState(null);
     const reviewsPerPage = 10;
 
+    const maskReviewAuthor = (id) => {
+        const raw = (id || '').trim();
+        if (!raw) return '비회원님';
+        if (raw.length <= 2) return raw[0] + '*';
+        return raw.slice(0, 2) + '***';
+    };
+
     // 상단 리뷰 슬라이더
     const [topThumbnailReviews, setTopThumbnailReviews] = useState([]);
 
@@ -201,7 +208,11 @@ const ReviewBoard = () => {
                             <div className="
                                 md:text-sm text-[clamp(12px,1.825vw,14px)]
                                 flex items-center justify-between text-gray-400 mt-3">
-                                <span>{review.id.slice(0, 2)}***님</span>
+                                <span>
+                                    {maskReviewAuthor(review.id) === '비회원님'
+                                        ? '비회원님'
+                                        : `${maskReviewAuthor(review.id)}님`}
+                                </span>
                                 <span>{review.createdAt?.slice(2, 10).replaceAll('-', '.')}</span>
                             </div>
                         </div>
@@ -297,7 +308,7 @@ const ReviewBoard = () => {
                                 </p>
 
                                 <div className="mt-4 pt-3 border-t border-gray-100 text-[12px] text-gray-500 flex justify-between">
-                                    작성자: {selectedReview.id?.slice(0, 2)}***
+                                    작성자: {maskReviewAuthor(selectedReview.id)}
                                     <span className="text-[12px] text-gray-500">
                                         {selectedReview.createdAt?.slice(0, 10)}
                                     </span>

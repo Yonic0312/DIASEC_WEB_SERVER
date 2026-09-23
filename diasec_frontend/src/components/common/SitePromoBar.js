@@ -7,7 +7,15 @@ import { useSitePromo } from '../../context/SitePromoContext';
 const SitePromoBar = () => {
     const { siteDiscountPercent } = useSitePromo();
     const pct = Math.max(0, Number(siteDiscountPercent) || 0);
-    const label = pct > 0 ? `OPEN 기념 ${pct}% 할인 + 무료배송 (~ 09.24)` : '+무료배송';
+    const promoLabel = pct > 0 ? (
+        <>
+            OPEN 기념 {pct}% 할인 {' '}
+            <span className="text-red-500">마감임박</span>
+            (~ 09.24) + 무료배송
+        </>
+    ) : (
+        '+ 무료배송'
+    );
    
     const [dismissed, setDismissed] = useState(false);
     const [scrollHidden, setScrollHidden] = useState(false);
@@ -18,7 +26,7 @@ const SitePromoBar = () => {
         if (dismissed || !barRef.current) return;
         const h = barRef.current.offsetHeight;
         if (h > 0) barHeightRef.current = h;
-    }, [dismissed, label]);
+    }, [dismissed, pct]);
 
     useEffect(() => {
         if (dismissed) return undefined;
@@ -55,7 +63,7 @@ const SitePromoBar = () => {
             <div ref={barRef} className="relative w-full bg-[#303030] text-white">
                 <div className="max-w-[1300px] mx-auto px-8 md:px-10 py-[6px] flex items-center justify-center text-center">
                     <span className="text-[11px] md:text-[13px] font-semibold tracking-wide">
-                        {label}
+                        {promoLabel}
                     </span>
                 </div>
                 <button

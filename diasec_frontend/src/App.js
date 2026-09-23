@@ -262,7 +262,7 @@ function SeoMetaManager() {
 
         const promoTitle = getSeoPromoTitle();
         const seoDefaults = {
-            title: `디아섹 액자 전문 • 맞춤액자 디아섹코리아${promoTitle}`,
+            title: `디아섹 아크릴 액자 전문 • 맞춤액자${promoTitle}`,
             description:
                 '프리미엄급 디아섹 공식 제작 쇼핑몰입니다. 사진 및 작품을 맞춤 사이즈 제작과 오픈기념 20% 할인 + 무료 배송 혜택을 확인하세요.',
             canonical: currentUrl,

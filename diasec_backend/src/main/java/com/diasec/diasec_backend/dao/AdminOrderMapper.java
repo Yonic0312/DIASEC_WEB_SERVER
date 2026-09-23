@@ -35,6 +35,9 @@ public interface AdminOrderMapper {
     // 리스정보 수정
     void updateLeasePeriod(@Param("itemId") Long itemId, @Param("leaseStart") String leaseStart, @Param("leaseEnd") String leaseEnd);
 
+    // 관리자: 주문 상품 사이즈(인치 문자열) 수정
+    int updateOrderItemSize(@Param("itemId") Long itemId, @Param("size") String size);
+
     String selectThumbnailByItemId(@Param("itemId") Long itemId);
     int clearThumbnail(@Param("itemId") Long itemId);
 

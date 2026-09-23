@@ -51,6 +51,7 @@
                     o.id LIKE CONCAT('%', #{keyword}, '%') 
                     or oi.title LIKE CONCAT('%', #{keyword}, '%')
                     or o.orderer_name LIKE CONCAT('%', #{keyword}, '%')
+                    or CAST(oi.oid AS CHAR) LIKE CONCAT('%', #{keyword}, '%')
                 )
             </if>
         </where>
@@ -81,6 +82,12 @@
         SET tracking_company = #{trackingCompany},
             tracking_number = #{trackingNumber}
         WHERE oid = #{oid}
+    </update>
+
+    <update id="updateOrderItemSize">
+        UPDATE order_items
+        SET size = #{size}
+        WHERE item_id = #{itemId}
     </update>
 
     <select id="selectShippingNotificationTarget" resultType="map">

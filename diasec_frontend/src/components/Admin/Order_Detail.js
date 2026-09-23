@@ -78,6 +78,15 @@ const PRINT_ORDER_STYLES = `
         border-color: #000 !important;
         -webkit-print-color-adjust: exact;
         print-color-adjust: exact;
+        font-weight:800;
+    }
+    .print-wrap .print-badge-red {
+        background: #fff !important;
+        color: #FF0000 !important;
+        border-color: #FF0000 !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+        font-size: 13px;
     }
     .print-wrap .print-note-box {
         min-height: 70px;
@@ -138,12 +147,6 @@ const PRINT_ORDER_STYLES = `
         .print-wrap .print-section {
             break-inside: avoid;
         }
-        .print-wrap .print-badge-dark {
-            background: #000 !important;
-            color: #fff !important;
-            -webkit-print-color-adjust: exact;
-            print-color-adjust: exact;
-        }
         .print-wrap .print-size-line {
             font-size: 16px;
             white-space: pre;
@@ -191,6 +194,12 @@ const Order_Detail = () => {
     const [showLeaseModal, setShowLeaseModal] = useState(false);
     const [leaseStart, setLeaseStart] = useState('');
     const [leaseEnd, setLeaseEnd] = useState('');
+
+    // 사이즈 수정 (화면 cm 입력 -> DB 인치 저장)
+    const [showSizeModal, setShowSizeModal] = useState(false);
+    const [sizeWidthCm, setSizeWidthCm] = useState('');
+    const [sizeHeightCm, setSizeHeightCm] = useState('');
+    const [sizeSaving, setSizeSaving] = useState(false);
 
     // 모달 입력 필드 상태 정의
     const [trackingCompany, setTrackingCompany] = useState('한진택배');
@@ -384,7 +393,7 @@ const Order_Detail = () => {
 
     const [showModal, setShowModal] = useState(false);
 
-    const isAnyModalOpen = showModal || showGuestPwModal;
+    const isAnyModalOpen = showModal || showGuestPwModal || showSizeModal;
 
     // 모달 열림 시 배경 스크롤 잠금
     useEffect(() => {
@@ -404,6 +413,7 @@ const Order_Detail = () => {
             if (e.key !== 'Escape') return;
             if (showModal) setShowModal(false);
             else if (showGuestPwModal) setShowGuestPwModal(false);
+            else if (showSizeModal) setShowSizeModal(false);
         };
         window.addEventListener('keydown', onKey);
 
@@ -417,7 +427,7 @@ const Order_Detail = () => {
             document.body.style.overflow = prevOverflow;
             window.scrollTo(0, scrollY);
         };
-    }, [isAnyModalOpen, showModal, showGuestPwModal]);
+    }, [isAnyModalOpen, showModal, showGuestPwModal, showSizeModal]);
 
     const reload = () => {
         axios.get(`${API}/order/detail/${itemId}`)
@@ -719,6 +729,64 @@ const Order_Detail = () => {
                 <span className="print-size-b">B: {bW} x {bH}</span>
             </>
         );
+    };
+
+    const parseSizeToCm = (size) => {
+        if (!size || typeof size !== 'string') return { wCm: '', hCm: '' };
+        const match = size.match(/([\d.]+)\s*[xX]\s*([\d.]+)/);
+        if (!match) return { wCm: '', hCm: '' };
+        const wInch = parseFloat(match[1]);
+        const hInch = parseFloat(match[2]);
+        if (isNaN(wInch) || isNaN(hInch)) return { wCm: '', hCm: '' };
+        return {
+            wCm: String(Math.round(wInch * 2.54)),
+            hCm: String(Math.round(hInch * 2.54)),
+        };
+    };
+
+    const openSizeModal = () => {
+        const { wCm, hCm } = parseSizeToCm(order.items?.[0]?.size);
+        setSizeWidthCm(wCm);
+        setSizeHeightCm(hCm);
+        setShowSizeModal(true);
+    };
+
+    const handleSizeSave = async () => {
+        const wCm = Number(sizeWidthCm);
+        const hCm = Number(sizeHeightCm);
+        if (!Number.isFinite(wCm) || !Number.isFinite(hCm) || wCm <= 0 || hCm <= 0) {
+            toast.error('가로·세로 cm를 올바르게 입력해 주세요.');
+            return;
+        }
+
+        const wInch = (wCm / 2.54).toFixed(1);
+        const hInch = (hCm / 2.54).toFixed(1);
+        const size = `${wInch} X ${hInch}`;
+
+        setSizeSaving(true);
+        try {
+            const res = await fetch(`${API}/admin/order/update-size`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({
+                    itemId: order.items[0].itemId,
+                    size,
+                }),
+            });
+            const data = await res.json();
+            if (!data?.success) {
+                toast.error(data?.message || '사이즈 저장 실패');
+                return;
+            }
+            toast.success('사이즈가 저장되었습니다.');
+            setShowSizeModal(false);
+            reload();
+        } catch (err) {
+            console.error('사이즈 저장 중 오류');
+        } finally {
+            setSizeSaving(false);
+        }
     };
 
     const convertCategoryName = (category) => {
@@ -1102,11 +1170,11 @@ const Order_Detail = () => {
                             <span className="print-badge">
                                 {convertCategoryName(order.items[0].category)}
                             </span>
-                            <span className={item.finishType === 'matte' ? 'print-badge print-badge-dark' : 'print-badge'}>
-                                 {item.finishType === 'matte' ? '무광' : '유광'}
-                            </span>
                             <span className="print-badge">
                                 수량 {order.items[0].quantity}개
+                            </span>
+                            <span className={item.finishType === 'matte' ? 'print-badge print-badge-red' : 'print-badge'}>
+                                 {item.finishType === 'matte' ? '무광' : '유광'}
                             </span>
                         </div>
  
@@ -1125,9 +1193,16 @@ const Order_Detail = () => {
                                 {(order.items[0].price * order.items[0].quantity).toLocaleString()}원
                             </div>
 
-                            <div className="print-size-line whitespace-pre">
+                            <div className="print-size-line whitespace-pre flex flex-wrap items-center gap-2">
                                 <span className="print-label">사이즈:</span>
                                 {renderPrintSize(order.items[0].size)}
+                                <button
+                                    type="button"
+                                    className="no-print px-2 py-0.5 text-[11px] font-medium border rounded bg-gray-800 text-white hover:bg-gray-700"
+                                    onClick={openSizeModal}
+                                >
+                                    사이즈 수정
+                                </button>
                             </div>            
 
                             {/* {order.items[0].category === 'customFrames' && hasCustomUploadImage && (
@@ -1166,20 +1241,15 @@ const Order_Detail = () => {
 
                         <div className="text-sm leading-6">
                             <div>
-                                <span className='print-label'>보정 신청:</span>
+                                <span className='print-label'>보정 신청: </span>
                                 {retouchEnabled ? (
-                                    <span className="print-badge print-badge-dark">신청</span>
+                                    <>
+                                        <span className="print-badge print-badge-dark">신청</span>
+                                        <span> {'->'} </span>
+                                        {retouchTypes.length > 0 ? retouchTypes.join(', ') : '선택 없음'}
+                                    </>
                                 ) : (
                                     '미신청'
-                                )}
-
-                                {retouchEnabled && (
-                                    <>
-                                        <div>
-                                            <span className="print-label">보정 항목:</span>
-                                            {retouchTypes.length > 0 ? retouchTypes.join(', ') : '선택 없음'}
-                                        </div>
-                                    </>
                                 )}
                             </div>
 
@@ -1596,6 +1666,74 @@ const Order_Detail = () => {
                     </button>
                 </div>
             </div>
+
+            {/* 사이즈 수정 모달 */}
+            {showSizeModal && (
+                <div
+                    className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-[10000] overscroll-none"
+                    onTouchMove={(e) => {
+                        if (e.target === e.currentTarget) e.preventDefault();
+                    }}
+                >
+                    <div className="bg-white p-6 rounded-lg w-[380px] shadow-lg relative">
+                        <h3 className="text-lg font-bold mb-2">사이즈 수정</h3>
+                        <p className="text-xs text-gray-500 mb-4">
+                            cm로 입력하면 인치로 변환되어 저장됩니다.
+                        </p>
+
+                        <div className="grid grid-cols-2 gap-3 mb-3">
+                            <label className="flex flex-col gap-1 text-sm">
+                                <span className="font-medium text-gray-700">가로 (cm)</span>
+                                <input 
+                                    type="number"
+                                    min="1"
+                                    step="1"
+                                    value={sizeWidthCm}
+                                    onChange={(e) => setSizeWidthCm(e.target.value)}
+                                    className="border border-gray-300 rounded px-2 py-1.5 w-full"
+                                />
+                            </label>
+                            <label className="flex flex-col gap-1 text-sm">
+                                <span className="font-medium text-gray-700">세로 (cm)</span>
+                                <input 
+                                    type="number"
+                                    min="1"
+                                    step="1"
+                                    value={sizeHeightCm}
+                                    onChange={(e) => setSizeHeightCm(e.target.value)}
+                                    className="border border-gray-300 rounded px-2 py-1.5 w-full"
+                                />
+                            </label>
+                        </div>
+
+                        {Number(sizeWidthCm) > 0 && Number(sizeHeightCm) > 0 && (
+                            <p className="text-xs text-gray-600 mb-4">
+                                저장 예정(인치): {' '}
+                                <strong>
+                                    {(Number(sizeWidthCm) / 2.54).toFixed(1)} X {(Number(sizeHeightCm) / 2.54).toFixed(1)}
+                                </strong>
+                            </p>
+                        )}
+
+                        <button
+                            type="button"
+                            onClick={handleSizeSave}
+                            disabled={sizeSaving}
+                            className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 disabled:opacity-50"
+                        >
+                            {sizeSaving ? '저장 중…' : '저장'}
+                        </button>
+
+                        <button
+                            type="button"
+                            onClick={() => setShowSizeModal(false)}
+                            className="absolute top-3 right-3 text-gray-400 hover:text-black"
+                        >
+                            ✕
+                        </button>
+                    </div>
+                </div>
+            )}
 
             {/* 배송 페이지 모달창 */}
             {showModal && (

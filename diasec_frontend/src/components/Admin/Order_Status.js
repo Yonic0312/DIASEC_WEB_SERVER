@@ -372,7 +372,7 @@ const Order_Status = () => {
                     <span className="mx-1">~</span>
                     <input type="date" className="w-[130px] h-[40px] border text-center" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
                     
-                    <input type="text" placeholder="회원ID, 주문자명, 상품명" className="w-[180px] h-[40px] border text-sm px-3" value={keyword} onChange={(e) => setKeyword(e.target.value)} />
+                    <input type="text" placeholder="주문번호, 회원ID, 주문자명, 상품명" className="w-[180px] h-[40px] border text-sm px-3" value={keyword} onChange={(e) => setKeyword(e.target.value)} />
                 </div>
             </div>
             
@@ -420,7 +420,7 @@ const Order_Status = () => {
                                             });
                                         }}
                                     >
-                                        <td className="p-3">{isSameOid ? '' : item.createdAt?.slice(0, 10)}</td>
+                                        <td className="p-3">{isSameOid ? '' : item.createdAt?.slice(2, 10)}</td>
                                         <td className="p-3">{isSameOid ? '' : item.oid}</td>
                                         <td className="p-3">{isSameOid ? '' : item.id == '' ? '비회원' : item.id}</td>
                                         <td className="p-3">{isSameOid ? '' : (item.ordererName || '-')}</td>

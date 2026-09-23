@@ -47,6 +47,13 @@ const getData = async (API, url,config = {}) => {
     return res.data;
 }
 
+const maskReviewAuthor = (id) => {
+    const raw = (id || '').trim();
+    if (!raw) return '비회원님';
+    if (raw.length <= 2) return raw[0] + '*';
+    return raw.slice(0, -2) + '***';
+}
+
 // 인기작품, 신규작품 포함
 const Main = () => {
     const API = process.env.REACT_APP_API_BASE;
@@ -599,7 +606,7 @@ const Main = () => {
                                 </span>
                                 <span className="inline-flex items-center gap-1">
                                     <Clock className="w-3.5 h-3.5 text-[#d0ac88]" />
-                                    주문 2~5일 수령
+                                    평균 2~5일 내 수령
                                 </span>
                                 <span className="inline-flex items-center gap-1">
                                     <ShieldCheck className="w-3.5 h-3.5 text-[#d0ac88]" />
@@ -1018,7 +1025,7 @@ const Main = () => {
                                 </p>
 
                                 <div className="mt-4 pt-3 border-t border-gray-100 text-[12px] text-gray-500 flex justify-between">
-                                    작성자: {selectedReview.id?.slice(0, 2)}***
+                                    작성자: {maskReviewAuthor(selectedReview.id)}
                                     <span className="text-[12px] text-gray-500">
                                         {selectedReview.createdAt?.slice(0, 10)}
                                     </span>

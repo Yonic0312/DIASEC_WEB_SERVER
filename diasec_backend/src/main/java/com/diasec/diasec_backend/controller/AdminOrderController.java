@@ -147,6 +147,26 @@ public class AdminOrderController {
         }
     }
 
+    // 관리자: 사이즈 수정 (DB에는 인치 문자열 저장)
+    @PostMapping("/order/update-size")
+    public Map<String, Object> updateORderItemSize(@RequestBody Map<String, Object> body) {
+        try { 
+            Long  itemId = Long.valueOf(String.valueOf(body.get("itemId")));
+            String size = strParam(body.get("size"));
+            if (size.isEmpty()) {
+                return Map.of("success", false, "message", "사이즈가 필요합니다.");
+            }
+            boolean ok = adminOrderService.updateOrderItemSize(itemId, size);
+            if (!ok) {
+                return Map.of("success", false, "message", "사이즈 저장에 실패했습니다.");
+            }
+            return Map.of("success", true, "size", size);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return Map.of("success", false, "message", e.getMessage() != null ? e.getMessage() : "오류");
+        }
+    }
+
     @PostMapping("/order/delete-custom-image")
     public ResponseEntity<?> deleteCustomImage(@RequestBody Map<String, Object> body) {
         try {

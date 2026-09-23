@@ -1,10 +1,10 @@
-import { useEffect, useMemo, useState, useContext } from "react";
+import { useEffect, useMemo, useState, useContext, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { usePartner } from '../../../context/PartnerContext';
 import { toast } from "react-toastify";
 import { MemberContext } from "../../../context/MemberContext";
-import { getDiscountedUnitPrice, getEffectiveExtraPercent } from "../../../utils/siteDiscount";
+import { getDiscountedUnitPrice, getEffectiveExtraPercent, getBulkDiscountPercent } from "../../../utils/siteDiscount";
 import {
     SitePriceRow,
     SitePriceTotal,
@@ -207,14 +207,29 @@ const Cart = () => {
         );
     }, [selectedItems]);
 
+    const selectedBulkPct = useMemo(
+        () => (checked.size > 0 ? getBulkDiscountPercent(selectedOriginalTotal) : 0),
+        [checked.size, selectedOriginalTotal]
+    );
+    // 선택 합계가 대량할인 구각에 들면, 다른 줄에도 더 높은 쪽만 올려서 표시
+    const useCombinedBulkPreview = checked.size > 0 && selectedBulkPct > 0;
+
+    const getOrderTotalForDiscount = useCallback((lineOriginalTotal) => {
+        if (!useCombinedBulkPreview) return lineOriginalTotal;
+        const lineBulk = getBulkDiscountPercent(lineOriginalTotal);
+        // 개별 대량할인이 선택 합계보다 높거나 같으면 개별 유지
+        return lineBulk >= selectedBulkPct ? lineOriginalTotal : selectedOriginalTotal;
+    }, [useCombinedBulkPreview, selectedBulkPct, selectedOriginalTotal]);
+
     const selectedTotalPrice = useMemo(() => {
-        const extra = getEffectiveExtraPercent(partnerDiscount, selectedOriginalTotal);
         return selectedItems.reduce((sum, it) => {
-            const extra = getEffectiveExtraPercent(partnerDiscount, selectedOriginalTotal);
+            const lineTotal = (Number(it.price) || 0) * (Number(it.quantity) || 1);
+            const totalForExtra = getOrderTotalForDiscount(lineTotal);
+            const extra = getEffectiveExtraPercent(partnerDiscount, totalForExtra);
             const unit = getDiscountedUnitPrice(it.price, extra);
             return sum + unit * (Number(it.quantity) || 1);
         }, 0);
-    }, [selectedItems, partnerDiscount, selectedOriginalTotal]);
+    }, [selectedItems, partnerDiscount, getOrderTotalForDiscount]);
 
     if (loading) return <div className="text-center py-20 text-gray-500">로딩 중...</div>;
 
@@ -327,6 +342,9 @@ const Cart = () => {
                         {items.map((it) => {
                             const cid = getKey(it);
                             const isChecked = checked.has(cid);
+                            const lineOriginalTotal =
+                                (Number(it.price) || 0) * (Number(it.quantity) || 1);
+                            const orderTotalForDiscount = getOrderTotalForDiscount(lineOriginalTotal);
 
                             return (
                                 <div className="flex flex-col">
@@ -434,7 +452,7 @@ const Cart = () => {
                                                     <SitePriceRow
                                                         unitPrice={it.price}
                                                         quantity={Number(it.quantity) || 1}
-                                                        originalOrderTotal={selectedOriginalTotal}
+                                                        originalOrderTotal={orderTotalForDiscount}
                                                         neutralClassName={`${SITE_PRICE_TEXT} text-gray-700 font-semibold`}
                                                     />
                                                 </div>
@@ -456,7 +474,9 @@ const Cart = () => {
                                     <SitePriceTotal
                                         original={selectedOriginalTotal}
                                         discounted={selectedTotalPrice}
-                                        originalOrderTotal={selectedOriginalTotal} 
+                                        originalOrderTotal={
+                                            useCombinedBulkPreview ? selectedOriginalTotal : undefined
+                                        }
                                     />
                                 )}
                             </div>

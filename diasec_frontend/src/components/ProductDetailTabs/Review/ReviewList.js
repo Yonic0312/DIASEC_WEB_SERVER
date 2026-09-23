@@ -53,9 +53,11 @@ const ReviewList = ({ pid }) => {
 
     // 닉네임 마스킹
     const maskedId = (id) => {
-        if (id.length <= 2) return id[0] + '*';
-        if (id.length <= 4) return id.slice(0, 1)  + '**';
-        return id.slice(0, 2) + '*'.repeat(id.length - 3) + id.slice(-1);
+        const raw = (id || '').trim();
+        if (!raw) return '비회원님';
+        if (raw.length <= 2) return raw[0] + '*';
+        if (raw.length <= 4) return raw.slice(0, 1) + '**';
+        return raw.slice(0, 2) + '*'.repeat(raw.length - 3) + raw.slice(-1);
     };
     
     // 리뷰 페이징
@@ -143,7 +145,11 @@ const ReviewList = ({ pid }) => {
                                 <div className="
                                     md:text-sm text-[clamp(12px,1.825vw,14px)]
                                     flex items-center justify-between text-gray-400">
-                                    <span>{review.id?.slice(0, 2)}***님</span>
+                                    <span>
+                                        {maskedId(review.id) === '님'
+                                            ? '비회원님'
+                                            : `${maskedId(review.id)}님`}
+                                    </span>
                                     <span>{review.createdAt?.slice(2, 10).replaceAll('-', '.')}</span>
                                 </div>
                                 <div className="
@@ -274,7 +280,7 @@ const ReviewList = ({ pid }) => {
                                     </p>
 
                                     <div className="mt-4 pt-3 border-t border-gray-100 text-[12px] text-gray-500 flex justify-between">
-                                        작성자: {selectedReview.id?.slice(0, 2)}***
+                                        작성자: {maskedId(selectedReview.id)}
                                         <span className="text-[12px] text-gray-500">
                                             {selectedReview.createdAt?.slice(0, 10)}
                                         </span>
