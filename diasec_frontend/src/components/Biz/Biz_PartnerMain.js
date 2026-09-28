@@ -33,7 +33,7 @@ const Biz_PartnerMain = () => {
 
     return (
         <div className="w-full px-4 mt-20 mb-16 break-keep">
-            <div className="max-w-4xl mx-auto space-y-10">
+            <div className="max-w-4xl mx-auto space-y-5">
                 <h1 className="md:text-3xl text-[clamp(18px,3.91vw,30px)] text-center font-bold">
                     업무제휴
                 </h1>
@@ -126,25 +126,34 @@ const Biz_PartnerMain = () => {
                             제휴 신청이 검토 중입니다. 검토 후 승인 여부를 안내드립니다.
                         </p>
                     )}
-                    {showApplyButton && (
-                        <button
-                            type="button"
-                            onClick={() => navigate('/bizPartnerApply')}
-                            className="bg-black text-white px-6 py-3 rounded font-medium"
-                        >
-                            업무 제휴 신청하기
-                        </button>
-                    )}
-                    {member?.id && (
-                        <button
-                            type="button"
-                            onClick={() => navigate('/mypage/partner')}
-                            className="border border-black px-6 py-3 rounded font-medium"
-                        >
-                            내 파트너 현황
-                        </button>
-                    )}
+                    <div className="flex gap-3 justify-center text-sm md:text-base">
+                        {showApplyButton && (
+                            <button
+                                type="button"
+                                onClick={() => navigate('/bizPartnerApply')}
+                                className="bg-black text-white px-6 py-3 rounded font-medium"
+                            >
+                                업무 제휴 신청하기
+                            </button>
+                        )}
+                        {member?.id && (
+                            <button
+                                type="button"
+                                onClick={() => navigate('/mypage/partner')}
+                                className="border border-black px-6 py-3 rounded font-medium"
+                            >
+                                내 파트너 현황
+                            </button>
+                        )}
+                    </div>
                 </div>
+            </div>
+
+            <div className='flex justify-center'>
+                <p className="mt-4 w-fit p-4 border border-gray-200 bg-gray-50 rounded-xl text-sm md:text-base">
+                    <span className="font-semibold">업무제휴 문의</span>{' '}
+                    담당자 · <a href="tel:010-4231-5879" className="underline">010-4231-5879</a>
+                </p>
             </div>
         </div>
     );

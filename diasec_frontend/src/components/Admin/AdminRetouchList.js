@@ -16,7 +16,7 @@ const AdminRetouchList = () => {
     const [list, setList] = useState([]);
     const [loading, setLoading] = useState(false);
 
-    // 업로드 중 상태
+    // 업로드 중·처리 중 상태
     const [uploadingItemId, setUploadingItemId] = useState(null);
     const [processingItemId, setProcessingItemId] = useState(null);
 
@@ -143,7 +143,7 @@ const AdminRetouchList = () => {
             { itemId },
             { withCredentials: true }
         );
-        if (!res.data?.success) throw new Error(res.data?.messgae || "삭제 실패");
+        if (!res.data?.success) throw new Error(res.data?.message || "삭제 실패");
         return res.data;
     };
 
@@ -257,7 +257,7 @@ const AdminRetouchList = () => {
 
                             {/* 주문자 */}
                             <div className="text-center col-span-2">
-                                <div>{row.memberId || "-"}</div>
+                                <div>{row.recipient || "-"}</div>
                             </div>
                             
                             {/* 상품/보정요청 */}
@@ -342,7 +342,7 @@ const AdminRetouchList = () => {
                                         {processingItemId === row.itemId ? "처리중..." : "승인 처리"}
                                     </button>
                                 )}
-                                 
+
                                 {canUpload(row) ? (
                                     <label className="inline-flex items-center justify-center px-2 py-1 text-xs border rounded cursor-pointer hover:bg-gray-50">
                                         {uploadingItemId === row.itemId ? "업로드중..." : "프리뷰 업로드"}
@@ -410,13 +410,12 @@ const AdminRetouchList = () => {
                                     && !row.previewUrl
                                     && !canAdminApprove(row)
                                     && !hasRetouchText(row) && (
-                                        <span className="text-xs text-gray-400 text-center">-</span>
-                                    )
-                                }
+                                    <span className="text-xs text-gray-400 text-center">-</span>
+                                )}
                             </div>
                         </div>
                     ))
-                ) }
+                )}
             </div>
 
             {/* 미리보기 모달 */}

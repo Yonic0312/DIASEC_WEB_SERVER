@@ -2,10 +2,6 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  
     "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
-<!--
-  [배포·동기화 주의] 운영 서버는 나이스페이용 컬럼·쿼리(nicepay_tid 등)가 포함되어 로컬 매퍼와 다를 수 있습니다.
-  로컬에서 복사한 이 파일로 서버를 덮어쓰지 마세요. OrderService·주문 플로우와 함께 diff 후 병합하세요.
--->
 <mapper namespace="com.diasec.diasec_backend.dao.OrderMapper">
 
     <!-- OrderVo 속성 정의 -->
@@ -35,18 +31,6 @@
         <result property="createdAt" column="created_at"/>
         <result property="recipientPhone" column="recipient_phone"/>
         <result property="guestPassword" column="guest_password"/>
-        <result property="nicepayTid" column="nicepay_tid"/>
-        <result property="nicepayOrderId" column="nicepay_order_id"/>
-        <result property="payMethodCode" column="pay_method_code"/>
-        <result property="cardName" column="card_name"/>
-        
-        <result property="vbankCode" column="vbank_code"/>
-        <result property="vbankName" column="vbank_name"/>
-        <result property="vbankAccount" column="vbank_account"/>
-        <result property="vbankHolder" column="vbank_holder"/>
-        <result property="vbankDueDate" column="vbank_due_date"/>
-        <result property="paidAt" column="paid_at"/>
-        <result property="webhookLastStatus" column="webhook_last_status"/>
     </resultMap>
 
     <!-- orders 테이블에 주문 저장 -->
@@ -55,18 +39,12 @@
             id, orderer_name, orderer_phone, email, recipient, postcode, address, detail_address,
             used_credit, payment_method, depositor, bank_account, receipt_type, receipt_method, receipt_info,
             total_price, total_deposit, delivery_fee, final_price, created_at, delivery_message, buyer_request, recipient_phone,
-            guest_password,
-            nicepay_tid, nicepay_order_id, pay_method_code, card_name,
-            vbank_code, vbank_name, vbank_account, vbank_holder, vbank_due_date,
-            paid_at, webhook_last_status
+            guest_password
         ) VALUES (
             #{id}, #{ordererName}, #{ordererPhone}, #{email}, #{recipient}, #{postcode}, #{address}, #{detailAddress},
             #{usedCredit}, #{paymentMethod}, #{depositor}, #{bankAccount}, #{receiptType}, #{receiptMethod}, #{receiptInfo},
             #{totalPrice}, #{totalDeposit}, #{deliveryFee}, #{finalPrice}, NOW(), #{deliveryMessage}, #{buyerRequest}, #{recipientPhone},
-            #{guestPassword},
-            #{nicepayTid}, #{nicepayOrderId}, #{payMethodCode}, #{cardName},
-            #{vbankCode}, #{vbankName}, #{vbankAccount}, #{vbankHolder}, #{vbankDueDate},
-            #{paidAt}, #{webhookLastStatus}
+            #{guestPassword}
         )
     </insert>
 
@@ -116,7 +94,7 @@
     <select id="selectOrderItems" resultType="OrderItemsVo">
         SELECT 
             oi.item_id as itemId, oi.oid, oi.cid, oi.pid, oi.category, oi.title, oi.quantity, oi.price, 
-            oi.period, oi.size, oi.thumbnail, oi.thumbnail_preview as thumbnailPreview, 
+            oi.period, oi.size, oi.thumbnail, oi.thumbnail_preview as thumbnailPreview,
             oi.custom_frame_delivered_at as customFrameDeliveredAt,
             oi.order_status as orderStatus, o.final_price AS finalPrice, finish_type as finishType,
             oi.lease_start as leaseStart, oi.lease_end as leaseEnd, tracking_number as trackingNumber, tracking_company as trackingCompany,
@@ -170,7 +148,7 @@
     <select id="selectGuestOrdersByOrdererPhoneDigits" resultMap="orderMap">
         SELECT * FROM orders
         WHERE guest_password IS NOT NULL
-            AND REPLACE(REPLACE(REPLACE(orderer_phone, '-', ''), ' ', ''), '.', '') = #{phoneDigits}
+          AND REPLACE(REPLACE(REPLACE(orderer_phone, '-', ''), ' ', ''), '.', '') = #{phoneDigits}
         ORDER BY created_at DESC
     </select>
 
@@ -178,7 +156,7 @@
     <select id="selectOrderItemById" resultType="OrderItemsVo">
         SELECT 
             oi.item_id as itemId, oi.oid, oi.cid, oi.pid, oi.category, oi.title, oi.author, oi.quantity, oi.price, oi.deposit, oi.finish_type as finishType,
-            oi.period, oi.size, oi.thumbnail, oi.thumbnail_preview as thumbnailPreview, 
+            oi.period, oi.size, oi.thumbnail, oi.thumbnail_preview as thumbnailPreview,
             oi.custom_frame_delivered_at as customFrameDeliveredAt,
             oi.order_status as orderStatus, 
             oi.lease_start as leaseStart, oi.lease_end as leaseEnd,
@@ -212,16 +190,6 @@
     <update id="cancelAllOrderItems">
         UPDATE order_items
         SET order_status = '취소'
-        WHERE oid = #{oid}
-    </update>
-
-    <!-- 가상계좌 환불 계좌 저장 (주문 취소 요청 시) -->
-    <update id="updateRefundAccountByOid">
-        UPDATE order_items
-        SET 
-            bank_name = #{bankName},
-            account_number = #{accountNumber},
-            account_holder = #{accountHolder}
         WHERE oid = #{oid}
     </update>
 
@@ -452,6 +420,7 @@
             oi.item_id AS itemId,
             oi.oid AS oid,
             o.id AS memberId,
+            o.recipient AS recipient,
             oi.title AS title,
             oi.retouch_enabled AS retouchEnabled,
             oi.order_status AS orderStatus,
@@ -573,13 +542,7 @@
             AND deleted_at IS NULL
     </update>
 
-    <select id="selectOidByNicepayOrderId" resultType="long" parameterType="string">
-        SELECT oid
-        FROM orders
-        WHERE nicepay_order_id = #{nicepayOrderId}
-        LIMIT 1
-    </select>
-
+    <!-- 맞춤액자: 배송완료 후 30일 경과한 썸네일만 정리 -->
     <select id="selectCustomFrameStalePreviewItems" resultType="OrderItemsVo">
         <![CDATA[
         SELECT
@@ -587,10 +550,10 @@
             thumbnail_preview AS thumbnailPreview
         FROM order_items
         WHERE category = 'customFrames'
-            AND thumbnail_preview IS NOT NULL
-            AND TRIM(thumbnail_preview) <> ''
-            AND custom_frame_delivered_at IS NOT NULL
-            AND custom_frame_delivered_at < DATE_SUB(NOW(), INTERVAL 30 DAY)
+          AND thumbnail_preview IS NOT NULL
+          AND TRIM(thumbnail_preview) <> ''
+          AND custom_frame_delivered_at IS NOT NULL
+          AND custom_frame_delivered_at < DATE_SUB(NOW(), INTERVAL 30 DAY)
         ]]>
     </select>
 

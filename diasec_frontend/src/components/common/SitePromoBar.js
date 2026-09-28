@@ -2,21 +2,13 @@ import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { X } from 'lucide-react';
 import { useSitePromo } from '../../context/SitePromoContext';
 
-/** 헤더 상단 고정 - x로 닫기 / 바 높이만큼 스크롤 시  숨김 · 맨 위에서만 다시 표시) */
-
+/** 헤더 상단 고정 — X로 닫기 / 바 높이만큼 스크롤 시 숨김 · 맨 위에서만 다시 표시 */
 const SitePromoBar = () => {
     const { siteDiscountPercent } = useSitePromo();
     const pct = Math.max(0, Number(siteDiscountPercent) || 0);
-    const promoLabel = pct > 0 ? (
-        <>
-            OPEN 기념 {pct}% 할인 {' '}
-            <span className="text-red-500">마감임박</span>
-            (~ 09.24) + 무료배송
-        </>
-    ) : (
-        '+ 무료배송'
-    );
-   
+    // const label = pct > 0 ? `OPEN 기념 ${pct}% 할인 마감임박(~ 09.24) + 무료배송` : '+ 전 상품 무료 배송';
+    const label = '전 상품 무료 배송';
+
     const [dismissed, setDismissed] = useState(false);
     const [scrollHidden, setScrollHidden] = useState(false);
     const barRef = useRef(null);
@@ -26,7 +18,7 @@ const SitePromoBar = () => {
         if (dismissed || !barRef.current) return;
         const h = barRef.current.offsetHeight;
         if (h > 0) barHeightRef.current = h;
-    }, [dismissed, pct]);
+    }, [dismissed, label]);
 
     useEffect(() => {
         if (dismissed) return undefined;
@@ -54,7 +46,7 @@ const SitePromoBar = () => {
     if (dismissed) return null;
 
     return (
-        <div 
+        <div
             className={`
                 overflow-hidden transition-[max-height,opacity] duration-300 ease-out
                 ${scrollHidden ? 'max-h-0 opacity-0' : 'max-h-12 opacity-100'}
@@ -63,7 +55,7 @@ const SitePromoBar = () => {
             <div ref={barRef} className="relative w-full bg-[#303030] text-white">
                 <div className="max-w-[1300px] mx-auto px-8 md:px-10 py-[6px] flex items-center justify-center text-center">
                     <span className="text-[11px] md:text-[13px] font-semibold tracking-wide">
-                        {promoLabel}
+                        {label}
                     </span>
                 </div>
                 <button

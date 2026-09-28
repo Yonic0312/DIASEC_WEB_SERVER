@@ -11,6 +11,8 @@ import {
     SitePriceTotal,
     SITE_PRICE_TEXT,
 } from '../common/SitePriceDisplay';
+import DeskStandInfoModal from '../common/DeskStandInfoModal';
+import { MIN_FRAME_PRICE } from '../../utils/customFramePrice';
 import bg from '../../assets/CustomFrames/p.png';
 import bg2 from '../../assets/CustomFrames/p2.png'; // 현재 배경
 
@@ -35,6 +37,7 @@ const None_Custom_Detail = () => {
     
     /** cm만 넣어 견적 확인(주문·이미지에 반영 안 함) */
     const [adminQuoteModalOpen, setAdminQuoteModalOpen] = useState(false);
+    const [deskStandModalOpen, setDeskStandModalOpen] = useState(false);
     const [adminQuoteW, setAdminQuoteW] = useState('');
     const [adminQuoteH, setAdminQuoteH] = useState('');
 
@@ -425,7 +428,7 @@ const None_Custom_Detail = () => {
             remainingArea -= tierArea;
             lastMax = tier.maxArea;
         }
-        return Math.max(25000, Math.floor(Math.round(totalPrice) / 1000) * 1000);
+        return Math.max(MIN_FRAME_PRICE, Math.floor(Math.round(totalPrice) / 1000) * 1000);
     }
 
     // 사이즈 조정바 최대 width 계산
@@ -1195,10 +1198,24 @@ const None_Custom_Detail = () => {
                                             <div className="flex-1 min-w-0 h-full">
                                                 <div className="flex items-start justify-between gap-2">
                                                     <div className='flex-1 h-fit text-start'>
-                                                        <p className='text-[12.5px] font-semibold text-gray-800'>
-                                                            {Math.floor(item.width)} x {Math.floor(item.height)}cm
-                                                        </p>
-                                                        <p className="mt-[-4px] mb-[4px]">
+                                                        <div className="flex flex-row justify-between">
+                                                            <p className='text-[12.5px] font-semibold text-gray-800'>
+                                                                {Math.floor(item.width)} x {Math.floor(item.height)}cm
+                                                            </p>
+                                                            {Number(item.price) <= MIN_FRAME_PRICE && (
+                                                                <button
+                                                                    type="button"
+                                                                    className="shrink-0 text-[11px] px-1.5 py-0.5 rounded border border-[#D0AC88] text-[#a57647] hover:bg-[#fff5ea] font-medium"
+                                                                    onClick={(e) => {
+                                                                        e.stopPropagation();
+                                                                        setDeskStandModalOpen(true);
+                                                                    }}
+                                                                >
+                                                                    탁상용?
+                                                                </button>
+                                                            )}
+                                                        </div>    
+                                                        <p className="mt-[-4px] mb-[4px] flex items-center gap-1.5 flex-wrap">
                                                             <SitePriceRow
                                                                 unitPrice={item.price}
                                                                 originalOrderTotal={totalPriceWithoutShipping}
@@ -1517,6 +1534,11 @@ const None_Custom_Detail = () => {
                     </div>
                 </div>
             )}
+            <DeskStandInfoModal
+                open={deskStandModalOpen}
+                onClose={() => setDeskStandModalOpen(false)}
+            />
+            
             {adminQuoteModalOpen && (
                 <div
                     className="fixed inset-0 z-[10000] flex items-center justify-center bg-black/45 p-4 overscroll-none"
