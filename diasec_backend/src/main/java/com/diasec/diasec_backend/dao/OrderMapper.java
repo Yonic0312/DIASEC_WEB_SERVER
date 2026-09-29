@@ -128,6 +128,9 @@ public interface OrderMapper {
     List<OrderItemFileVo> selectRetouchPreviewToDelete();
     int markRetouchPreviewDeleted(@Param("fileId") Long fileId);
 
+    // 판매로 볼 액자 수량 합계 (입금대기, 취소, 환불 제외)
+    long sumSoldFrameQuantity();
+
     // 배송완료 후 30일 지난 맞춤액자 썸네일 정리 대상
     List<OrderItemsVo> selectCustomFrameStalePreviewItems();
 

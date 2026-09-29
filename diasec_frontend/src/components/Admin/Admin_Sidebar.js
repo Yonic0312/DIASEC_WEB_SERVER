@@ -163,6 +163,7 @@ const Admin_Sidebar = () => {
             <button className="text-sm opacity-65" onClick={() => navigate('/admin_ReviewManager')}>후기 관리</button>
             <button className="text-sm opacity-65" onClick={() => navigate('/admin_EventManager')}>이벤트 관리</button>
             <button className="text-sm opacity-65" onClick={() => navigate('/admin_SiteDiscount')}>사이트 할인율 관리</button>
+            <button className="text-sm opacity-65" onClick={() => navigate('/admin_SoldFrames')}>판매 액자 수</button>
             <button className="text-sm opacity-65" onClick={() => navigate('/admin_MainBlog')}>메인 홈 블로그 관리</button>
         </div>
     )

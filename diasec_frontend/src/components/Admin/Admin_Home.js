@@ -421,6 +421,7 @@ const Admin_Home = () => {
             { label: '후기', path: '/admin_ReviewManager' },
             { label: '이벤트', path: '/admin_EventManager' },
             { label: '사이트 할인율', path: '/admin_SiteDiscount' },
+            { label: '판매 액자 수', path: '/admin_SoldFrames' },
             { label: '메인 홈 블로그', path: '/admin_MainBlog' },
         ],
         []

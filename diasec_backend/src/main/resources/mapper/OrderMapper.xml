@@ -557,6 +557,14 @@
         ]]>
     </select>
 
+    <select id="sumSoldFrameQuantity" resultType="long">
+        SELECT CAST(COALESCE(SUM(quantity), 0) AS SIGNED)
+        FROM order_items
+        WHERE order_status IN (
+            '배송완료', '교환신청', '교환회수완료', '교환배송중', '교환완료'
+        )
+    </select>
+
     <update id="clearThumbnailPreview">
         UPDATE order_items
         SET thumbnail_preview = NULL
