@@ -578,11 +578,14 @@ const Main = () => {
                     ))}
                 </div>
                 {/* 신뢰 요약 바 */}
-                {reviewStats.count > 0 && (() => {
-                    const avgRating = (reviewStats.avgRating != null
-                        ? Number(reviewStats.avgRating)
-                        : (topThumbnailReviews.reduce((s, r) => s + (r.rating || 5), 0) / Math.max(1, topThumbnailReviews.length))
-                    ).toFixed(1);
+                {(() => {
+                    const hasReviews = reviewStats.count > 0;
+                    const avgRating = hasReviews
+                        ? (reviewStats.avgRating != null
+                            ? Number(reviewStats.avgRating)
+                            : (topThumbnailReviews.reduce((s, r) => s + (r.rating || 5), 0) / Math.max(1, topThumbnailReviews.length))
+                        ).toFixed(1)
+                        : null;
                     return (
                         <div className="w-full px-4">
                             <div className="
@@ -592,14 +595,16 @@ const Main = () => {
                                 border-y border-gray-200
                                 text-[11px] sm:text-[12px] md:text-[13px] text-gray-600
                             ">
-                                <span
-                                    className="inline-flex items-center gap-1 cursor-pointer hover:text-[#a67a3e] transition-colors"
-                                    onClick={() => navigate('/reviewBoard')}
-                                >
-                                    <Star className="w-3.5 h-3.5 text-orange-400 fill-orange-400" />
-                                    <span className="font-semibold text-gray-900">{avgRating}</span>
-                                    <span className="underline underline-offset-2">리뷰 {reviewStats.count.toLocaleString()}건</span>
-                                </span>
+                                {hasReviews && (
+                                    <span
+                                        className="inline-flex items-center gap-1 cursor-pointer hover:text-[#a67a3e] transition-colors"
+                                        onClick={() => navigate('/reviewBoard')}
+                                    >
+                                        <Star className="w-3.5 h-3.5 text-orange-400 fill-orange-400" />
+                                        <span className="font-semibold text-gray-900">{avgRating}</span>
+                                        <span className="underline underline-offset-2">리뷰 {reviewStats.count.toLocaleString()}건</span>
+                                    </span>
+                                )}
                                 <span className="inline-flex items-center gap-1">
                                     <Truck className="w-3.5 h-3.5 text-[#d0ac88]" />
                                     무료배송

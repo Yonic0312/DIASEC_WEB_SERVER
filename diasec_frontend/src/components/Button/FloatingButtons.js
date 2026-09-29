@@ -13,6 +13,24 @@ const FloatingButtons = () => {
 
     return (
         <div className="fixed bottom-28 md:bottom-10 right-3 md:right-8 flex flex-col gap-3 z-[100]">
+            <a
+                href="https://pf.kakao.com/_RWqbX"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="카카오톡 상담"
+                className="flex items-center justify-center
+                    xl:w-16 lg:w-14 md:w-12 w-[42px]
+                    xl:h-16 lg:h-14 md:h-12 h-[42px]
+                    rounded-full bg-[#FEE500] text-[#3C1E1E] shadow-lg hover:bg-[#F5DC00] transition"
+            >
+                <svg viewBox="0 0 24 24" className="w-[58%] h-[58%]" aria-hidden="true">
+                    <path
+                        fill="currentColor"
+                        d="M12 3C6.5 3 2 6.6 2 11c0 2.8 1.8 5.2 4.5 6.6-.15.55-.7 2.55-.8 2.95-.1.4.15.4.3.3.15-.1 2.4-1.6 3.4-2.3.8.15 1.6.25 2.6.25 5.5 0 10-3.6 10-8S17.5 3 12 3z"
+                    />
+                </svg>
+            </a>
+            
             {!isCartPage && (
                 <button
                     type="button"
@@ -32,6 +50,7 @@ const FloatingButtons = () => {
                     <ShoppingCart/>
                 </button>
             )}
+            
 
             <button
                 type="button"

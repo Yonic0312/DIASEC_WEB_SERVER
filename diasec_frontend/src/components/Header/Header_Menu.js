@@ -275,7 +275,7 @@ const Header_Menu = () => {
 
     // 데스크톱 메뉴 (기존)
     return (
-        <div className="relative hidden md:block items-center w-full h-fit border-b-[1px] px-2"
+        <div className="relative hidden md:block items-center w-full h-fit px-2"
             onMouseLeave={scheduleClose}
             onMouseEnter={() => {
                 if (closeTimerRef.current) clearTimeout(closeTimerRef.current);

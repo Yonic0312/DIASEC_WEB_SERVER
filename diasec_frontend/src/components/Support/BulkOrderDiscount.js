@@ -38,7 +38,7 @@ const BulkOrderDiscount = () => {
                     <div className="space-y-1 text-sm md:text-base leading-relaxed">
                         <p>대량 주문 시 주문 금액에 따라 추가 할인 혜택을 제공합니다.</p>
                         {/* <p>현재 사이트에서 진행 중인 할인과 중복 적용됩니다.</p> */}
-                        <p>아래와 같이 주문 금액에 따라 할인이 적용되됩니다.</p>
+                        <p>아래와 같이 주문 금액에 따라 할인이 적용됩니다.</p>
                         <p>제휴 할인과는 중복되지 않으며, 두가지 중 높은 할인율이 적용됩니다.</p>
                     </div>
                 </header>
@@ -115,8 +115,7 @@ const BulkOrderDiscount = () => {
                             신한은행 110-117-372730 / 예금주: 임정원(디아섹)
                         </p>
                         <p className="text-gray-800">
-                            <span className="font-semibold">대량주문 문의</span>{' '}
-                            담당자 · <a href="tel:010-4231-5879" className="underline">010-4231-5879</a>
+                            <span className="font-semibold">문의</span>{' '} : <a href="tel:010-4231-5879" className="underline">010-4231-5879</a>
                         </p>
                     </div>
                 </section>

@@ -117,7 +117,7 @@ const SEO_SITE_ORIGIN = 'https://diasec.co.kr';
 const SEO_DEFAULT_OG_IMAGE = `${SEO_SITE_ORIGIN}/icon.png`;
 const getSeoPromoTitle = () => {
     const pct = getSiteWideDiscountPercent();
-    return pct > 0 ? ` | 오픈 ${pct}% 할인 + 전 상품 무료배송` : ' + 전 상품 무료배송';
+    return ' + 전 상품 무료배송';
 };
 
 function getMainItemsSeoByType(type) {

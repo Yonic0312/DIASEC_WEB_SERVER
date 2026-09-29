@@ -524,8 +524,7 @@ const Biz_ConsultWrite = () => {
             </div>
             <div className='flex justify-center'>
                 <p className="mt-4 w-fit p-4 border border-gray-200 bg-gray-50 rounded-xl text-sm md:text-base">
-                    <span className="font-semibold">기업컨설팅 문의</span>{' '}
-                    담당자 · <a href="tel:010-4231-5879" className="underline">010-4231-5879</a>
+                    <span className="font-semibold">문의</span>{' '} : <a href="tel:010-4231-5879" className="underline">010-4231-5879</a>
                 </p>
             </div>
         </div>
