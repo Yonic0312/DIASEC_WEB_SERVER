@@ -106,6 +106,44 @@
   animation: sizeAdjustHintTextBlink 1s ease-in-out infinite;
 }
 
+@keyframes optionHintPop {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes optionHintFloat {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+.option-hint-pop {
+  animation: optionHintPop 0.25s ease forwards;
+}
+
+.option-hint-bubble {
+  background-color: #808080;
+  filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.16));
+  animation: optionHintFloat 2.4s ease-in-out infinite;
+}
+
+.option-hint-bubble::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: -5px;
+  width: 12px;
+  height: 12px;
+  background-color: inherit;
+  transform: translate(-50%) rotate(45deg);
+}
 
 @font-face {
     font-family: 'Paperozi';

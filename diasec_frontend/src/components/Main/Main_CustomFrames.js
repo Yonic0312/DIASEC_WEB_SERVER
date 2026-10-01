@@ -501,7 +501,25 @@ const Main_CustomFrames = () => {
 
     const dismissSizeAdjustHint = () => {
         setShowSizedAdjustHint(false);
-    }
+    };
+
+    const optionHintConsumedRef = useRef(false);
+    const optionHintTimerRef = useRef(null);
+    const [showOptionHint, setShowOptionHint] = useState(false);
+
+    const activateOptionHint = () => {
+        if (optionHintConsumedRef.current || customItems.length === 0) return;
+        optionHintConsumedRef.current = true;
+        setShowOptionHint(true);
+        optionHintTimerRef.current = setTimeout(() => setShowOptionHint(false), 14000);
+    };
+
+    const dismissOptionHint = () => {
+        clearTimeout(optionHintTimerRef.current);
+        setShowOptionHint(false);
+    };
+
+    useEffect(() => () => clearTimeout(optionHintTimerRef.current), []);
 
     const showToastOnce = (message) => {
         if (!toastCooldown) {
@@ -550,6 +568,7 @@ const Main_CustomFrames = () => {
         }
 
         setWidthInput(String(Math.round(value)));
+        activateOptionHint();
     }
 
     const handleHeightChange = (e) => {
@@ -589,6 +608,7 @@ const Main_CustomFrames = () => {
         }
     
         setHeightInput(String(Math.round(value)));
+        activateOptionHint();
     };
 
     const toInchSize = (wCm, hCm) => {
@@ -807,6 +827,7 @@ const Main_CustomFrames = () => {
         setHeightInput(String(clamped.height))
         setPaperKey(key);
         dismissSizeAdjustHint();
+        activateOptionHint();
     };
 
     const isCustomOrderFull = customItems.length >= MAX_CUSTOM_ORDER_ITEMS;
@@ -1108,7 +1129,7 @@ const Main_CustomFrames = () => {
                                 md:text-sm text-[clamp(10px,1.82vw,14px)]
                                 mt-2 text-600 font-medium text-center'
                         >
-                            이미지 등록
+                            이미지 업로드
                         </span>
                     </div>
 
@@ -1180,7 +1201,7 @@ const Main_CustomFrames = () => {
                             px-3
                             mt-2 text-gray-600
                             md:text-sm text-[clamp(10.5px,1.825vw,14px)]">
-                        오른쪽에서 이미지 등록을 하신 후 사이즈를 조정해 결제를 하면 주문이 완료됩니다
+                        오른쪽에서 이미지 업로드를 하신 후 사이즈를 조정해 결제를 하면 주문이 완료됩니다
                     </p>
                 </div>
             </div>
@@ -1249,7 +1270,7 @@ const Main_CustomFrames = () => {
 
                     {/* 이미지 업로드 */}
                     <div className="md:mt-3">
-                        <label className="text-base font-semibold">이미지 등록</label>
+                        <label className="text-base font-semibold">이미지 업로드</label>
                         <div className='md:mt-2'>
                             {/* 숨겨진 파일 업로드 input */}
                             <input 
@@ -1380,6 +1401,10 @@ const Main_CustomFrames = () => {
                                         dismissSizeAdjustHint();
                                         const onlyNumber = e.target.value.replace(/\D/g, '');
                                         setWidthInput(onlyNumber);
+                                        const v = parseFloat(onlyNumber);
+                                        if (!isNaN(v) && v >= getActualMinWidth()) {
+                                            handleWidthChange({ target: { value: v }});
+                                        }
                                     }}
                                     onKeyDown={(e) => {
                                         if (e.key === "Enter") {
@@ -1429,6 +1454,10 @@ const Main_CustomFrames = () => {
                                         dismissSizeAdjustHint();
                                         const onlyNumber = e.target.value.replace(/\D/g, '');
                                         setHeightInput(onlyNumber);
+                                        const v = parseFloat(onlyNumber);
+                                        if (!isNaN(v) && v >= MIN_HEIGHT) {
+                                            handleHeightChange({ target: { value: v }});
+                                        }
                                     }}
                                     onKeyDown={(e) => {
                                         if (e.key === "Enter") {
@@ -1507,14 +1536,24 @@ const Main_CustomFrames = () => {
                         {/* 결제 목록 */}
                         {selectedItem && (
                             <>
-                                <span
-                                    className={`
-                                        mt-2 ml-1 inline-flex items-center text-[12px] font-semibold
-                                        ${isCustomOrderFull ? ' text-[#a67a3e]' : ' text-gray-600'}
-                                    `}
-                                >
-                                    등록 {customItems.length} / {MAX_CUSTOM_ORDER_ITEMS}
-                                </span>
+                                <div className="w-full mt-1 px-1">
+                                    <span
+                                        className={`
+                                            w-fit inline-flex items-center text-[12px] font-semibold
+                                            ${isCustomOrderFull ? ' text-[#a67a3e]' : ' text-gray-600'}
+                                        `}
+                                    >
+                                        현재 업로드 개수 {customItems.length}개
+                                        {/* {MAX_CUSTOM_ORDER_ITEMS}개 */}
+                                    </span>
+                                    {showOptionHint && (
+                                        <div className="option-hint-pop relative z-20 mb-2 flex justify-center" role="status">
+                                            <div className="option-hint-bubble relative rounded-lg px-2.5 py-2 text-center text-[13px] font-medium leading-snug text-white">
+                                                아래에 가격과 옵션을 확인해 주십시오
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
                                 <div className='max-h-[300px] overflow-y-scroll mt-1 space-y-2'>
                                     {customItems.map((item, idx) => (
                                         <div 
@@ -1579,6 +1618,7 @@ const Main_CustomFrames = () => {
                                                         className='w-6 h-6 shrink-0 text-red-500 hover:text-white hover:bg-red-500 border border-red-300 rounded-full flex items-center justify-center transition'
                                                         onClick={(e) => {
                                                             e.stopPropagation();
+                                                            dismissOptionHint();
 
                                                             const deleteId = item.id;
 
@@ -1635,6 +1675,7 @@ const Main_CustomFrames = () => {
                                                             className="w-6 h-6 border rounded-md bg-white hover:bg-gray-100 text-[14px] font-bold flex items-center justify-center"
                                                             onClick={(e) => {
                                                                 e.stopPropagation();
+                                                                dismissOptionHint();
                                                                 updateItemQuantity(item.id, -1);
                                                             }}
                                                         >
@@ -1647,6 +1688,7 @@ const Main_CustomFrames = () => {
                                                             onClick={(e) => e.stopPropagation()}
                                                             onChange={(e) => {
                                                                 e.stopPropagation();
+                                                                dismissOptionHint();
                                                                 const { value } = e.target;
                                                                 if (value === '') return;
                                                                 setItemQuantity(item.id, value);
@@ -1662,6 +1704,7 @@ const Main_CustomFrames = () => {
                                                             className="w-6 h-6 border rounded-md bg-white hover:bg-gray-100 text-[14px] font-bold flex items-center justify-center"
                                                             onClick={(e) => {
                                                                 e.stopPropagation();
+                                                                dismissOptionHint();
                                                                 updateItemQuantity(item.id, 1);
                                                             }}
                                                         >
@@ -1677,6 +1720,7 @@ const Main_CustomFrames = () => {
                                                             type="button"
                                                             onClick={(e) => {
                                                                 e.stopPropagation();
+                                                                dismissOptionHint();
                                                                 if (item.finishType !== 'matte') return;
                                                                 toggleFinishType(item.id);
                                                             }}
@@ -1691,6 +1735,7 @@ const Main_CustomFrames = () => {
                                                             type="button"
                                                             onClick={(e) => {
                                                                 e.stopPropagation();
+                                                                dismissOptionHint();
                                                                 if (item.finishType === 'matte') return;
                                                                 toggleFinishType(item.id);
                                                             }}
@@ -1730,6 +1775,7 @@ const Main_CustomFrames = () => {
                                                                 }`}
                                                             onClick={(e) => {
                                                                 e.stopPropagation();
+                                                                dismissOptionHint();
                                                                 openRetouchModal(item);
                                                             }}
                                                         >

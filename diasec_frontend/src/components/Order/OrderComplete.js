@@ -82,6 +82,20 @@ const OrderComplete = () => {
             .finally(() => setLoading(false));
     }, [oidFromQuery, fromState.oid, fromState.guestPassword, guestPassword]);
 
+    // 네이버 광고 구매 전환 (주문당 1회, 새로고침 시 중복 방지)
+    useEffect(() => {
+        if (!oid || finalPrice == null) return;
+        const sentKey = `naverCnvSent_${oid}`;
+        if (sessionStorage.getItem(sentKey)) return;
+
+        if (window.wcs && window.wcs_do) {
+            const _nasa = {};
+            _nasa['cnv'] = window.wcs.cnv('1', String(finalPrice)); // 1 = 구매완료
+            window.wcs_do(_nasa);
+            sessionStorage.setItem(sentKey, '1');
+        }
+    }, [oid, finalPrice]);
+
     if (errorFromQuery === '1') {
         return (
             <div className="w-full min-h-[600px] flex flex-col items-center justify-center px-4 py-10">

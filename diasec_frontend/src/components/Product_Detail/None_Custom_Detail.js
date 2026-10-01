@@ -224,6 +224,24 @@ const None_Custom_Detail = () => {
         setShowSizeAdjustHint(false);
     };
 
+    const optionHintConsumedRef = useRef(false);
+    const optionHintTimerRef = useRef(null);
+    const [showOptionHint, setShowOptionHint] = useState(false);
+
+    const activateOptionHint = () => {
+        if (optionHintConsumedRef.current || customItems.length === 0) return;
+        optionHintConsumedRef.current = true;
+        setShowOptionHint(true);
+        optionHintTimerRef.currentj = setTimeout(() => setShowOptionHint(false), 14000);
+    };
+
+    const dismissOptionHint = () => {
+        clearTimeout(optionHintTimerRef.current);
+        setShowOptionHint(false);
+    };
+
+    useEffect(() => () => clearTimeout(optionHintTimerRef.current), []);
+
     useEffect(() => {
         setWidthInput(String(Math.floor(width)));
     }, [width]);
@@ -271,6 +289,7 @@ const None_Custom_Detail = () => {
         }
 
         setWidthInput(String(Math.floor(value)));
+        activateOptionHint();
     }
 
     const handleHeightChange = (e) => {
@@ -310,6 +329,7 @@ const None_Custom_Detail = () => {
         }
 
         setHeightInput(String(Math.floor(value)));
+        activateOptionHint();
     }
 
     const toInchSize = (wCm, hCm) => {
@@ -548,6 +568,7 @@ const None_Custom_Detail = () => {
         setHeightInput(String(clamped.height));
         setPaperKey(key);
         dismissSizeAdjustHint();
+        activateOptionHint();
     };
 
     // 최종 비용 계산(배송비 없음 - 전 구간 무료배송)
@@ -1037,6 +1058,10 @@ const None_Custom_Detail = () => {
                                         dismissSizeAdjustHint();
                                         const onlyNumber = e.target.value.replace(/\D/g, '');
                                         setWidthInput(onlyNumber);
+                                        const v = parseFloat(onlyNumber);
+                                        if (!isNaN(v) && v >= getActualMinWidth()) {
+                                            handleWidthChange({ target: { value: v } });
+                                        }
                                     }}
                                     onKeyDown={(e) => {
                                         if (e.key === "Enter") {
@@ -1091,6 +1116,10 @@ const None_Custom_Detail = () => {
                                         dismissSizeAdjustHint();
                                         const onlyNumber = e.target.value.replace(/\D/g, '');
                                         setHeightInput(onlyNumber);
+                                        const v = parseFloat(onlyNumber);
+                                        if (!isNaN(v) && v >= MIN_HEIGHT) {
+                                            handleHeightChange({ target: { value: v } });
+                                        }
                                     }}
                                     onKeyDown={(e) => {
                                         if (e.key === "Enter") {
@@ -1163,7 +1192,8 @@ const None_Custom_Detail = () => {
                                             ${isCustomOrderFull ? 'text-[#a67a3e]' : 'text-gray-600'}
                                         `}
                                     >
-                                        등록 {customItems.length} / {MAX_CUSTOM_ORDER_ITEMS}
+                                        현재 상품 개수 {customItems.length}개
+                                        {/* {MAX_CUSTOM_ORDER_ITEMS} */}
                                     </span>
                                     <button
                                         type="button"
@@ -1182,6 +1212,13 @@ const None_Custom_Detail = () => {
                                         +
                                     </button>
                                 </div>
+                                {showOptionHint && (
+                                    <div className="option-hint-pop relative z-20 mt-2 mb-1 flex justify-center" role="status">
+                                        <div className="option-hint-bubble relative rounded-lg px-2.5 py-2 text-center text-[13px] font-medium leading-snug text-white">
+                                            아래에 가격과 옵션을 확인해 주십시오
+                                        </div>
+                                    </div>
+                                )}
                                 <div className='max-h-[300px] overflow-y-scroll mt-1 space-y-2'>
                                     {customItems.map((item, idx) => (
                                         <div key={item.id} 
@@ -1232,6 +1269,7 @@ const None_Custom_Detail = () => {
                                                             className='w-6 h-6 shrink-0 text-red-500 hover:text-white hover:bg-red-500 border border-red-300 rounded-full flex items-center justify-center transition'
                                                             onClick={(e) => {
                                                                 e.stopPropagation();
+                                                                dismissOptionHint();
                                                                 const deleteId = item.id;
 
                                                                 setCustomItems(prev => {
@@ -1260,6 +1298,7 @@ const None_Custom_Detail = () => {
                                                         className="w-6 h-6 border rounded-md bg-white hover:bg-gray-100 text-[14px] font-bold flex items-center justify-center"
                                                         onClick={(e) => {
                                                             e.stopPropagation();
+                                                            dismissOptionHint();
                                                             updateItemQuantity(item.id, -1);
                                                         }}
                                                     >
@@ -1272,6 +1311,7 @@ const None_Custom_Detail = () => {
                                                         onClick={(e) => e.stopPropagation()}
                                                         onChange={(e) => {
                                                             e.stopPropagation();
+                                                            dismissOptionHint();
                                                             const { value } = e.target;
                                                             if (value === '') return;
                                                             setItemQuantity(item.id, value);
@@ -1287,6 +1327,7 @@ const None_Custom_Detail = () => {
                                                         className="w-6 h-6 border rounded-md bg-white hover:bg-gray-100 text-[14px] font-bold flex items-center justify-center"
                                                         onClick={(e) => {
                                                             e.stopPropagation();
+                                                            dismissOptionHint();
                                                             updateItemQuantity(item.id, 1);
                                                         }}
                                                     >
@@ -1300,6 +1341,7 @@ const None_Custom_Detail = () => {
                                                             type="button"
                                                             onClick={(e) => {
                                                                 e.stopPropagation();
+                                                                dismissOptionHint();
                                                                 if (item.finishType !== 'matte') return;
                                                                 toggleFinishType(item.id);
                                                             }}
@@ -1314,6 +1356,7 @@ const None_Custom_Detail = () => {
                                                             type="button"
                                                             onClick={(e) => {
                                                                 e.stopPropagation();
+                                                                dismissOptionHint();
                                                                 if (item.finishType === 'matte') return;
                                                                 toggleFinishType(item.id);
                                                             }}

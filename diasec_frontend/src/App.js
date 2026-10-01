@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useMember } from "./context/MemberContext";
 import { toast } from 'react-toastify';
@@ -406,6 +406,19 @@ function Layout() {
         axios.post(`${API}/visit/page`, { path: pagePath }, { withCredentials: true })
             .catch(() => {});
     }, [API, path, location.pathname, location.search]);
+
+    // 네이버 광고: SPA 화면 이동 시 페이지뷰 집계 (첫 화면은 index.html에서 이미 집계)
+    const naverFirstPageRef = useRef(true);
+    useEffect(() => {
+        if (naverFirstPageRef.current) {
+            naverFirstPageRef.current = false;
+            return;
+        }
+        if (path.startsWith('/admin')) return;
+        if (window.wcs && window.wcs_do) {
+            window.wcs_do();
+        }
+    }, [location.pathname, path]);
 
     useEffect(() => {
         const handler = async (e) => {

@@ -4,6 +4,7 @@ import { toast } from 'react-toastify';
 import axios from 'axios';
 import { resolveTrackingLookupUrl } from '../../utils/deliveryTrackingUrls';
 import thumbCustom from '../../assets/CustomFrames/customFrames.png';
+import { MIN_FRAME_PRICE } from '../../utils/customFramePrice';
 
 const PRINT_ORDER_STYLES = `
     .print-wrap {
@@ -695,7 +696,7 @@ const Order_Detail = () => {
             }
         }
     }
-    const renderPrintSize = (size) => {
+    const renderPrintSize = (size, unitPrice) => {
         if (!size || typeof size !== 'string') return size;
 
         const match = size.match(/([\d.]+)\s*[xX]\s*([\d.]+)/);
@@ -718,13 +719,17 @@ const Order_Detail = () => {
         const bW = wCm + 5;
         const bH = hCm + 5;
 
+        const isSmallFrame = Number(unitPrice) <= MIN_FRAME_PRICE;
+
         return (
             <>
                 <span className="print-size-base">{wCm} x {hCm} cm</span>
                 {'  |  '}
                 <span className="print-size-c">C: {cW} x {cH}</span>
                 {'  |  '}
-                <span className="print-size-p">P: {pW} x {pH}</span>
+                <span className="print-size-p">
+                    {isSmallFrame ? 'P: 후면 거치대 2개' : `P: ${pW} x ${pH}`}
+                </span>
                 {'  |  '}
                 <span className="print-size-b">B: {bW} x {bH}</span>
             </>
@@ -1195,7 +1200,7 @@ const Order_Detail = () => {
 
                             <div className="print-size-line whitespace-pre flex flex-wrap items-center gap-2">
                                 <span className="print-label">사이즈:</span>
-                                {renderPrintSize(order.items[0].size)}
+                                {renderPrintSize(order.items[0].size, order.items[0].price)}
                                 <button
                                     type="button"
                                     className="no-print px-2 py-0.5 text-[11px] font-medium border rounded bg-gray-800 text-white hover:bg-gray-700"
