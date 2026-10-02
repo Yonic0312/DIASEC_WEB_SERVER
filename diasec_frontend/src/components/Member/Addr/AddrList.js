@@ -103,6 +103,7 @@ const AddrList = () => {
                     <input 
                         type="checkbox"
                         checked={isAllChecked}
+                        onChange={handleAllCheck}
                         className="w-4 h-4"
                     />
                     전체 선택

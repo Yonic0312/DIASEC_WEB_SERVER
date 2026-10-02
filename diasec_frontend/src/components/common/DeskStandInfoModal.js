@@ -36,7 +36,7 @@ const DeskStandInfoModal = ({ open, onClose }) => {
                     탁상용 안내
                 </h3>
                 <p className="text-sm text-gray-600 leading-relaxed mb-2">
-                    25,000원 이하 상품은 후면에 프레임 대신
+                    가로, 세로가 모두 30cm 이하인 상품은 후면에 프레임 대신
                     <strong className="text-gray-900"> 후면 거치대가 2개</strong> 들어갑니다.
                     <br />
                     상단은 벽에 걸 수 있도록, 하단은 세워 둘 수 있도록 구성됩니다.

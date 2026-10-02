@@ -390,7 +390,7 @@ const OrderForm = () => {
             title: item.title,
             author: item.author,
             quantity: item.quantity,
-            price: getDiscountedUnitPrice(item.price, partnerDiscount),
+            price: getDiscountedUnitPrice(item.price, extraDiscountPercent),
             period: item.period,
             size: item.size,
             thumbnail: item.thumbnail,
@@ -1109,6 +1109,7 @@ const OrderForm = () => {
                                 <SitePriceRow
                                     unitPrice={item.price}
                                     quantity={Number(item.quantity)}
+                                    originalOrderTotal={originalSubtotal}
                                     neutralClassName={`${SITE_PRICE_TEXT} font-bold`}
                                 />
                             </div>
@@ -1644,6 +1645,7 @@ const OrderForm = () => {
                     <SitePriceTotal
                         original={originalSubtotal}
                         discounted={totalPrice}
+                        originalOrderTotal={originalSubtotal}
                         className={SITE_PRICE_TEXT}
                     />
                 </div>

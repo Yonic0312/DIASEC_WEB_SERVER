@@ -114,7 +114,7 @@ const MemberHome = () => {
                 setPartner(partnerRes);
             } catch (e) {
                 console.error('마이페이지 요약 로드 실패', e);
-                if (cancelled) {
+                if (!cancelled) {
                     setSummary({
                         loading: false,
                         credit: 0,
