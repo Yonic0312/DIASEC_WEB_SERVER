@@ -120,13 +120,13 @@ const Biz_PartnerMain = () => {
                     </div>
                 </section>
 
-                <div className="flex flex-col items-center gap-3 pt-4">
+                <div className="flex flex-col items-start sm:ml-[10%] ml-[18%] gap-3 pt-4">
                     {member?.id && partnerStatus === '대기' && (
                         <p className="text-sm text-amber-800 bg-amber-50 border border-amber-200 rounded-lg px-4 py-3 text-center max-w-lg">
                             제휴 신청이 검토 중입니다. 검토 후 승인 여부를 안내드립니다.
                         </p>
                     )}
-                    <div className="flex gap-3 justify-center text-sm md:text-base">
+                    <div className="flex gap-3 text-sm md:text-base">
                         {showApplyButton && (
                             <button
                                 type="button"
@@ -147,13 +147,14 @@ const Biz_PartnerMain = () => {
                         )}
                     </div>
                 </div>
+                <div className='flex sm:ml-[18%] ml-[30%]'>
+                    <p className="mt-2 w-fit text-sm md:text-[15px]">
+                        <span className="font-semibold">문의</span>{' '} : <a href="tel:010-4231-5879">010-4231-5879</a>
+                    </p>
+                </div>
             </div>
 
-            <div className='flex justify-center'>
-                <p className="mt-4 w-fit p-4 border border-gray-200 bg-gray-50 rounded-xl text-sm md:text-base">
-                    <span className="font-semibold">문의</span>{' '} : <a href="tel:010-4231-5879" className="underline">010-4231-5879</a>
-                </p>
-            </div>
+            
         </div>
     );
 };

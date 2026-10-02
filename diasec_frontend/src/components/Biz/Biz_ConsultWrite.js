@@ -523,8 +523,8 @@ const Biz_ConsultWrite = () => {
                 </form>
             </div>
             <div className='flex justify-center'>
-                <p className="mt-4 w-fit p-4 border border-gray-200 bg-gray-50 rounded-xl text-sm md:text-base">
-                    <span className="font-semibold">문의</span>{' '} : <a href="tel:010-4231-5879" className="underline">010-4231-5879</a>
+                <p className="mt-6 w-fit text-sm md:text-[15px]">
+                    <span className="font-semibold">문의</span>{' '} : <a href="tel:010-4231-5879">010-4231-5879</a>
                 </p>
             </div>
         </div>
