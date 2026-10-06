@@ -3,15 +3,19 @@ import P1 from '../../assets/whatDiasec/1.jpg'
 const reasons = [
     {
         title: '검증된 자재',
-        desc: '그 이유는 장기보전을 위한 검증된 자재를 사용하기 때문입니다.',
+        desc: '그이유는 독입수입용지와 변색이 적은 울트라 크롬잉크, 자체 개발한 뒷면 프레임 등 검증된 자재만을 사용하기 때문입니다',
     },
     {
         title: '공법의 노하우',
-        desc: '시간이 흐름에 따라 발생할 수 있는 액자의 변색·뒤틀림·박리 현상 등을 방지하기 위한, 엄선된 자재와 축적된 공법의 노하우가 디아섹의 품질을 좌우합니다.',
+        desc: '오랜 시행착오와 연구개발로 축적된 디아섹코리아의 제작 노하우는 변색·뒤틀림·박리 현상을 최소화하고, 오랜 시간이 지나도 안정적인 품질을 유지합니다',
     },
     {
         title: '수작업 마감',
-        desc: '또한, 숙련된 기술자가 미세한 부분까지 수작업으로 마감처리를 함으로써 디아섹의 완성도를 높여줍니다.',
+        desc: '또한, 숙련된 기술자가 고객의 안전을 위한 미세한 부분까지 수작업으로 마감처리를 함으로써 디아섹의 완성도를 높여줍니다.',
+    },
+    {
+        title: '가격 이상의 가치',
+        desc: '디아섹코리아의 전 상품 무료배송과, 후면 프레임 차별화와 대형 액자는 크기에 맞는 전용 프레임을 적용해 안정성을 높였습니다. 이런 구성까지 따져보면 실제 구매가격은 더욱 합리적입니다.',
     },
 ];
 
@@ -24,7 +28,7 @@ const Main_PricePolicy = () => {
                     <div className="flex items-center justify-center w-full gap-4 mb-10">
                         <div className="flex-1 border-t-[1px] border-[#D0AC88]"></div>
                         <span className="lg:text-[36px] text-[clamp(22px,3.519vw,36px)] font-bold text-[#D0AC88] text-center">
-                            디아섹코리아의 가격정책
+                            디아섹코리아의 10년 품질보증
                         </span>
                         <div className="flex-1 border-t-[1px] border-[#D0AC88]"></div>
                     </div>
@@ -33,7 +37,7 @@ const Main_PricePolicy = () => {
                 <div className="flex flex-col items-center px-4">
                     <section className="flex flex-col lg:flex-row items-start gap-4 md:gap-10 mb-10">
                         <div className="w-full max-w-[850px] flex flex-col justify-center md:flex-row md:items-stretch px-4 gap-8 md:gap-10">
-                            <div className="w-full md:w-[30%] shrink-0 overflow-hidden rounded-xl bg-gray-100 shadow-sm ring-1 ring-black/5">
+                            <div className="w-full md:w-[40%] shrink-0 overflow-hidden rounded-xl bg-gray-100 shadow-sm ring-1 ring-black/5">
                                 <img 
                                     className="w-full h-auto object-cover" 
                                     src={P1} 
@@ -42,16 +46,17 @@ const Main_PricePolicy = () => {
                             </div>
                             <div className="flex min-w-0 flex-1 flex-col justify-center gap-2 text-left">
                                 <h3 className="
-                                    text-[15px] md:text-[24px]
+                                    text-[15px] md:text-[22px]
                                     font-bold text-gray-900">
                                     디아섹코리아의 제품가격은 결코 저렴하지 않습니다
                                 </h3>
-                                <span className=" text-[13px] md:text-[19px] leading-relaxed text-gray-600">
-                                그 이유는 디아섹코리아가 디아섹 최초 개발자인
+                                <span className=" text-[13px] md:text-[17px] leading-relaxed text-gray-600">
+                                    디아섹코리아는 디아섹 최초 개발자인
                                     스위스 Heinz Sovilla 부부의{' '}
-                                    작품 보존 정신을 존중하고,{' '}
-                                    독일식 정통 제작 공법을 기준으로 제작하기 때문입니다.
-                                    오랜 시간이 지나도 작품 본연의 색감과 형태를 그대로 유지하는 기술력,
+                                    작품 보존 정신을 계승한,{' '}
+                                    독일식 정통 제작 공법을 기준으로 제작합니다.
+                                    19년의 오랜 제작 경험과 축적된 노하우로 오랜시간이 지나도 작품 본연의 색감과
+                                    형태를 그대로 유지하는 기술력으로 프리미엄 디아섹액자를 생산합니다
                                 </span>
                             </div>
                         </div>
@@ -74,7 +79,7 @@ const Main_PricePolicy = () => {
                         <div className="flex items-center justify-center w-full gap-4 mb-10">
                             <div className="flex-1 border-t-[1px] border-[#D0AC88]"></div>
                             <span className="lg:text-[36px] text-[clamp(20px,3.519vw,36px)] font-bold text-[#D0AC88] text-center">
-                                정통 디아섹이 저렴할 수 없는 이유
+                                정통 디아섹을 고집하는 이유
                             </span>
                             <div className="flex-1 border-t-[1px] border-[#D0AC88]"></div>
                         </div>

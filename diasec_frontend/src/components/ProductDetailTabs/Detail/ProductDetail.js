@@ -165,7 +165,7 @@ const ProductDetail = ({ pid }) => {
                             {/* <li>예시 외 <span className='font-semibold text-gray-900'>난이도가 높은 보정 또는 작업 시간이 많이 소요되는 경우</span> 시간당 <span className='text-[#D0AC88] font-semibold'>5만원</span>입니다.</li> */}
                             <li><span>원고 이미지가 지나치게 흐리거나 해상도가 낮은 경우, 화질 개선에 한계가 있을 수 있는 점 양해 부탁드립니다.</span></li>
                             <li><span>작업 난이도가 높은 보정 작업은 추가 시간이 소요되며, 별도의 추가 비용이 발생할 수 있습니다.</span></li>
-                            <li><span>보정에 관한 궁금한 사항이 있으시면 문의 바랍니다.</span></li>                    
+                            <li><span>보정에 관한 궁금한 사항이 있으시면 문의 바랍니다. ☎ 02-389-5879</span></li>            
                         </ul>
                     </div>
                 </div>

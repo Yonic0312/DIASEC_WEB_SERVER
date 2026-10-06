@@ -4,8 +4,9 @@ import axios from 'axios';
 import HeaderSearch from './HeaderSearch';
 import { useMember } from '../../context/MemberContext';
 
-import diasec1 from '../../assets/dropDownMenu/diasec/1.jpg'; 
+import diasec1 from '../../assets/dropDownMenu/diasec/1.jpg';
 import diasec2 from '../../assets/dropDownMenu/diasec/2.jpg';
+import diasec3 from '../../assets/dropDownMenu/diasec/3.jpg';
 
 import custom1 from '../../assets/dropDownMenu/customFrame/c1.jpg'; 
 import custom2 from '../../assets/dropDownMenu/customFrame/c2.jpg'; 
@@ -21,8 +22,6 @@ import custom10 from '../../assets/dropDownMenu/customFrame/c10.jpg';
 const Header_Menu = () => {
     const API = process.env.REACT_APP_API_BASE;
     const navigate = useNavigate();
-    const { member } = useMember();
-    const isAdmin = member?.role === 'ADMIN';
 
     const [hovered, setHovered] = useState(null); // 드롭다운 상태 (PC)
 
@@ -61,7 +60,7 @@ const Header_Menu = () => {
         diasec: [
             { label: '회사소개', img: diasec1, link: '/main_CompanyProfile'},
             { label: '디아섹이란', img: diasec2, link: '/introduce'},
-            { label: '가격정책', img: null, link: '/pricePolicy'},
+            { label: '10년 품질보증', img: diasec3, link: '/pricePolicy'},
         ], 
         masterPiece: [], 
         koreanPainting: [], 
@@ -252,12 +251,8 @@ const Header_Menu = () => {
     const showDropdown = !!hovered && isDropdownMenu(hovered);
     const currentItems = useMemo(() => {
         if (!hovered) return [];
-        const items = dropdown[hovered] || [];
-        if (hovered === 'diasec' && !isAdmin) {
-            return items.filter((item) => item.link !== '/pricePolicy');
-        }
-        return items;
-    }, [hovered, dropdown, isAdmin]);
+        return dropdown[hovered] || [];
+    }, [hovered, dropdown]);
 
     // 메뉴 즉시 닫기 금지
     const closeTimerRef = useRef(null);

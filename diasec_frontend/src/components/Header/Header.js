@@ -56,17 +56,12 @@ const Header = () => {
         photoIllustration: { offset: 0, hasMore: true, loading: false },
     });
 
-    const isAdmin = member?.role === 'ADMIN';
-
-    const getDiasecMenuItems = (items) =>
-        isAdmin ? items : items.filter((item) => item.link !== '/pricePolicy');
-
     // 드롭다운/드로어에 쓸 하위 항목 (서버 데이터)
     const [dropdown, setDropdown] = useState({
         diasec: [
             { label: '디아섹코리아 회사소개', img: diasec1, link: '/main_CompanyProfile'}, 
             { label: '디아섹이란', img: diasec2, link: '/introduce'},
-            { label: '가격정책', img: diasec2, link: '/pricePolicy'},
+            { label: '10년 품질보증', img: diasec2, link: '/pricePolicy'},
         ], 
         masterPiece: [], photoIllustration: [], fengShui: [], koreanPainting:[], Contemporary: [],
         authorCollection: [], customFrame: [], companyOrder: [], registerAuthor: [], event: []
@@ -431,7 +426,7 @@ const Header = () => {
                                             }}
                                         >
                                             <div className="grid grid-cols-1 gap-2 pb-3 pl-1 pr-2">
-                                                {getDiasecMenuItems(dropdown[m.key] || []).map(item => (
+                                                {(dropdown[m.key] || []).map(item => (
                                                     <button
                                                         key={item.label}
                                                         className="flex items-center gap-3 rounded-lg p-2 hover:bg-gray-50 text-left"
