@@ -45,8 +45,8 @@ const None_Custom_Detail = () => {
     const [adminQuoteApplyPartnerDiscount, setAdminQuoteApplyPartnerDiscount] = useState(false);
 
     const openAdminQuoteModal = () => {
-        setAdminQuoteW(String(Math.floor(width)));
-        setAdminQuoteH(String(Math.floor(height)));
+        setAdminQuoteW(String(Math.round(width)));
+        setAdminQuoteH(String(Math.round(height)));
         setAdminQuoteApplyPartnerDiscount(false);
         setAdminQuoteModalOpen(true);
     };
@@ -60,8 +60,8 @@ const None_Custom_Detail = () => {
         const w = landscape ? paper.h : paper.w;
         const h = landscape ? paper.w : paper.h;
 
-        setAdminQuoteW(String(Math.floor(w)));
-        setAdminQuoteH(String(Math.floor(h)));
+        setAdminQuoteW(String(Math.round(w)));
+        setAdminQuoteH(String(Math.round(h)));
     }
 
     // 헤더 높이만큼 빼고 판단
@@ -152,8 +152,8 @@ const None_Custom_Detail = () => {
 
         setWidth(item.width);
         setHeight(item.height);
-        setWidthInput(String(Math.floor(item.width)));
-        setHeightInput(String(Math.floor(item.height)));
+        setWidthInput(String(Math.round(item.width)));
+        setHeightInput(String(Math.round(item.height)));
     };
 
     // 추가 버튼 클릭
@@ -168,8 +168,8 @@ const None_Custom_Detail = () => {
         }
 
         // 현재 입력값 기준으로 새 옵션 생성
-        const nextW = Math.floor(width);
-        const nextH = Math.floor(height);
+        const nextW = Math.round(width);
+        const nextH = Math.round(height);
         const newArea = getPriceAreaCm(width, height);
         const newPrice = calculateCumulativePrice(newArea);
 
@@ -209,8 +209,8 @@ const None_Custom_Detail = () => {
     };
 
     // 입력 완료 후 반영
-    const [widthInput, setWidthInput] = useState(String(Math.floor(width)));
-    const [heightInput, setHeightInput] = useState(String(Math.floor(height)));
+    const [widthInput, setWidthInput] = useState(String(Math.round(width)));
+    const [heightInput, setHeightInput] = useState(String(Math.round(height)));
     const sizeHintConsumedRef = useRef(false);
     const [showSizeAdjustHint, setShowSizeAdjustHint] = useState(false);
 
@@ -243,94 +243,88 @@ const None_Custom_Detail = () => {
     useEffect(() => () => clearTimeout(optionHintTimerRef.current), []);
 
     useEffect(() => {
-        setWidthInput(String(Math.floor(width)));
+        setWidthInput(String(Math.round(width)));
     }, [width]);
 
     useEffect(() => {
-        setHeightInput(String(Math.floor(height)));
-    }, [width]);
+        setHeightInput(String(Math.round(height)));
+    }, [height]);
 
     const handleWidthChange = (e) => {
-        let value = parseFloat(e.target.value);
-
+        let value = Math.round(parseFloat(e.target.value));
         if (isNaN(value)) return;
 
-        const minWidth = getActualMinWidth();
+        const minWidth = Math.ceil(getActualMinWidth());
+        const maxW = Math.floor(actualMaxWidth);
 
         if (value < minWidth) {
-            showToastOnce(`최소 넓이는 ${Math.floor(minWidth)}cm입니다.`);
+            showToastOnce(`최소 넓이는 ${minWidth}cm입니다.`);
             value = minWidth;
-        } else if (value > actualMaxWidth) {
-            showToastOnce(`최대 넓이는 ${Math.floor(actualMaxWidth)}cm입니다.`);
-            value = actualMaxWidth;
+        } else if (value > maxW) {
+            showToastOnce(`최대 넓이는 ${maxW}cm입니다.`);
+            value = maxW;
         }
 
-        value = parseFloat(value.toFixed(1));
-
         if (aspectRatio) {
-            let newHeight = parseFloat((value / aspectRatio).toFixed(1));
-
+            let newHeight = Math.round(value / aspectRatio);
             if (newHeight < MIN_HEIGHT) {
                 showToastOnce(`이미지 비율로 계산된 높이가 최소 높이 ${MIN_HEIGHT}cm 미만이라 자동 조정됩니다.`);
                 newHeight = MIN_HEIGHT;
-                value = parseFloat((newHeight * aspectRatio).toFixed(1));
+                value = Math.round(newHeight * aspectRatio);
             }
 
-            if (newHeight > maxHeight) {
-                showToastOnce(`이미지 비율로 계산된 높이가 최대 높이 ${maxHeight}cm를 초과하여 자동 조정됩니다.`);
-                newHeight = maxHeight;
-                value = parseFloat((newHeight * aspectRatio).toFixed(1));
+            if (newHeight > Math.floor(maxHeight)) {
+                showToastOnce(`이미지 비율로 계산된 높이가 최대 높이 ${Math.floor(maxHeight)}cm를 초과하여 자동 조정됩니다.`);
+                newHeight = Math.floor(maxHeight);
+                value = Math.round(newHeight * aspectRatio);
             }
             
-            setWidth(Math.floor(value));
-            setHeight(Math.floor(newHeight));
+            setWidth(value);
+            setHeight(newHeight);
         } else {
-            setWidth(Math.floor(value));
+            setWidth(value);
         }
 
-        setWidthInput(String(Math.floor(value)));
+        setWidthInput(String(value));
         activateOptionHint();
-    }
+    };
 
     const handleHeightChange = (e) => {
-        let value = parseFloat(e.target.value);
-
+        let value = Math.round(parseFloat(e.target.value));
         if (isNaN(value)) return;
 
+        const maxH = Math.floor(actualMaxHeight);
         if (value < MIN_HEIGHT) {
             showToastOnce(`최소 높이는 ${MIN_HEIGHT}cm입니다.`);
             value = MIN_HEIGHT;
-        } else if (value > actualMaxHeight) {
-            showToastOnce(`최대 높이는 ${Math.floor(actualMaxHeight)}cm입니다.`);
-            value = actualMaxHeight;
+        } else if (value > maxH) {
+            showToastOnce(`최대 높이는 ${maxH}cm입니다.`);
+            value = maxH;
         }
 
-        value = parseFloat(value.toFixed(1));
-
         if (aspectRatio) {
-            let newWidth = parseFloat((value * aspectRatio).toFixed(1));
+            let newWidth = Math.round(value * aspectRatio);
 
             if (newWidth < MIN_WIDTH) {
                 showToastOnce(`이미지 비율로 계산된 가로가 최소 너비 ${MIN_WIDTH}cm 미만이라 자동 조정됩니다.`);
                 newWidth = MIN_WIDTH;
-                value = parseFloat((newWidth / aspectRatio).toFixed(1));
+                value = Math.round(newWidth / aspectRatio);
             }
 
-            if (newWidth > maxWidth) {
-                showToastOnce(`이미지 비율로 계산된 가로가 최대 너비 ${maxWidth}cm를 초과하여 자동 조정됩니다.`);
-                newWidth = maxWidth;
-                value = parseFloat((newWidth / aspectRatio).toFixed(1));
+            if (newWidth > Math.floor(maxWidth)) {
+                showToastOnce(`이미지 비율로 계산된 가로가 최대 너비 ${Math.floor(maxWidth)}cm를 초과하여 자동 조정됩니다.`);
+                newWidth = Math.floor(maxWidth);
+                value = Math.round(newWidth / aspectRatio);
             }
 
-            setWidth(Math.floor(newWidth));
-            setHeight(Math.floor(value));
+            setWidth(newWidth);
+            setHeight(value);
         } else {
-            setHeight(Math.floor(value));
+            setHeight(value);
         }
-
-        setHeightInput(String(Math.floor(value)));
+        setHeightInput(String(value));
         activateOptionHint();
-    }
+    };
 
     const toInchSize = (wCm, hCm) => {
         const wInch = (wCm / 2.54).toFixed(1);
@@ -429,8 +423,8 @@ const None_Custom_Detail = () => {
     const paperHeightPct = (paperHpx / BASE_BG_H) * 100;
     // A3 ~ A0 오버레이 //
 
-    //화면에 보이는 cm(내림) 기준으로 면적, 가격 통일
-    const getPriceAreaCm = (w, h) => Math.floor(Number(w) || 0) * Math.floor(Number(h) || 0);
+    //화면에 보이는 cm(반올림) 기준으로 면적, 가격 통일
+    const getPriceAreaCm = (w, h) => Math.round(Number(w) || 0) * Math.round(Number(h) || 0);
 
     // 계산
     const calculateCumulativePrice = (area) => {
@@ -520,8 +514,8 @@ const None_Custom_Detail = () => {
         }
 
         return {
-            width: Math.floor(width),
-            height: Math.floor(height),
+            width: Math.round(width),
+            height: Math.round(height),
         };
     };
 
@@ -546,11 +540,11 @@ const None_Custom_Detail = () => {
         const clamped = clampSizeToLimits(raw.width, raw.height, aspectRatio);
 
         if (
-            clamped.width !== Math.floor(raw.width) ||
-            clamped.height !== Math.floor(raw.height)
+            clamped.width !== Math.round(raw.width) ||
+            clamped.height !== Math.round(raw.height)
         ) {
-            const rawW = Math.floor(raw.width);
-            const rawH = Math.floor(raw.height);
+            const rawW = Math.round(raw.width);
+            const rawH = Math.round(raw.height);
             const belowMin = rawW < actualMinWidth || rawH < MIN_HEIGHT;
 
             if (belowMin) {
@@ -627,13 +621,16 @@ const None_Custom_Detail = () => {
                                 startW = parseFloat((startH * ratio).toFixed(1));
                             }
 
+                            startW = Math.round(startW);
+                            startH = Math.round(startH);
+
                             setWidth(startW);
                             setHeight(startH);
-                            setWidthInput(String(Math.floor(startW)));
-                            setHeightInput(String(Math.floor(startH)));
+                            setWidthInput(String(startW));
+                            setHeightInput(String(startH));
 
-                            const storedW = Math.floor(startW);
-                            const storedH = Math.floor(startH);
+                            const storedW = startW;
+                            const storedH = startH;
                             const area = getPriceAreaCm(storedW, storedH);
                             const price = calculateCumulativePrice(area);
 
@@ -680,8 +677,8 @@ const None_Custom_Detail = () => {
 
         const newArea = getPriceAreaCm(width, height);
         const newPrice = calculateCumulativePrice(newArea);
-        const nextW = Math.floor(width);
-        const nextH = Math.floor(height);
+        const nextW = Math.round(width);
+        const nextH = Math.round(height);
 
         setCustomItems(prev => 
             prev.map(item => 
@@ -1077,7 +1074,7 @@ const None_Custom_Detail = () => {
                                     onBlur={() => {
                                         const v = parseFloat(widthInput);
                                         if (isNaN(v)) {
-                                        setWidthInput(String(Math.floor(width)));
+                                        setWidthInput(String(Math.round(width)));
                                         return;
                                         }
                                         handleWidthChange({ target: { value: v } });
@@ -1092,9 +1089,9 @@ const None_Custom_Detail = () => {
                                 />
                                 <input
                                     type="range"
-                                    min={actualMinWidth}
-                                    max={actualMaxWidth}
-                                    step="0.1"
+                                    min={Math.ceil(actualMinWidth)}
+                                    max={Math.floor(actualMaxWidth)}
+                                    step="1"
                                     value={width}
                                     onChange={(e) => {
                                         dismissSizeAdjustHint();
@@ -1133,7 +1130,7 @@ const None_Custom_Detail = () => {
                                     onBlur={() => {
                                         const v = parseFloat(heightInput);
                                         if (isNaN(v)) {
-                                            setHeightInput(String(Math.floor(height)));
+                                            setHeightInput(String(Math.round(height)));
                                             return;
                                         }
                                         handleHeightChange({ target: { value: v } });
@@ -1147,7 +1144,7 @@ const None_Custom_Detail = () => {
                                     }`}
                                 />
                                 <span className=" text-xs text-right text-gray-600">
-                                    (약 { Math.floor(width / 2.54) } x { Math.floor(height / 2.54) } inch)
+                                    (약 { Math.round(width / 2.54) } x { Math.round(height / 2.54) } inch)
                                 </span>
                             </div>
                         </div>
@@ -1237,7 +1234,7 @@ const None_Custom_Detail = () => {
                                                     <div className='flex-1 h-fit text-start'>
                                                         <div className="flex flex-row justify-between">
                                                             <p className='text-[12.5px] font-semibold text-gray-800'>
-                                                                {Math.floor(item.width)} x {Math.floor(item.height)}cm
+                                                                {Math.round(item.width)} x {Math.round(item.height)}cm
                                                             </p>
                                                             {Number(item.width) <= 30 && Number(item.height)  <= 30 && (
                                                                 <button
@@ -1659,8 +1656,8 @@ const None_Custom_Detail = () => {
 
                         <div className="rounded-lg bg-gray-50 border border-gray-200 p-4 mb-3 min-h-[88px]">
                             {(() => {
-                                const pw = Math.floor(parseFloat(String(adminQuoteW).replace(/[^\d.]/g, '')) || 0);
-                                const ph = Math.floor(parseFloat(String(adminQuoteH).replace(/[^\d.]/g, '')) || 0);
+                                const pw = Math.round(parseFloat(String(adminQuoteW).replace(/[^\d.]/g, '')) || 0);
+                                const ph = Math.round(parseFloat(String(adminQuoteH).replace(/[^\d.]/g, '')) || 0);
                                 if (pw <= 0 || ph <= 0) {
                                     return (
                                         <p className="text-sm text-gray-500">가로·세로에 숫자를 입력하면 견적이 표시됩니다.</p>
@@ -1682,8 +1679,8 @@ const None_Custom_Detail = () => {
                                 const discountLabel = (() => {
                                     const parts = [];
                                     if (sitePct > 0) parts.push(`사이트 ${sitePct}%`);
-                                    if (bulkPct > 0 && bulkPct >= partnerPct) parts.push(`대량 ${bulkPct}`);
-                                    else if (partnerPct > 0) parts.push(`파트너 ${partnerPct}`);
+                                    if (bulkPct > 0 && bulkPct >= partnerPct) parts.push(`대량 ${bulkPct}%`);
+                                    else if (partnerPct > 0) parts.push(`파트너 ${partnerPct}%`);
                                     return parts.length ? `${parts.join(' + ')} 할인 적용` : '';
                                 })();
                                 return (
@@ -1710,7 +1707,7 @@ const None_Custom_Detail = () => {
                                             </div>
                                         ) : (
                                             <p className="text-base font-bold text-gray-900">
-                                                견적 {original.toLocaleString()}원
+                                                가격 {original.toLocaleString()}원
                                             </p>
                                         )}
                                     </div>

@@ -189,8 +189,8 @@ const Main_CustomFrames = () => {
             }
 
             const cfg = {
-                width: startW,
-                height: startH,
+                width: Math.round(startW),
+                height: Math.round(startH),
                 aspectRatio: ratio,
                 maxWidth: maxW,
                 maxHeight: maxH,
@@ -530,84 +530,78 @@ const Main_CustomFrames = () => {
     };
 
     const handleWidthChange = (e) => {
-        let value = parseFloat(e.target.value);
-
+        let value = Math.round(parseFloat(e.target.value));
         if (isNaN(value)) return;
 
-        const minWidth = getActualMinWidth();
-
+        const minWidth = Math.ceil(getActualMinWidth());
+        const maxW = Math.floor(actualMaxWidth);
         if (value < minWidth) {
-            showToastOnce(`최소 넓이는 ${Math.round(minWidth)}cm입니다.`);
+            showToastOnce(`최소 넓이는 ${minWidth}cm입니다.`);
             value = minWidth;
-        } else if (value > actualMaxWidth) {
-            showToastOnce(`최대 넓이는 ${Math.round(actualMaxWidth)}cm입니다.`);
-            value = actualMaxWidth;
+        } else if (value > maxW) {
+            showToastOnce(`최대 넓이는 ${maxW}cm입니다.`);
+            value = maxW;
         }
 
-        value = parseFloat(value.toFixed(1));
-
         if (aspectRatio) {
-            let newHeight = parseFloat((value / aspectRatio).toFixed(1));
+            let newHeight = Math.round(value / aspectRatio);
 
             if (newHeight < MIN_HEIGHT) {
                 showToastOnce(`이미지 비율로 계산된 높이가 최소 높이 ${MIN_HEIGHT}cm 미만이라 자동 조정됩니다.`);
                 newHeight = MIN_HEIGHT;
-                value = parseFloat((newHeight * aspectRatio).toFixed(1));
+                value = Math.round(newHeight * aspectRatio);
             }
 
-            if (newHeight > maxHeight) {
-                showToastOnce(`이미지 비율로 계산된 높이가 최대 높이 ${maxHeight}cm를 초과하여 자동 조정됩니다.`);
-                newHeight = maxHeight;
-                value = parseFloat((newHeight * aspectRatio).toFixed(1));
+            if (newHeight > Math.floor(maxHeight)) {
+                showToastOnce(`이미지 비율로 계산된 높이가 최대 높이 ${Math.floor(maxHeight)}cm를 초과하여 자동 조정됩니다.`);
+                newHeight = Math.floor(maxHeight);
+                value = Math.round(newHeight * aspectRatio);
             }
             
-            setWidth(Math.round(value));
+            setWidth(value);
             setHeight(Math.round(newHeight));
         } else {
-            setWidth(Math.round(value));
+            setWidth(value);
         }
 
-        setWidthInput(String(Math.round(value)));
+        setWidthInput(String(value));
         activateOptionHint();
-    }
+    };
 
     const handleHeightChange = (e) => {
-        let value = parseFloat(e.target.value);
-    
+        let value = Math.round(parseFloat(e.target.value));
         if (isNaN(value)) return;
-    
+
+        const maxH = Math.floor(actualMaxHeight);
         if (value < MIN_HEIGHT) {
             showToastOnce(`최소 높이는 ${MIN_HEIGHT}cm입니다.`);
             value = MIN_HEIGHT;
-        } else if (value > actualMaxHeight) {
-            showToastOnce(`최대 높이는 ${Math.round(actualMaxHeight)}cm입니다.`);
-            value = actualMaxHeight;
+        } else if (value > maxH) {
+            showToastOnce(`최대 높이는 ${maxH}cm입니다.`);
+            value = maxH;
         }
     
-        value = parseFloat(value.toFixed(1));
-    
         if (aspectRatio) {
-            let newWidth = parseFloat((value * aspectRatio).toFixed(1));
-
+            let newWidth = Math.round(value * aspectRatio);
             if (newWidth < MIN_WIDTH) {
                 showToastOnce(`이미지 비율로 계산된 가로가 최소 너비 ${MIN_WIDTH}cm 미만이라 자동 조정됩니다.`);
                 newWidth = MIN_WIDTH;
-                value = parseFloat((newWidth / aspectRatio).toFixed(1));
+                value = Math.round(newWidth / aspectRatio);
             }
     
-            if (newWidth > maxWidth) {
-                showToastOnce(`이미지 비율로 계산된 가로가 최대 너비 ${maxWidth}cm를 초과하여 자동 조정됩니다.`);
-                newWidth = maxWidth;
-                value = parseFloat((newWidth / aspectRatio).toFixed(1));
+            if (newWidth > Math.floor(maxWidth)) {
+                showToastOnce(`이미지 비율로 계산된 가로가 최대 너비 ${Math.floor(maxWidth)}cm를 초과하여 자동 조정됩니다.`);
+                newWidth = Math.floor(maxWidth);
+                value = Math.round(newWidth / aspectRatio);
             }
     
-            setWidth(Math.round(newWidth));
-            setHeight(Math.round(value));
+            setWidth(newWidth);
+            setHeight(value);
         } else {
-            setHeight(Math.round(value));
+            setHeight(value);
         }
     
-        setHeightInput(String(Math.round(value)));
+        setHeightInput(String(value));
         activateOptionHint();
     };
 
@@ -1490,9 +1484,9 @@ const Main_CustomFrames = () => {
                         <div className="mt-[4px] flex justify-between">
                             <input
                                 type="range"
-                                min={actualMinWidth}
-                                max={actualMaxWidth}
-                                step="0.1"
+                                min={Math.ceil(actualMinWidth)}
+                                max={Math.floor(actualMaxWidth)}
+                                step="1"
                                 value={width}
                                 onChange={(e) => {
                                     dismissSizeAdjustHint();
