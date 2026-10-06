@@ -220,7 +220,7 @@ const AuthorPage = () => {
         formData.append("memberId", memberId);
         formData.append("nickname", editNick);
         formData.append("authorName", profile.author_name);
-        formData.append("authorIntro", profile.author_intro);
+        formData.append("authorIntro", profile.editIntro);
         if (editAuthor_profile_image) formData.append("author_profile_image", editAuthor_profile_image);
 
         try {

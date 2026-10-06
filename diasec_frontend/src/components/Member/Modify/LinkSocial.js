@@ -125,7 +125,7 @@ export default function LinkSocial() {
 
                     <button
                         type="button"
-                        onClick={() => navigate("/login")}
+                        onClick={() => navigate("/userLogin")}
                         className="
                             h-11 border border-gray-300 rounded-md
                             text-[14px] md:text-base

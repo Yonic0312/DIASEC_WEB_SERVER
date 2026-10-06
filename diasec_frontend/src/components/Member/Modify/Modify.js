@@ -410,7 +410,7 @@ const Modify = () => {
         try {
             await axios.post(`${API}/member/delete`, { id }, { withCredentials: true});
 
-            toast.error('회원 탈퇴가 완료되었습니다.');
+            toast.success('회원 탈퇴가 완료되었습니다.');
             setMember(null);
             navigate('/');
         } catch (err) {

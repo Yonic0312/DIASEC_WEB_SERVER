@@ -307,7 +307,7 @@ const Main_Introduce = () => {
                                 text-[clamp(17px,4.381vw,28px)] md:text-[28px]
                                 font-medium text-gray-900 mb-[6px] border-b border-gray-300"
                             >
-                                Heinz Sovila와 Brulhart
+                                Heinz Sovilla와 Brulhart
                             </h2>
                             <div 
                                 className="

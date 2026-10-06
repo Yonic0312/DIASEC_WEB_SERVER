@@ -271,7 +271,7 @@ const AuthorRegisterForm = () => {
                             <div 
                                 className="
                                     md:text-base text-[clamp(11px,2.085vw,16px)]
-                                    font-semibold mb-3">정산 계좌 정보 (판매 수익 10%) <span className="text-red-500">*</span></div>
+                                    font-semibold mb-3">정산 계좌 정보 (판매 수익 13%) <span className="text-red-500">*</span></div>
                             <div 
                                 className="
                                     md:text-sm text-[clamp(11px,1.8252vw,14px)]

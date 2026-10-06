@@ -380,7 +380,7 @@ const Order_Detail = () => {
                 toast.success(`${claimType} 요청이 접수되었습니다.`);
                 navigate('/orderList');
             } else {
-                toast.error(`${claimType} 요청 실패 : + data.message`);
+                toast.error(`${claimType} 요청 실패 : + ${data.message}`);
             }
         })
         .catch(err => toast.error('서버 오류'));

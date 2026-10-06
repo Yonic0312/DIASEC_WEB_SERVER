@@ -89,11 +89,11 @@ public class AdminOrderController {
 
         // 환불 정보는 optional
         String bankName = (String) request.getOrDefault("bankName", null);
-        String accountNubmer = (String) request.getOrDefault("accountNubmer", null);
+        String accountNumber = (String) request.getOrDefault("accountNumber", null);
         String accountHolder = (String) request.getOrDefault("accountHolder", null);
 
         return adminOrderService.updateOrderDetailWithNotification(
-            itemId, trackingCompany, trackingNumber, bankName, accountNubmer, accountHolder,
+            itemId, trackingCompany, trackingNumber, bankName, accountNumber, accountHolder,
             Boolean.TRUE.equals(request.get("applyToSameOrder"))
                 || "true".equalsIgnoreCase(String.valueOf(request.get("applyToSameOrder")))
         );

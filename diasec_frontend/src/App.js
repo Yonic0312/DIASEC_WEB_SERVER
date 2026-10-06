@@ -560,7 +560,7 @@ function App() {
                         <Route path="/orderForm" element={<OrderForm/>} />
                         <Route path="/orderComplete" element={<OrderComplete/>} />
                         <Route path="/introduce" element={<Main_Introduce/>} />
-                        <Route path="/pricePolicy" element={<AdminRoute><Main_PricePolicy/></AdminRoute>} />
+                        <Route path="/pricePolicy" element={<Main_PricePolicy/>} />
                         <Route path="/mainEvent" element={<Main_Event/>} />
                         <Route path="/mainEventDetail/:id" element={<Main_EventDetail/>} />
                         <Route path="/reviewWrite" element={<ReviewWrite/>} />

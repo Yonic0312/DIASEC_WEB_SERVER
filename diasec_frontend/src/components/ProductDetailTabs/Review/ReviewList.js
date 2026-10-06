@@ -146,7 +146,7 @@ const ReviewList = ({ pid }) => {
                                     md:text-sm text-[clamp(12px,1.825vw,14px)]
                                     flex items-center justify-between text-gray-400">
                                     <span>
-                                        {maskedId(review.id) === '님'
+                                        {maskedId(review.id) === '비회원님'
                                             ? '비회원님'
                                             : `${maskedId(review.id)}님`}
                                     </span>

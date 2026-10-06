@@ -179,7 +179,7 @@ const WishList = () => {
 
                 await axios.post(`${API}/cart/insert`, cartList, {
                     withCredentials: true,
-                    hearders: { "Content-Type": "application/json" },
+                    headers: { "Content-Type": "application/json" },
             });
 
             toast.success("선택한 상품을 장바구니에 담았습니다.");

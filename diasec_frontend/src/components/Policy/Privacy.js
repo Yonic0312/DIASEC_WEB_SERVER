@@ -174,7 +174,7 @@ const Privacy = () => {
           {/* 시행일 */}
           <section className="pt-2">
             <p className="text-sm text-gray-500">
-              시행일자: 2026-02-20 (운영 시작일에 맞게 수정)
+              시행일자: 2026-06-06
             </p>
           </section>
         </div>

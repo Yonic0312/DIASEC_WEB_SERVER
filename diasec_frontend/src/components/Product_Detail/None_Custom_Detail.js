@@ -1006,7 +1006,7 @@ const None_Custom_Detail = () => {
                                     if (category === "masterPiece") {
                                         navigate(`/main_Items?type=${category}&author=${encodeURIComponent(product.author)}`);
                                     } else {
-                                        navigate(`/main_Items?type=${category}&label=${encodeURIComponent(product.author)}`);
+                                        navigate(`/main_Items?type=${category}&author=${encodeURIComponent(product.author)}`);
                                     }
                                     
                                 }}

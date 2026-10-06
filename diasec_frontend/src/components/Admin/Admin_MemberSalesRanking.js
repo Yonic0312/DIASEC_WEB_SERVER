@@ -171,7 +171,7 @@ const Admin_MemberSalesRanking = () => {
                                         <td className="px-3 py-2.5 text-gray-800">{row.email || '-'}</td>
                                         <td className="px-3 py-2.5">
                                             <span className={`inline-block px-2 py-0.5 rounded text-xs font-medium ${
-                                                row.pratnerStatus === '승인'
+                                                row.partnerStatus === '승인'
                                                     ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
                                                     : 'bg-gray-100 text-gray-600 border border-gray-200'
                                             }`}>

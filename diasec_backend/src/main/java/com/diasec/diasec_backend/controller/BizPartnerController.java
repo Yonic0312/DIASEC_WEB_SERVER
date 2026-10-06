@@ -43,7 +43,7 @@ public class BizPartnerController {
 
             vo.setMemberId(memberId);
             bizPartnerService.apply(vo);
-            return ResponseEntity.ok("신청이접수되었습니다.");
+            return ResponseEntity.ok("신청이 접수되었습니다.");
         } catch (IllegalArgumentException | IllegalStateException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         } catch (Exception e) {

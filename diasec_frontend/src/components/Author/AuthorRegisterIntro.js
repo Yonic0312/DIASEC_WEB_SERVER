@@ -61,7 +61,7 @@ const AuthorRegisterIntro = () => {
                         className="
                             md:text-sm text-[clamp(9.5px,1.8252vw,14px)]
                             text-red-700 whitespace-pre-wrap">
-                        {'사유 : ' + rejectReason || '반려 사유가 제공되지 않았습니다.'}
+                        {'사유 : ' + (rejectReason || '반려 사유가 제공되지 않았습니다.')}
                     </div>
                 </section>
             )}

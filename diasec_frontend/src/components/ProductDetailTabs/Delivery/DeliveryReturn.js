@@ -48,7 +48,7 @@ const DeliveryReturn = () => {
                         md:text-xl text-[clamp(18px,2.607vw,20px)] 
                         font-semibold">교환 및 반품 주소</span>
                 <address className="not-italic text-gray-700 mt-2">
-                    경기도 고양시 덕양구 통일로 140 삼송 테크노벨리 A동 355호 (10594) 디투원
+                    경기도 고양시 덕양구 통일로 140 삼송테크노벨리 A동 355호 (10594) 디투원
                 </address>
             </section>
 

@@ -68,7 +68,7 @@ public class ReviewController {
         OrderItemsVo item = orderService.selectOrderItemById((long) itemId);
         if (item == null) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(Map.of("success", false, "message", "주문 상품을 찾으 수 없습니다."));
+                .body(Map.of("success", false, "message", "주문 상품을 찾을 수 없습니다."));
         }
 
         Long oid = item.getOid();
@@ -133,7 +133,7 @@ public class ReviewController {
             }
             if (guestPassword == null || !passwordEncoder.matches(guestPassword, order.getGuestPassword())) {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(Map.of("success", false, "message", "비민번호가 일치하지 않습니다."));
+                    .body(Map.of("success", false, "message", "비밀번호가 일치하지 않습니다."));
             }
 
             return ResponseEntity.ok(reviewService.getEligibleReviewsByGuestOid(oid));

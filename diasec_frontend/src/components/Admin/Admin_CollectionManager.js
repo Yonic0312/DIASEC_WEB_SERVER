@@ -562,7 +562,7 @@ const Admin_CollectionManager = () => {
                                 })
                                 .catch(() => toast.error("이미지 업로드 실패"));
                             }}
-                            clasName="border px-3 py-2 w-full mb-4"
+                            className="border px-3 py-2 w-full mb-4"
                         />
                         <div className="flex justify-end gap-2">
                             <button onClick={() => setEditingLabel(null)} className="text-sm">취소</button>

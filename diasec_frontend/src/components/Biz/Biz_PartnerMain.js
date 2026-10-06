@@ -55,7 +55,7 @@ const Biz_PartnerMain = () => {
                 <section className="space-y-3">
                     <h2 className="text-xl font-bold">이런 파트너를 찾습니다</h2>
                     <p className="text-gary-700">
-                        웨딩 스튜디오, 인테리어 및 모델하우스, 전시·갤러리 기획사, 프렌차이즈 본사, 콘텐츠 제작자 등 <br/>
+                        웨딩 스튜디오, 인테리어 및 모델하우스, 전시·갤러리 기획사, 프랜차이즈 본사, 콘텐츠 제작자 등 <br/>
                         장기적인 협업이 가능한 전문 파트너를 찾고 있습니다.
                     </p>
                 </section>
