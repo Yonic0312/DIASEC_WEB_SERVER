@@ -174,7 +174,11 @@ public class MemberController {
 
     @PostMapping("/update")
     public ResponseEntity<?> updateMember(@RequestBody MemberVo member, HttpServletRequest request) {
-        MemberVo foundMember = validateMemberExistence(member.getId());
+        String loginId = resolveLoginMemberId();
+        if (loginId == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("로그인이 필요합니다.");
+        }
+        MemberVo foundMember = validateMemberExistence(loginId);
 
         if ("web".equals(foundMember.getProvider())) {
             // 현재 비밀번호가 일치하는지 확인
@@ -210,9 +214,34 @@ public class MemberController {
                     SecurityContextHolder.getContext());
             }
 
+        member.setId(loginId);
         memberService.updateMember(member);
 
         return ResponseEntity.ok("회원정보 수정 완료");
+    }
+
+    private String resolveLoginMemberId() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()
+            || "anonymousUser".equals(authentication.getPrincipal())) {
+            return null;
+        }
+
+        Object principal = authentication.getPrincipal();
+        if (principal instanceof CustomUserDetails userDetails) {
+            return userDetails.getMember().getId();
+        }
+        if (principal instanceof org.springframework.security.oauth2.core.user.OAuth2User oAuth2User) {
+            MemberVo member = memberService.findByProviderUid(
+                oAuth2User.getAttribute("provider"),
+                oAuth2User.getAttribute("providerUid")
+            );
+            if (member == null) {
+                member = memberService.findWebMemberByEmail(oAuth2User.getAttribute("email"));
+            }
+            return member != null ? member.getId() : null;
+        }
+        return null;
     }
 
     // 회원 탈퇴
@@ -223,20 +252,22 @@ public class MemberController {
             return ResponseEntity.badRequest().body("id 누락");
         }
 
+        String loginId = resolveLoginMemberId();
+        if (loginId == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("로그인이 필요합니다.");
+        }
+
+        boolean isAdmin = SecurityContextHolder.getContext().getAuthentication()
+            .getAuthorities().stream()
+            .anyMatch(a -> "ROLE_ADMIN".equals(a.getAuthority()));
+
+        if (!isAdmin && !loginId.equals(targetId)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("본인 계정만 탈퇴할 수 있습니다.");
+        }
+
         memberService.deleteMember(member.getId());
 
         // 본인 탈퇴인 경우에만 로그아웃 처리
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        String loginId = null;
-
-        if (auth != null && auth.isAuthenticated() && !"anonymouseUser".equals(auth.getPrincipal())) {
-            Object principal = auth.getPrincipal();
-
-            if (principal instanceof CustomUserDetails userDetails) {
-                loginId = userDetails.getMember().getId();
-            }
-        }
-
         if (loginId != null && loginId.equals(targetId)) {
             HttpSession session = request.getSession(false);
             if (session != null) session.invalidate();
@@ -411,8 +442,6 @@ public class MemberController {
         target.setRegion(source.getRegion());
         target.setSmsAgree(source.isSmsAgree());
         target.setEmailAgree(source.isEmailAgree());
-        target.setRole(source.getRole());
-        target.setCredit(source.getCredit());
     }
 
     /**
@@ -499,6 +528,19 @@ public class MemberController {
 
     @GetMapping("/credit")
     public ResponseEntity<?> selectCreditById(@RequestParam String id) {
+        String loginId = resolveLoginMemberId();
+        if (loginId == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("로그인이 필요합니다.");
+        }
+
+        boolean isAdmin = SecurityContextHolder.getContext().getAuthentication()
+            .getAuthorities().stream()
+            .anyMatch(a -> "ROLE_ADMIN".equals(a.getAuthority()));
+
+        if (!isAdmin && !loginId.equals(id)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("본인 적립금만 조회할 수 있습니다.");
+        }
+
         int credit = memberService.selectCreditById(id);
         return ResponseEntity.ok(Map.of("credit", credit));
     }

@@ -120,7 +120,7 @@
     <update id="decreaseCredit">
         UPDATE member
         SET credit = credit - #{credit}
-        WHERE id = #{id}
+        WHERE id = #{id} AND credit >= #{credit}
     </update>
 
     <!-- order_items 아이템 목록 가져오기 (orders에 들어갈) -->

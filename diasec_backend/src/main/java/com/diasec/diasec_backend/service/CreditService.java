@@ -22,20 +22,20 @@ public class CreditService {
 
     // 크레딧 등록 작업
     public void insertCreditHistory(CreditVo creditVo) {
-
         if (creditVo.getAmount() <= 0) return;
         if (creditVo.getId() == null || creditVo.getType() == null) return;
-
-        // 적립금 내역 넣기
-        creditMapper.insertCreditHistory(creditVo);
 
         // 적립금 if문 ()
         if (creditVo.getType().equals("적립")) {
             // 적립
             orderMapper.increaseCredit(creditVo.getId(), creditVo.getAmount());
         } else {
-            orderMapper.decreaseCredit(creditVo.getId(), creditVo.getAmount());
+            int updated = orderMapper.decreaseCredit(creditVo.getId(), creditVo.getAmount());
+            if (updated == 0) {
+                throw new IllegalStateException("적립금이 부족합니다.");
+            }
         }
+        creditMapper.insertCreditHistory(creditVo);
     
     }
 

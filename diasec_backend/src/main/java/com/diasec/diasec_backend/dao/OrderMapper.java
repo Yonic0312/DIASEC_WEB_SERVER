@@ -29,7 +29,7 @@ public interface OrderMapper {
     void increaseCredit(@Param("id") String memberId, @Param("credit") int credit);
 
     // @유저 사용한 적립금 차감@
-    void decreaseCredit(@Param("id") String memberId, @Param("credit") int credit);
+    int decreaseCredit(@Param("id") String memberId, @Param("credit") int credit);
 
     // 날짜, 타입 필터로 값 가져오기
     List<OrderVo> selectOrderListWithFilter(@Param("id") String id, @Param("startDate") String startDate, @Param("endDate") String endDate, @Param("status") String status);
