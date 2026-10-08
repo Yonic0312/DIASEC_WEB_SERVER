@@ -48,7 +48,7 @@ const Main_PricePolicy = () => {
                                 <h3 className="
                                     text-[15px] md:text-[22px]
                                     font-bold text-gray-900">
-                                    디아섹코리아의 제품가격은 결코 저렴하지 않습니다
+                                    고객의 소중한 추억을 오랜 기간 동안 간직하도록 설계 제작된 정통 디아섹만을 만듭니다
                                 </h3>
                                 <span className=" text-[13px] md:text-[17px] leading-relaxed text-gray-600">
                                     디아섹코리아는 디아섹 최초 개발자인

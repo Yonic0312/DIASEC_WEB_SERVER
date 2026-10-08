@@ -870,12 +870,31 @@ const OrderDetail = () => {
                                 className="
                                     text-black mb-2">결제 수단: <span className="font-normal">{order.paymentMethod}</span></span>
                         </div>
-                        {/* { order.paymentMethod === '무통장입금' && (
-                            <>
-                                <div><span className="text-black mb-2">입금자명:</span> {order.depositor}</div>
-                                <div><span className="text-black mb-2">입금 계좌:</span> {order.bankAccount}</div>
-                            </>
-                        )} */}
+                            {order.paymentMethod === '가상계좌' &&
+                                order.items?.some(it => it.orderStatus === '입금대기') && (() => {
+                                    const due = order.vbankDueDate ? new Date(String(order.vbankDueDate).replace(' ', 'T')) : null;
+                                    const expired = due && due.getTime() < Date.now();
+
+                                    if (expired) {
+                                        return (
+                                            <div className="text-red-500">
+                                                입금 기한({String(order.vbankDueDate).slice(0, 16)})이 지나 가상계좌가 만료되었습니다.<br />
+                                                다시 주문해 주시거나 고객센터로 문의해 주세요.
+                                            </div>
+                                        );
+                                    }
+                                    return (
+                                        <>
+                                        <div><span className="text-black mb-2">입금 은행:</span> {order.vbankName}</div>
+                                        <div><span className="text-black mb-2">입금 계좌:</span> {order.vbankAccount}</div>
+                                        <div><span className="text-black mb-2">예금주:</span> {order.vbankHolder}</div>
+                                        {order.vbankDueDate && (
+                                            <div><span className="text-black mb-2">입금 기한:</span> {String(order.vbankDueDate).slice(0, 16)} 까지</div>
+                                        )}
+                                    </>
+                                    )
+                                }
+                            )()}
                         <div><span className="text-black mb-2">총 상품금액:</span> {order.totalPrice.toLocaleString()}원</div>
                         <div><span className="text-black mb-2">적립금 사용:</span> {order.usedCredit.toLocaleString()}원</div>
                         <div><span className="text-black mb-2">배송비:</span> {order.deliveryFee.toLocaleString()}원</div>

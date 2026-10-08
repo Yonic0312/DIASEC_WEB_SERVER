@@ -444,7 +444,9 @@ const Main = () => {
                 const data = await getData(API, '/site-setting/main-blogs', {
                     signal: controller.signal,
                 });
-                setMainHomeBlogs(Array.isArray(data) ? data : []);
+                const list = Array.isArray(data) ? data : [];
+                // 나중에 등록한 글이 왼쪽, 예전 글은 오른쪽으로
+                setMainHomeBlogs([...list].reverse());
             } catch (err) {
                 if (err?.name === 'CanceledError') return;
                 console.error('메인 블로그 로딩 실패:', err);
@@ -881,7 +883,7 @@ const Main = () => {
                 <p className="
                     md:text-base text-[clamp(11px,2.086vw,16px)]
                     text-center text-gray-600 ">
-                    실제 고객님들의 생생한 후기를 확인해보세요.
+                    고객님들이 직접 남겨주신 생생한 후기를 만나보세요.
                 </p>
                 <div className="relative overflow-hidden mt-3">
                     <div className="flex transition-transform duration-500 ease-in-out"

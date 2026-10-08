@@ -4,7 +4,9 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { ChevronDown, X, Menu as MenuIcon } from 'lucide-react';
-import diasec1 from '../../assets/dropDownMenu/diasec/1.jpg'; import diasec2 from '../../assets/dropDownMenu/diasec/2.jpg';
+import diasec1 from '../../assets/dropDownMenu/diasec/1.jpg';
+import diasec2 from '../../assets/dropDownMenu/diasec/2.jpg';
+import diasec3 from '../../assets/dropDownMenu/diasec/3.jpg';
 import logo from '../../assets/images/logo.png'
 import HeaderSearch from './HeaderSearch';
 
@@ -61,7 +63,7 @@ const Header = () => {
         diasec: [
             { label: '디아섹코리아 회사소개', img: diasec1, link: '/main_CompanyProfile'}, 
             { label: '디아섹이란', img: diasec2, link: '/introduce'},
-            { label: '10년 품질보증', img: diasec2, link: '/pricePolicy'},
+            { label: '10년 품질보증', img: diasec3, link: '/pricePolicy'},
         ], 
         masterPiece: [], photoIllustration: [], fengShui: [], koreanPainting:[], Contemporary: [],
         authorCollection: [], customFrame: [], companyOrder: [], registerAuthor: [], event: []

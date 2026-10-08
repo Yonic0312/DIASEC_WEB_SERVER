@@ -1,25 +1,29 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
 
 const Order_Status = () => {
     const API = process.env.REACT_APP_API_BASE;
     const navigate = useNavigate();
-    const [currentPage, setCurrentPage] = useState(1);
+
     const [searchParams, setSearchParams] = useSearchParams();
+    const [currentPage, setCurrentPage] = useState(() => {
+        const page = parseInt(searchParams.get('page') || '1', 10);
+        return Number.isFinite(page) && page > 0 ? page : 1;
+    });
     const [orderList, setOrderList] = useState([]);
-    const [statusFilter, setStatusFilter] = useState('전체');
-    const [categoryFilter, setCategoryFilter] = useState('전체'); // 카테고리 필터
+    const [statusFilter, setStatusFilter] = useState(() => searchParams.get('status') || '전체');
+    const [categoryFilter, setCategoryFilter] = useState(() => searchParams.get('category') || '전체'); // 카테고리 필터
 
     // 심사 대기중인 사람 수
     const [pendingAuthorCount, setPendingAuthorCount] = useState(0);
 
     // 검색
-    const [keyword, setKeyword] = useState('');
+    const [keyword, setKeyword] = useState(() => searchParams.get('keyword') || '');
 
     // 날짜 검색
-    const [startDate, setStartDate] = useState('');
-    const [endDate, setEndDate] = useState('');
+    const [startDate, setStartDate] = useState(() => searchParams.get('startDate') || '');
+    const [endDate, setEndDate] = useState(() => searchParams.get('endDate') || '');
 
     const handleAllPeriod = () => {
         setStartDate('');
@@ -223,11 +227,16 @@ const Order_Status = () => {
         setSearchParams(params, { replace: true });
     }, [statusFilter, categoryFilter, keyword, startDate, endDate, currentPage]);
 
-    // 검색조건 바뀌면 페이지 1로 리셋
+    // 검색조건 바뀌면 페이지 1로 리셋. 상세에서 돌아올 때는 주소의 page를 유지
+    const skipPageResetRef = useRef(true);
     useEffect(() => {
+        if (skipPageResetRef.current) {
+            skipPageResetRef.current = false;
+            return;
+        }
         setCurrentPage(1);
     }, [statusFilter, categoryFilter, startDate, endDate, keyword]);
-
+    
     // 상세 페이지로 넘어갈때 검색조건도 넘어감 //
 
     // 상세페이지 (모달창)
@@ -308,7 +317,7 @@ const Order_Status = () => {
     // 페이징
     const itemsPerPage = 10;
 
-    const totalPages = Math.max(1, Math.ceil(orderList.length / itemsPerPage));
+    const totalPages = Math.max(1, Math.ceil(groupedOrderList.length / itemsPerPage));
     const currentItems = groupedOrderList.slice(
         (currentPage - 1) * itemsPerPage, 
         currentPage * itemsPerPage
