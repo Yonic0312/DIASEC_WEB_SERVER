@@ -197,11 +197,6 @@ public class AdminOrderService {
         return "";
     }
 
-    // 리스 정보 수정
-    public void updateLeasePeriod(Long itemId, String leaseStart, String leaseEnd) {
-        adminOrderMapper.updateLeasePeriod(itemId, leaseStart, leaseEnd);
-    }
-
     // 관리자: 사이즈(인치 문자열) 수정
     public boolean updateOrderItemSize(Long itemId, String size) {
         if (itemId == null || size == null || size.isBlank()) return false;

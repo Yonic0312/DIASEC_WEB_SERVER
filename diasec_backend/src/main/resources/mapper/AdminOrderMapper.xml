@@ -24,8 +24,6 @@
         <result property="bankName" column="bank_name"/>
         <result property="accountNumber" column="account_number"/>
         <result property="accountHolder" column="account_holder"/>
-        <result property="leaseStart" column="lease_start"/>
-        <result property="leaseEnd" column="lease_end"/>
         <result property="id" column="user_id"/>
         <result property="ordererName" column="orderer_name"/>
     </resultMap>
@@ -106,16 +104,6 @@
         JOIN orders o ON oi.oid = o.oid
         WHERE oi.item_id = #{itemId}
     </select>
-
-    <!-- 리스정보 수정 -->
-    <update id="updateLeasePeriod">
-        UPDATE order_items
-        SET 
-            lease_start = #{leaseStart},
-            lease_end = #{leaseEnd}
-        WHERE
-         item_id = #{itemId}
-    </update>
 
     <select id="selectThumbnailByItemId" resultType="string">
         SELECT thumbnail

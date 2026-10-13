@@ -8,6 +8,9 @@ package com.diasec.diasec_backend.controller;
 import java.util.Map;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -15,7 +18,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.diasec.diasec_backend.security.CustomUserDetails;
+import com.diasec.diasec_backend.service.MemberService;
 import com.diasec.diasec_backend.service.NicepayService;
+import com.diasec.diasec_backend.vo.MemberVo;
 import com.diasec.diasec_backend.vo.OrderVo;
 
 import jakarta.servlet.http.HttpServletResponse;
@@ -27,6 +33,7 @@ import lombok.RequiredArgsConstructor;
 public class NicepayController {
     
     private final NicepayService nicepayService;
+    private final MemberService memberService;
 
     // 가상계좌 발급 요청
     @PostMapping("/vbank")
@@ -46,6 +53,13 @@ public class NicepayController {
     @PostMapping("/vbank/prepare")
     public ResponseEntity<?> prepareVBank(@RequestBody OrderVo orderVo) {
         try {
+            String loginId = resolveLoginMemberId();
+            if (loginId != null) {
+                orderVo.setId(loginId);
+            } else {
+                orderVo.setId("");
+                orderVo.setUsedCredit(0);
+            }
             String orderId = nicepayService.saveDraft(orderVo);
             return ResponseEntity.ok(Map.of("success", true, "orderId", orderId));
         } catch (Exception e) {
@@ -69,6 +83,13 @@ public class NicepayController {
     @PostMapping("/prepare")
     public ResponseEntity<?> prepareCard(@RequestBody OrderVo orderVo) {
         try {
+            String loginId = resolveLoginMemberId();
+            if (loginId != null) {
+                orderVo.setId(loginId);
+            } else {
+                orderVo.setId("");
+                orderVo.setUsedCredit(0);
+            }
             String orderId = nicepayService.saveDraft(orderVo);
             return ResponseEntity.ok(Map.of("success", true, "orderId", orderId));
         } catch (Exception e) {
@@ -76,6 +97,28 @@ public class NicepayController {
             return ResponseEntity.internalServerError().body(Map.of("success", false, "message", e.getMessage()));
         }
     }
+
+    private String resolveLoginMemberId() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()
+            || "anonymousUser".equals(authentication.getPrincipal())) {
+        return null;
+        }
+        Object principal = authentication.getPrincipal();
+        if (principal instanceof CustomUserDetails userDetails) {
+            return userDetails.getMember().getId();
+        }
+        if (principal instanceof OAuth2User oAuth2User) {
+            String provider = oAuth2User.getAttribute("provider");
+            String providerUid = oAuth2User.getAttribute("providerUid");
+            String email = oAuth2User.getAttribute("email");
+            MemberVo member = memberService.findByProviderUid(provider, providerUid);
+            if (member == null) member = memberService.findWebMemberByEmail(email);
+            return member != null ? member.getId() : null;
+        }
+        return null;
+    }
+
 
     @GetMapping("/return")
     public void cardReturnGet(@RequestParam Map<String, String> params, HttpServletResponse response) throws Exception {

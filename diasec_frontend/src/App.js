@@ -62,7 +62,6 @@ import CustomFrames from './components/Main/Main_CustomFrames'
 import Main_CompanyProfile from './components/Main/Main_CompanyProfile'
 import MyRetouchList from './components/Member/Order/MyRetouchList'
 import MemberHome from './components/Member/MemberHome'
-// import LeasePage from './components/Lease/LeasePage'
 import AuthorRegisterIntro from './components/Author/AuthorRegisterIntro'
 import AuthorRegisterForm from './components/Author/AuthorRegisterForm'
 import AuthorPage from './components/Author/AuthorPage'
@@ -95,7 +94,6 @@ import Admin_SoldFrames from './components/Admin/Admin_SoldFrames'
 import Admin_MainBlog from './components/Admin/Admin_MainBlog'
 import Admin_BizConsultList from './components/Admin/Admin_BizConsultList'
 import Admin_BizConsultView from './components/Admin/Admin_BizConsultView'
-// import Admin_Lease_Status from './components/Admin/Lease_Status'
 import Admin_AuthorManager from './components/Admin/AuthorManager'
 import Admin_RetouchList from './components/Admin/AdminRetouchList'
 import Admin_Home from './components/Admin/Admin_Home'
@@ -548,7 +546,6 @@ function App() {
                         <Route path="/changePwd" element={<ChangePwd />} />
                         <Route path="/cart" element={<Cart />} />
                         <Route path="/orderList" element={<OrderList />} />
-                        {/* <Route path="/orderList_Lease" element={<OrderList_Lease />} /> */}
                         <Route path="/orderDetail/:oid" element={<OrderDetail />} />
                         <Route path="/orderTracking/:itemId" element={<OrderTracking />} />
                         <Route path="/addrList" element={<AddrList />} />
@@ -579,7 +576,6 @@ function App() {
                         <Route path="/main_CompanyProfile" element={<Main_CompanyProfile />} />
                         <Route path="/mypage/retouch" element={<MyRetouchList />} />
                         <Route path="/mypage" element={<MemberHome />} />
-                        {/* <Route path="/leasePage" element={<LeasePage />} /> */}
                         <Route path="/authorRegisterIntro" element={<AuthorRegisterIntro />} />
                         <Route path="/authorRegisterForm" element={<AuthorRegisterForm />} />
                         <Route path="/authorPage/:id" element={<AuthorPage />} />

@@ -247,18 +247,6 @@ const OrderList = () => {
         }];
     };
 
-    // 리스상품 반납일 계산기
-    const calculateRemainingDays = (leaseEnd) => {
-        const endDate = new Date(leaseEnd);
-        const today = new Date();
-        const timeDiff = endDate - today;
-
-        if (isNaN(timeDiff)) return null;
-
-        const days = Math.ceil(timeDiff / (1000 * 60 * 60 * 24));
-        return days > 0 ? days : 0;
-    }
-
     return (
         <div className="flex flex-col w-full max-w-[1100px] mb-20 
             mr-2 ml-2 md:ml-0"
@@ -449,21 +437,6 @@ const OrderList = () => {
                                                         사이즈: {item.isGrouped ? item.displaySize : convertInchToCm(item.size)}
                                                     </span>
                                                 </div>
-                                                {item.category === 'lease' && (
-                                                `기간 : ${item.period}`
-                                                )}
-
-                                                {item.category === 'lease' && item.leaseStart && (
-                                                    ` / (${item.leaseStart} ~ ${item.leaseEnd})`)
-                                                }
-
-                                                {item.category === 'lease' && !item.leaseStart && (
-                                                    ` / 리스 기간이 아직 등록되지 않았습니다.`)
-                                                }
-
-                                                {item.category === 'lease' && item.leaseEnd && (
-                                                    ` / 남은 기간: ${calculateRemainingDays(item.leaseEnd)}일`)
-                                                }
                                                 <div className="flex font-bold ml-auto">
                                                     <span>
                                                         {item.isGrouped

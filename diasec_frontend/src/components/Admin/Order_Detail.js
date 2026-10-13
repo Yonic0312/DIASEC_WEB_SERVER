@@ -80,13 +80,16 @@ const PRINT_ORDER_STYLES = `
         print-color-adjust: exact;
         font-weight:800;
     }
-    .print-wrap .print-badge-red {
-        background: #fff !important;
-        color: #FF0000 !important;
-        border-color: #FF0000 !important;
+    .print-wrap .print-badge-black {
+        background: #000000 !important;
+        color: #FFF !important;
+        border-color: #000 !important;
         -webkit-print-color-adjust: exact;
         print-color-adjust: exact;
-        font-size: 13px;
+        font-size: 14px;
+        font-weight: 700;
+        -webkit-text-stroke: 0.45px #fff;
+        paint-order: stroke fill;
     }
     .print-wrap .print-note-box {
         min-height: 70px;
@@ -189,11 +192,6 @@ const Order_Detail = () => {
     const { itemId } = useParams();
     const [order, setOrder] = useState(null);
     const [siblingItemIds, setSiblingItemIds] = useState(siblingItemIdsFromState);
-
-    // 리스 정보 수정
-    const [showLeaseModal, setShowLeaseModal] = useState(false);
-    const [leaseStart, setLeaseStart] = useState('');
-    const [leaseEnd, setLeaseEnd] = useState('');
 
     // 사이즈 수정 (화면 cm 입력 -> DB 인치 저장)
     const [showSizeModal, setShowSizeModal] = useState(false);
@@ -843,39 +841,6 @@ const Order_Detail = () => {
         }
     }
 
-    // 리스 저장
-    const handleLeaseSave = () => {
-        if (!leaseStart || !leaseEnd) {
-            toast.error("리스 시작일과 종료일을 모두 입력해주세요.");
-            return;
-        }
-
-        fetch(`${API}/admin/order/update-lease-period`, {
-            method: 'POST',
-            headers: { 'Content-Type' : 'application/json' },
-            credentials: 'include',
-            body: JSON.stringify({
-                itemId: order.items[0].itemId,
-                leaseStart,
-                leaseEnd
-            })
-        })
-        .then(res => res.json())
-        .then(data => {
-            if (data.success) {
-                toast.success("리스 기간이 저장되었습니다.");
-                setShowLeaseModal(false);
-                reload();
-            } else {
-                toast.error("저장 실패: " + (data.message || ""));
-            }
-        })
-        .catch(err => {
-            console.error("리스 기간 저장 실패", err);
-            toast.error("서버 오류");
-        });
-    };
-
     // 고객 업로드 보여주기 (원본 없으면 150px 썸네일)
     const customFrameThumb =
         (order.items[0].thumbnail || order.items[0].thumbnailPreview)
@@ -1125,18 +1090,6 @@ const Order_Detail = () => {
                             운송장 정보 수정
                         </button>
 
-                        {order.items[0].category === 'lease' && (
-                            <button 
-                                className="px-2 py-1 text-[11px] font-medium border bg-green-600 text-white border-white rounded-xl hover:text-gray-300 transition"
-                                onClick={() => {
-                                    setLeaseStart(order.items[0].leaseStartDate?.slice(0, 10) || '');
-                                    setLeaseEnd(order.items[0].leaseStartDate?.slice(0, 10) || '');
-                                    setShowLeaseModal(true);
-                                }}>
-                                리스정보 수정
-                            </button>
-                        )}
-
                         <button 
                             className="px-2 py-1 text-[11px] font-medium border bg-black text-white border-gray-500 rounded-xl hover:text-gray-300  transition" 
                             onClick={() => navigate(`/admin/order_Status${backQuery}`)}> 
@@ -1177,7 +1130,7 @@ const Order_Detail = () => {
                             <span className="print-badge">
                                 수량 {order.items[0].quantity}개
                             </span>
-                            <span className={item.finishType === 'matte' ? 'print-badge print-badge-red' : 'print-badge'}>
+                            <span className={item.finishType === 'matte' ? 'print-badge print-badge-black' : 'print-badge'}>
                                  {item.finishType === 'matte' ? '무광' : '유광'}
                             </span>
                         </div>

@@ -110,7 +110,7 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.POST, "/api/uploads/customFrames/tmp").permitAll()
 
                  // 4. 비회원 주문 관련
-                 .requestMatchers(
+                .requestMatchers(
                     "/api/order/insert", "/api/order/guest-search", "/api/order/detail/**",
                     "/api/order/cancel", "/api/order/cancelRequest", "/api/order/guest-reset-password", "/api/order/update-retouch",
                     "/api/order/retouch/*/approve", "/api/order/retouch/*/reject"

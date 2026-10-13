@@ -14,21 +14,17 @@ public class OrderItemsVo {
     private String title;
     private String author;
     private int quantity;
-    private int deposit;
     private int price;
-    private String period;
     private int finalPrice;
     private String size;
     private String thumbnail;
     private String thumbnailPreview;
-    private String customFrameDeliveredAt; // 맞춤액자 배송완료 시각 (썸네일 30일 자동삭제 기준)
+    /** 맞춤액자 배송완료 시각 (썸네일 30일 자동삭제 기준) */
+    private String customFrameDeliveredAt;
     private String orderStatus;
     private String trackingNumber;
     private String trackingCompany;
     private String finishType;
-
-    private String leaseStart;
-    private String leaseEnd;
 
     // 반품
     private String reason;

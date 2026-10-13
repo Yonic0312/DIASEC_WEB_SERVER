@@ -93,6 +93,21 @@ public class OrderController {
                 ordervo.setGuestPassword(encodedPw);
             }
 
+            String loginId = resolveLoginMemberId();
+            if (loginId != null) {
+                ordervo.setId(loginId);
+            } else {
+                ordervo.setId("");
+                ordervo.setUsedCredit(0);
+            }
+
+            if (!"적립금".equals(ordervo.getPaymentMethod())) {
+                return ResponseEntity.badRequest().body(Map.of(
+                    "success", false,
+                    "message", "이 결제수단은 결제 승인 뒤에만 저장됩니다."
+                ));
+            }
+
             orderService.insertOrder(ordervo, customFrameFiles, customFramePreviewFiles);
             boolean isBankTransfer = "무통장입금".equals(ordervo.getPaymentMethod());
             if (!isBankTransfer) {

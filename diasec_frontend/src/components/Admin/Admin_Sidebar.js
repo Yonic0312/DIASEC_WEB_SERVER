@@ -94,7 +94,7 @@ const Admin_Sidebar = () => {
     }, [API]);
 
     return (
-        <div className="flex flex-col items-start w-[200px] mr-4 gap-3 mb-20">
+        <div className="flex flex-col items-start w-[165px] mr-4 gap-3 mb-20 shrink-0">
             <div className="mb-6 w-full">
                 <button
                     type="button"

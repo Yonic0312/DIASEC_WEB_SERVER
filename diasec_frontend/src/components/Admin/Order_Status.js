@@ -5,7 +5,6 @@ import { toast } from 'react-toastify';
 const Order_Status = () => {
     const API = process.env.REACT_APP_API_BASE;
     const navigate = useNavigate();
-
     const [searchParams, setSearchParams] = useSearchParams();
     const [currentPage, setCurrentPage] = useState(() => {
         const page = parseInt(searchParams.get('page') || '1', 10);
@@ -136,14 +135,7 @@ const Order_Status = () => {
         const data = await res.json();
 
         if (!data.success) {
-            console.error('[admin update-status] failed', {
-                httpStatus: res.status,
-                itemId,
-                oid,
-                newStatus,
-                response: data,
-            });
-            toast.error(data.message || '상태 변경 실패');
+            toast.error('상태 변경 실패');
             return;
         }
 
@@ -236,7 +228,7 @@ const Order_Status = () => {
         }
         setCurrentPage(1);
     }, [statusFilter, categoryFilter, startDate, endDate, keyword]);
-    
+
     // 상세 페이지로 넘어갈때 검색조건도 넘어감 //
 
     // 상세페이지 (모달창)
@@ -252,6 +244,7 @@ const Order_Status = () => {
 
     const [customCompany, setCustomCompany] = useState(''); // 직접 입력일 때 사용하는 변수
     const [applyToSameOrder, setApplyToSameOrder] = useState(true);
+
     // 모달 값 저장 함수
     const handleSave = () => {
         if(!trackingCompany || trackingCompany.trim() === '') {
@@ -381,7 +374,7 @@ const Order_Status = () => {
                     <span className="mx-1">~</span>
                     <input type="date" className="w-[130px] h-[40px] border text-center" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
                     
-                    <input type="text" placeholder="주문번호, 회원ID, 주문자명, 상품명" className="w-[180px] h-[40px] border text-sm px-3" value={keyword} onChange={(e) => setKeyword(e.target.value)} />
+                    <input type="text" placeholder="주문번호, 회원ID, 주문자명, 상품명" className="w-[220px] h-[40px] border text-sm px-3" value={keyword} onChange={(e) => setKeyword(e.target.value)} />
                 </div>
             </div>
             
@@ -393,17 +386,17 @@ const Order_Status = () => {
                 <table className="w-full text-sm border-collapse">
                     <thead className="bg-gray-100 border-b">
                         <tr className="text-center">
-                            <th className="w-[9%] p-3 font-medium text-gray-700">주문일자</th>
-                            <th className="w-[7%] p-3 font-medium text-gray-700">주문번호</th>
-                            <th className="w-[9%] p-3 font-medium text-gray-700">회원ID</th>
-                            <th className="w-[8%] p-3 font-medium text-gray-700">주문자</th>
-                            <th className="w-[9%] p-3 font-medium text-gray-700">카테고리</th>
-                            <th className="w-[26%] p-3 font-medium text-gray-700">상품명</th>
-                            <th className="w-[5%] p-3 text-center font-medium text-gray-700">수량</th>
+                            <th className="w-[9%] p-2 font-medium text-gray-700">주문일자</th>
+                            <th className="w-[7%] p-2 font-medium text-gray-700">주문번호</th>
+                            <th className="w-[9%] p-2 font-medium text-gray-700">회원ID</th>
+                            <th className="w-[8%] p-2 font-medium text-gray-700">주문자</th>
+                            <th className="w-[9%] p-2 font-medium text-gray-700">카테고리</th>
+                            <th className="w-[26%] p-2 font-medium text-gray-700">상품명</th>
+                            <th className="w-[5%] text-center p-2 font-medium text-gray-700">수량</th>
                             {/* <th className="w-[10%] p-3 text-center font-medium text-gray-700">단가</th> */}
-                            <th className="w-[12%] p-3 font-medium text-gray-700">총금액</th>
-                            <th className="w-[8.8%] p-3 font-medium text-gray-700">상태</th>
-                            <th className="w-[5.5%] p-3 font-medium text-gray-700">변경</th>
+                            <th className="w-[12%] p-2 font-medium text-gray-700">총금액</th>
+                            <th className="w-[8.8%] p-2 font-medium text-gray-700">상태</th>
+                            <th className="w-[5.5%] p-2 font-medium text-gray-700">변경</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -421,20 +414,20 @@ const Order_Status = () => {
                                             const siblingItemIds = orderList
                                                 .filter((row) => row.oid === item.oid)
                                                 .map((row) => row.itemId);
-                                            navigate(`/admin/order_Detail/${item.itemId}?${qs}`, { 
+                                            navigate(`/admin/order_Detail/${item.itemId}?${qs}`, {
                                                 state: {
                                                     orderCount: item.orderCount,
                                                     siblingItemIds,
-                                                }
+                                                },
                                             });
                                         }}
                                     >
-                                        <td className="p-3">{isSameOid ? '' : item.createdAt?.slice(2, 10)}</td>
-                                        <td className="p-3">{isSameOid ? '' : item.oid}</td>
-                                        <td className="p-3">{isSameOid ? '' : item.id == '' ? '비회원' : item.id}</td>
-                                        <td className="p-3">{isSameOid ? '' : (item.ordererName || '-')}</td>
-                                        <td className="p-3">{categoryMap[item.category] || item.category}</td>
-                                        <td className={`p-3 text-black flex justify-between`}>
+                                        <td className="px-2 py-3">{isSameOid ? '' : item.createdAt?.slice(2, 10)}</td>
+                                        <td className="px-2 py-3">{isSameOid ? '' : item.oid}</td>
+                                        <td className="px-2 py-3">{isSameOid ? '' : item.id == '' ? '비회원' : item.id}</td>
+                                        <td className="px-2 py-3">{isSameOid ? '' : (item.ordererName || '-')}</td>
+                                        <td className="px-2 py-3">{categoryMap[item.category] || item.category}</td>
+                                        <td className={`px-2 py-3 text-black flex justify-between`}>
                                             <span className="align-middle">{item.title}</span>
                                             {item.category === 'customFrames' && (() => {
                                                 const has150 = hasStoredImagePath(item.thumbnailPreview);
@@ -454,13 +447,13 @@ const Order_Status = () => {
                                                 );
                                             })()}
                                         </td>
-                                        <td className="p-3">{item.quantity}</td>
+                                        <td className="px-2 py-3">{item.quantity}</td>
                                         {/* <td className="p-3 text-center">{item.price?.toLocaleString()}원</td> */}
-                                        <td className="p-3">{(item.price * item.quantity).toLocaleString()}원</td>
-                                        <td className={`p-3 font-semibold ${statusBadgeColor(item.orderStatus)}`}>
+                                        <td className="px-2 py-3">{(item.price * item.quantity).toLocaleString()}원</td>
+                                        <td className={`px-2 py-3 font-semibold ${statusBadgeColor(item.orderStatus)}`}>
                                             {item.orderStatus}
                                         </td>
-                                        <td className="p-3">
+                                        <td className="px-2 py-3">
                                             <select
                                                 value={item.orderStatus}
                                                 onClick={(e) => e.stopPropagation()} 
@@ -613,7 +606,7 @@ const Order_Status = () => {
                         ) : null}
 
                         <label className="flex items-center gap-2 mb-3 text-sm text-gray-800 cursor-pointer select-none">
-                            <input 
+                            <input
                                 type="checkbox"
                                 checked={applyToSameOrder}
                                 onChange={(e) => setApplyToSameOrder(e.target.checked)}

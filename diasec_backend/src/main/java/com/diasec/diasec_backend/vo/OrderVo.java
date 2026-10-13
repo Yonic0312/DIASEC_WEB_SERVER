@@ -22,7 +22,6 @@ public class OrderVo {
     private String paymentMethod;
     private String receiptType; // 현금영수증 [개인, 사업자]
     private int totalPrice;
-    private int totalDeposit;
     private int deliveryFee;
     private int finalPrice;
     private String buyerRequest;

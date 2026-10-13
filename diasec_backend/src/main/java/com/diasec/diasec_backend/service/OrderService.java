@@ -110,6 +110,13 @@ public class OrderService {
             }
         }
 
+        String status = "가상계좌".equals(orderVo.getPaymentMethod()) ? "입금대기" : "결제완료";
+        if (orderVo.getItems() != null) {
+            for (OrderItemsVo item : orderVo.getItems()) {
+                item.setOrderStatus(status);
+            }
+        }
+
         // 1. orders 테이블에 주문 저장 (oid 생성)
         orderMapper.insertOrder(orderVo);
 

@@ -181,10 +181,6 @@ const OrderForm = () => {
         setRecipientPhone3(phone3);
     }, [isSameAsOrderer, ordererName, phone1, phone2, phone3]);
 
-    // 보증금 계산
-    const totalDeposit = location.state?.totalDeposit || 0;
-    const deposit = totalDeposit;
-
     // 크레딧 계산
     const [usedCredit, setUsedCredit] = useState(0);
     const [useFullCredit, setUseFullCredit] = useState(false);
@@ -215,7 +211,7 @@ const OrderForm = () => {
     );
     const deliveryFee = 0;
     const CARD_MIN_PAYMENT = 100;
-    const payableBeforeCredit = totalPrice + deliveryFee + deposit;
+    const payableBeforeCredit = totalPrice + deliveryFee;
     const availableCredit = !isGuest ? Number(credit || 0) : 0;
 
     const maxUsableCredit = (() => {
@@ -403,12 +399,10 @@ const OrderForm = () => {
             author: item.author,
             quantity: item.quantity,
             price: getDiscountedUnitPrice(item.price, extraDiscountPercent),
-            period: item.period,
             size: item.size,
             thumbnail: item.thumbnail,
             thumbnailPreview: item.thumbnailPreview,
             orderStatus,
-            deposit: item.deposit,
             finishType: item.finishType ?? 'glossy',
             retouchEnabled: item.retouchEnabled ?? 0,
             retouchTypes: item.retouchEnabled ? (item.retouchTypes ?? null) : null,
@@ -587,7 +581,6 @@ const OrderForm = () => {
                     receiptInfo,
                     receiptMethod,
                     totalPrice,
-                    totalDeposit,
                     finalPrice,
                     deliveryFee,
                     deliveryMessage,
@@ -654,7 +647,6 @@ const OrderForm = () => {
                     receiptInfo,
                     receiptMethod,
                     totalPrice,
-                    totalDeposit,
                     finalPrice,
                     deliveryFee,
                     deliveryMessage,
@@ -754,7 +746,6 @@ const OrderForm = () => {
             receiptInfo,
             receiptMethod,
             totalPrice,
-            totalDeposit,
             finalPrice: orderFinalPrice,
             deliveryFee,
             deliveryMessage,
@@ -785,13 +776,11 @@ const OrderForm = () => {
                 author: item.author,
                 quantity: item.quantity,
                 price: getDiscountedUnitPrice(item.price, extraDiscountPercent),
-                period: item.period,
                 size: item.size,
                 // 맞춤액자는 주문 확정 시 multipart 파일로 업로드 후 서버에서 URL 세팅
                 thumbnail: item.category === 'customFrames' ? null : item.thumbnail,
                 thumbnailPreview: item.category === 'customFrames' ? null : item.thumbnailPreview,
                 orderStatus: finalOrderStatus,
-                deposit: item.deposit,
                 finishType: item.finishType ?? 'glossy',
 
                 // 보정
@@ -1680,17 +1669,6 @@ const OrderForm = () => {
                     />
                 </div>
                 <hr />
-                {deposit > 0 && (
-                    <>
-                        <div className="flex flex-row items-center justify-between mt-3 mx-3 mb-3">
-                            <div className="w-[150px] text-sm">
-                                보증금
-                            </div>
-                            <span> {deposit.toLocaleString()} 원</span>
-                        </div>
-                        <hr />
-                    </>
-                )}
                 
                 <div className="flex flex-row items-center justify-between mt-3 mx-3 mb-3">
                     <div className="w-[150px]">

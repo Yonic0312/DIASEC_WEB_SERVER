@@ -131,22 +131,6 @@ public class AdminOrderController {
         return o == null ? "" : String.valueOf(o).trim();
     }
 
-    // 리스정보 수정
-    @PostMapping("/order/update-lease-period")
-    public ResponseEntity<?> updateLeasePeriod(@RequestBody Map<String, Object> body) {
-        try {
-            Long itemId = Long.parseLong(body.get("itemId").toString());
-            String leaseStart = (String) body.get("leaseStart");
-            String leaseEnd = (String) body.get("leaseEnd");
-
-            adminOrderService.updateLeasePeriod(itemId, leaseStart, leaseEnd);
-            return ResponseEntity.ok(Map.of("success", true));
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.internalServerError().body(Map.of("success", false, "message", e.getMessage()));
-        }
-    }
-
     // 관리자: 사이즈 수정 (DB에는 인치 문자열 저장)
     @PostMapping("/order/update-size")
     public Map<String, Object> updateORderItemSize(@RequestBody Map<String, Object> body) {

@@ -1,3 +1,5 @@
+/** 로컬 코드 붙여넣기 금지 */
+
 package com.diasec.diasec_backend.service;
 
 import java.nio.charset.StandardCharsets;
@@ -201,10 +203,13 @@ public class MemberService {
 
     @Transactional
     public void createSocialMember(String email, String nickname, String provider, String providerUid) {
+        String safeNickname = (nickname == null || nickname.isBlank()) ? "소셜회원" : nickname.trim();
+        if (safeNickname.length() > 40) safeNickname = safeNickname.substring(0, 40);
+
         MemberVo vo = new MemberVo();
         vo.setEmail(email);
-        vo.setNickname(nickname);
-        vo.setName((nickname != null && !nickname.isBlank()) ? nickname : "소셜회원");
+        vo.setNickname(safeNickname);
+        vo.setName(safeNickname);
         vo.setProvider(provider);
         vo.setRole("USER");
         vo.setSmsAgree(true);

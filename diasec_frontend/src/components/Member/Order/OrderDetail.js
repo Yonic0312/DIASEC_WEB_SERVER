@@ -450,18 +450,6 @@ const OrderDetail = () => {
         } 
     }
 
-    // 리스상품 반납일 계산기
-    const calculateRemainingDays = (leaseEnd) => {
-        const endDate = new Date(leaseEnd);
-        const today = new Date();
-        const timeDiff = endDate - today;
-
-        if (isNaN(timeDiff)) return null;
-
-        const days = Math.ceil(timeDiff / (1000 * 60 * 60 * 24));
-        return days > 0 ? days : 0;
-    }
-
     return (
         <>
             <div className="w-full bg-white sm:px-8 px-2 sm:mx-4 mx-2 sm:py-10 py-5 shadow-md border border-gray-200 space-y-4 mb-20">

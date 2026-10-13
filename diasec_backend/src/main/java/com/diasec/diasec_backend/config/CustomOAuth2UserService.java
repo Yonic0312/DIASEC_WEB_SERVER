@@ -1,3 +1,5 @@
+/** 로컬 코드 붙여넣기 금지  */
+
 package com.diasec.diasec_backend.config;
 
 import com.diasec.diasec_backend.service.MemberService;
@@ -77,6 +79,9 @@ public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2Authentic
             providerUid = response != null ? String.valueOf(response.get("id")) : null;
             email = response != null ? (String) response.get("email") : null;
             nickname = response != null ? (String) response.get("name") : null;
+            if (nickname == null || nickname.isBlank()) {
+                nickname = response != null ? (String) response.get("nickname") : null;
+            }
 
             System.out.println("[OAUTH][NAVER] uid=" + providerUid);
             System.out.println("[OAUTH][NAVER] email=" + email);
@@ -114,6 +119,13 @@ public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2Authentic
     }
 
     if (linked != null) {
+        if (nickname == null || nickname.isBlank()) {
+            nickname = (linked.getNickname() != null && !linked.getNickname().isBlank())
+                ? linked.getNickname()
+                : fallbackNickname(null, email);
+            userAttributes.put("nickname", nickname);
+        }
+
         System.out.println("[OAUTH] => RETURN linked user (no linking needed)");
         System.out.println("================== [OAUTH] loadUser END ==================\n");
         return new DefaultOAuth2User(
@@ -164,6 +176,8 @@ public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2Authentic
 
     System.out.println("[OAUTH] => NEW SOCIAL MEMBER createSocialMember(email=" + email + ", provider=" + provider + ", uid=" + providerUid + ")");
     try {
+        nickname = fallbackNickname(nickname, email);
+        userAttributes.put("nickname", nickname);
         memberService.createSocialMember(email, nickname, provider, providerUid);
         System.out.println("[OAUTH] createSocialMember OK");
     } catch (Exception ex) {
@@ -185,6 +199,15 @@ public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2Authentic
         userAttributes,
         "nickname"
     );
+}
+
+private String fallbackNickname(String nickname, String email) {
+    if (nickname != null && !nickname.isBlank()) return nickname.trim();
+    if (email != null && email.contains("@")) {
+        String local = email.substring(0, email.indexOf('@')).trim();
+        if (!local.isBlank()) return local;
+    }
+    return "소셜회원";
 }
 
 }
