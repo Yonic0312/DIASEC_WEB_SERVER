@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.diasec.diasec_backend.security.CustomUserDetails;
 import com.diasec.diasec_backend.service.MemberService;
 import com.diasec.diasec_backend.service.NicepayService;
+import com.diasec.diasec_backend.service.OrderPriceValidator;
 import com.diasec.diasec_backend.vo.MemberVo;
 import com.diasec.diasec_backend.vo.OrderVo;
 
@@ -34,6 +35,7 @@ public class NicepayController {
     
     private final NicepayService nicepayService;
     private final MemberService memberService;
+    private final OrderPriceValidator orderPriceValidator;
 
     // 가상계좌 발급 요청
     @PostMapping("/vbank")
@@ -60,6 +62,7 @@ public class NicepayController {
                 orderVo.setId("");
                 orderVo.setUsedCredit(0);
             }
+            orderPriceValidator.validate(orderVo);
             String orderId = nicepayService.saveDraft(orderVo);
             return ResponseEntity.ok(Map.of("success", true, "orderId", orderId));
         } catch (Exception e) {
@@ -90,6 +93,7 @@ public class NicepayController {
                 orderVo.setId("");
                 orderVo.setUsedCredit(0);
             }
+            orderPriceValidator.validate(orderVo);
             String orderId = nicepayService.saveDraft(orderVo);
             return ResponseEntity.ok(Map.of("success", true, "orderId", orderId));
         } catch (Exception e) {

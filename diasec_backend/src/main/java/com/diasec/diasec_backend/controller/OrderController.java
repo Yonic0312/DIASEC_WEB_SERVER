@@ -37,6 +37,7 @@ import com.diasec.diasec_backend.service.MemberService;
 
 import com.diasec.diasec_backend.dao.OrderMapper;
 import com.diasec.diasec_backend.service.CartService;
+import com.diasec.diasec_backend.service.OrderPriceValidator;
 import com.diasec.diasec_backend.service.CreditService;
 import com.diasec.diasec_backend.service.OrderService;
 import com.diasec.diasec_backend.service.ProductService;
@@ -69,6 +70,7 @@ public class OrderController {
     private final PasswordEncoder passwordEncoder;
     private final OrderMapper orderMapper;
     private final ObjectMapper objectMapper;
+    private final OrderPriceValidator orderPriceValidator;
 
     // OrderForm 주문 저장    
     @PostMapping(value = "/insert", consumes = "multipart/form-data")
@@ -100,6 +102,8 @@ public class OrderController {
                 ordervo.setId("");
                 ordervo.setUsedCredit(0);
             }
+
+            orderPriceValidator.validate(ordervo);
 
             if (!"적립금".equals(ordervo.getPaymentMethod())) {
                 return ResponseEntity.badRequest().body(Map.of(

@@ -1,6 +1,9 @@
+/** 로컬 파일 복사 금지 */
+
 import { useEffect, useMemo, useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import { calculateCumulativePrice, getMidWidth } from "../../../utils/customFramePrice";
 import { toast } from "react-toastify";
 import { MemberContext } from "../../../context/MemberContext"; // 경로가 다르면 아래 주석 참고
 
@@ -152,6 +155,45 @@ const WishList = () => {
         }
     };
 
+    const MIN_SIDE_CM = 12;
+
+    const loadImageRatio = (src) => new Promise((resolve, reject) => {
+        const img = new Image();
+        img.onload = () => resolve(img.width / img.height);
+        img.onerror = reject;
+        img.src = src;
+    });
+
+    // Must match None_Custom_Detail initial option (min width of first top image)
+    const getDefaultSizeAndPrice = async (pid) => {
+        const res = await axios.get(`${API}/product/top-images?pid=${pid}`);
+        const url = res.data?.[0];
+        if (!url) throw new Error(`상품 이미지 없음: ${pid}`);
+
+        const ratio = await loadImageRatio(url);
+        const maxW = ratio >= 1 ? 200.7 : 101.6;
+        const maxH = ratio >= 1 ? 101.6 : 200.7;
+        const minW = Math.max(MIN_SIDE_CM, MIN_SIDE_CM * ratio);
+
+        let w = getMidWidth(minW, maxW, maxH, ratio);
+        let h = parseFloat((w / ratio).toFixed(1));
+        if (h < MIN_SIDE_CM) {
+            h = MIN_SIDE_CM;
+            w = parseFloat((h * ratio).toFixed(1));
+        }
+        if (h > maxH) {
+            h = maxH;
+            w = parseFloat((h * ratio).toFixed(1));
+        }
+        w = Math.round(w);
+        h = Math.round(h);
+
+        return {
+            size: `${(w / 2.54).toFixed(1)} X ${(h / 2.54).toFixed(1)}`,
+            price: calculateCumulativePrice(w * h),
+        };
+    };
+
     // ✅ 선택 장바구니 담기
     const addSelectedToCart = async () => {
         if (!member?.id) {
@@ -166,20 +208,25 @@ const WishList = () => {
         }
 
         try {
-            const cartList = selectedItems.map((it) => ({
-                id: member.id,
-                pid: it.pid,
-                title: it.title,
-                category: it.category,
-                price: Number(it.price || 0),
-                thumbnail: it.thumbnail,
-                size: it.size || "",
-                quantity: 1,
-                }));
-
-                await axios.post(`${API}/cart/insert`, cartList, {
-                    withCredentials: true,
-                    headers: { "Content-Type": "application/json" },
+            const cartList = await Promise.all(
+                selectedItems.map(async (it) => {
+                    const { size, price } = await getDefaultSizeAndPrice(it.pid);
+                    return {
+                        id: member.id,
+                        pid: it.pid,
+                        title: it.title,
+                        category: it.category,
+                        price,
+                        thumbnail: it.thumbnail,
+                        size,
+                        quantity: 1,
+                        finishType: 'glossy',
+                    };
+                })
+            );
+            await axios.post(`${API}/cart/insert`, cartList, {
+                withCredentials: true,
+                headers: { "Content-Type": "application/json" },
             });
 
             toast.success("선택한 상품을 장바구니에 담았습니다.");

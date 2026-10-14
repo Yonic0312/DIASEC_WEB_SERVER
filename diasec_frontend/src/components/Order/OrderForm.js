@@ -855,9 +855,9 @@ const OrderForm = () => {
         if (!size) return "";
         if (!size.includes('X')) return size;
         const [inchW, inchH] = size.split(/[xX]/).map(s => s.trim());
-        const cmW = (parseFloat(inchW) * 2.54).toFixed(1);
-        const cmH = (parseFloat(inchH) * 2.54).toFixed(1);
-        return `${inchW} x ${inchH} (${cmW}cm x ${cmH}cm)`;
+        const cmW = Math.round(parseFloat(inchW) * 2.54);
+        const cmH = Math.round(parseFloat(inchH) * 2.54);
+        return `${Math.round(parseFloat(inchW))} x ${Math.round(parseFloat(inchH))} (${cmW}cm x ${cmH}cm)`;
     }
 
     const convertCategoryName = (category) => {

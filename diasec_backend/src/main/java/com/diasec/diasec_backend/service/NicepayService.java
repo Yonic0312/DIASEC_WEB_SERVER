@@ -239,6 +239,12 @@ public class NicepayService {
             return orderFormFailRedirect("card");
         }
 
+        OrderVo pending = getDraft(orderId);
+        if (pending != null && pending.getFinalPrice() != amount) {
+            removeDraft(orderId);
+            return orderFormFailRedirect("card");
+        }
+
         Map<String, Object> approveResult = approvePayment(tid, amount);
         String resultCode = approveResult != null ? String.valueOf(approveResult.get("resultCode")) : null;
         if (!"0000".equals(resultCode)) {
@@ -316,6 +322,12 @@ public class NicepayService {
         try {
             amount = Integer.parseInt(amountStr != null ? amountStr : "0");
         } catch (NumberFormatException e) {
+            return orderFormFailRedirect("vbank");
+        }
+
+        OrderVo pending = getDraft(orderId);
+        if (pending != null && pending.getFinalPrice() != amount) {
+            removeDraft(orderId);
             return orderFormFailRedirect("vbank");
         }
     
