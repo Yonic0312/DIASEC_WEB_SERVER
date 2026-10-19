@@ -233,8 +233,9 @@ public class AdminOrderService {
             Long itemId, String newStatus, String id, int usedCredit, Long oid, boolean skipPgRefund) {
         
         // 목록(order_Status): PG 환불 수행 / 상세(Order_Detail): skipPgRefund=true 로 생략
-        if ("환불완료".equals(newStatus) && oid != null && !skipPgRefund) {
-            Map<String, Object> pgBlock = tryNicepayRefundBeforeRefundComplete(itemId, oid);
+        if (("환불완료".equals(newStatus) || "취소".equals(newStatus))
+                && oid != null && !skipPgRefund) {
+            Map<String, Object> pgBlock = tryNicepayRefundBeforeRefundComplete(itemId, oid, newStatus);
             if (pgBlock != null) {
                 return pgBlock;
             }
@@ -317,7 +318,7 @@ public class AdminOrderService {
      * 환불완료 직전 나이스페이 취소·환불. 카드는 계좌 없음, 가상계좌는 order_items 환불 계좌 필요.
      * tid 없으면 PG 생략. null 반환 = 진행 OK, Map 반환 = 실패 응답.
      */
-    private Map<String, Object> tryNicepayRefundBeforeRefundComplete(Long itemId, Long oid) {
+    private Map<String, Object> tryNicepayRefundBeforeRefundComplete(Long itemId, Long oid, String newStatus) {
         OrderVo order = orderService.selectOrderByOid(oid);
         if (order == null || order.getItems() == null) {
             return Map.of("success", false, "message", "주문 정보를 찾을 수 없습니다.");
@@ -329,7 +330,7 @@ public class AdminOrderService {
         if (line == null) {
             return Map.of("success", false, "message", "해당 주문 상품을 찾을 수 없습니다.");
         }
-        if ("환불완료".equals(line.getOrderStatus())) {
+        if ("환불완료".equals(line.getOrderStatus()) || "취소".equals(line.getOrderStatus())) {
             return null;
         }
         String tid = order.getNicepayTid();
@@ -349,6 +350,9 @@ public class AdminOrderService {
             if (line.getAccountNumber() == null || line.getAccountNumber().isBlank()
                     || line.getBankName() == null || line.getBankName().isBlank()
                     || line.getAccountHolder() == null || line.getAccountHolder().isBlank()) {
+                if ("취소".equals(newStatus)) {
+                    return null;
+                }
                 return Map.of("success", false,
                         "message", "가상계좌 PG 환불: 환불 계좌(은행·계좌·예금주)가 order_items에 있어야 합니다.");
             }

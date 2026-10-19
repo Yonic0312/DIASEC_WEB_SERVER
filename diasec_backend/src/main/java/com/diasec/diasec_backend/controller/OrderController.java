@@ -192,33 +192,51 @@ public class OrderController {
     public ResponseEntity<?> cancelOrderItem(@RequestBody Map<String, Object> body) {
         try {
             Long oid = Long.parseLong(body.get("oid").toString());
-            String id = body.get("id") == null ? null : String.valueOf(body.get("id"));
-            int usedCredit = body.get("usedCredit") == null ? 0
-                    : Integer.parseInt(String.valueOf(body.get("usedCredit")));
+            OrderVo order = orderService.selectOrderByOid(oid);
+            String authError = verifyOrderViewAuth(order, optionalStr(body, "guestPassword"));
+            if (authError != null) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(Map.of("success", false, "message", authError));
+            }
 
-            orderService.requestCancelOrder(oid, null, null, null);
+            boolean depositWaiting = order.getItems().stream()
+                .allMatch(item -> "입금대기".equals(item.getOrderStatus()));
+            if (!depositWaiting) {
+                return ResponseEntity.badRequest()
+                    .body(Map.of("success", false, "message", "입금대기 상태만 취소할 수 있습니다."));
+            }
 
-            // if (usedCredit > 0 && id != null && !"null".equals(id) && !id.isBlank()) {
-            //     CreditVo creditVo = new CreditVo();
-            //     creditVo.setId(id);
-            //     creditVo.setAmount(usedCredit);
-            //     creditVo.setType("적립");
-            //     creditVo.setDescription("주문 취소");
-            //     creditVo.setOid(oid);
-            //     creditService.insertCreditHistory(creditVo);
-            // }
-
+            Map<String, Object> error = orderService.requestCancelOrder(oid, null, null, null);
+            if (error != null) {
+                return ResponseEntity.badRequest().body(error);
+            }
             return ResponseEntity.ok(Map.of("success", true));
         } catch (Exception e) {
             e.printStackTrace();
-            return ResponseEntity.internalServerError().body(Map.of("success", false, "message", e.getMessage()));
+            return ResponseEntity.internalServerError()
+                .body(Map.of("success", false, "message", e.getMessage()));
         }
     }
 
     @PostMapping("/cancelRequest")
     public ResponseEntity<?> requestCancelOrder(@RequestBody Map<String, Object> body) {
-        Long oid = Long.parseLong(body.get("oid").toString());
         try {
+            Long oid = Long.parseLong(body.get("oid").toString());
+            OrderVo order = orderService.selectOrderByOid(oid);
+            String authError = verifyOrderViewAuth(order, optionalStr(body, "guestPassword"));
+            if (authError != null) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(Map.of("success", false, "message", authError));
+            }
+
+            boolean paid = order.getItems().stream()
+                    .allMatch(item -> "결제완료".equals(item.getOrderStatus()));
+
+            if (!paid) {
+                return ResponseEntity.badRequest()
+                    .body(Map.of("success", false, "message", "결제완료 상태만 취소 요청할 수 있습니다."));
+            }
+
             Map<String, Object> error = orderService.requestCancelOrder(oid,
                     optionalStr(body, "bankName"),
                     optionalStr(body, "accountNumber"),
@@ -228,7 +246,8 @@ public class OrderController {
             }
             return ResponseEntity.ok(Map.of("success", true));
         } catch (Exception e) {
-            return ResponseEntity.internalServerError().body(Map.of("success", false, "message", e.getMessage()));
+            return ResponseEntity.internalServerError()
+                .body(Map.of("success", false, "message", e.getMessage()));
         }
     }
 

@@ -211,6 +211,7 @@ const Order_Detail = () => {
 
     // 비회원 비밀번호 수정
     const [showGuestPwModal, setShowGuestPwModal] = useState(false);
+    const [showCancelAccount, setShowCancelAccount] = useState(false);
     const [newGuestPw, setNewGuestPw] = useState('');
     const [confirmGuestPw, setConfirmGuestPw] = useState('');
 
@@ -274,6 +275,19 @@ const Order_Detail = () => {
         const item = order?.items?.[0];
         if (!item) return;
 
+        const needsRefundAccount = newStatus == '취소'
+            && order.paymentMethod === '가상계좌'
+            && ['결제완료', '취소요청'].includes(item.orderStatus)
+            && (!item.bankName || !item.accountNumber || !item.accountHolder);
+        
+        if (needsRefundAccount) {
+            setBankName(item.bankName || '');
+            setAccountNumber(item.accountNumber || '');
+            setAccountHolder(item.accountHolder || '');
+            setShowCancelAccount(true);
+            return;
+        }
+
         // 1) 상태 변경 confirm
         const ok = window.confirm(`주문 상태를 "${newStatus}"(으)로 변경할까요?`);
         if (!ok) return;
@@ -312,7 +326,7 @@ const Order_Detail = () => {
         const data = await res.json();
 
         if (!data.success) {
-            toast.error("상태 변경 실패");
+            toast.error(data.message || '상태 변경 실패');
             return;
         }
 
@@ -332,6 +346,59 @@ const Order_Detail = () => {
         } catch (err) {
             console.error(err.message || "처리 중 오류") ;
             reload();
+        }
+    };
+
+    const submitAdminCancelAccount = async () => {
+        if (!bankName.trim() || !accountNumber.trim() || !accountHolder.trim()) {
+            toast.error('환불 계좌 정보를 모두 입력해주세요.');
+            return;
+        }
+        const item = order.items[0];
+        try {
+            const saveRes = await fetch(`${API}/admin/order/update-detail`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({
+                    itemId: item.itemId,
+                    trackingCompany: item.trackingCompany || '',
+                    trackingNumber: item.trackingNumber || '',
+                    bankName: bankName.trim(),
+                    accountNumber: accountNumber.trim(),
+                    accountHolder: accountHolder.trim(),
+                    applyToSameOrder: false
+                })
+            });
+            const saved = await saveRes.json();
+            if (!saved.success) {
+                toast.error(saved.message || '환불 계좌 저장에 실패했습니다.');
+                return;
+            }
+    
+            const res = await fetch(`${API}/admin/order/update-status`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({
+                    itemId: item.itemId,
+                    orderStatus: '취소',
+                    id: order.id,
+                    usedCredit: order.usedCredit,
+                    oid: order.oid
+                })
+            });
+            const data = await res.json();
+            if (!data.success) {
+                toast.error(data.message || '상태 변경 실패');
+                return;
+            }
+            setShowCancelAccount(false);
+            toast.success('상태가 변경되었습니다.');
+            reload();
+        } catch (err) {
+            console.error(err);
+            toast.error('서버 오류');
         }
     };
     
@@ -1767,6 +1834,28 @@ const Order_Detail = () => {
                             className="absolute top-3 right-3 text-gray-400 hover:text-black">
                         ✕
                         </button>
+                    </div>
+                </div>
+            )}
+
+            {showCancelAccount && (
+                <div
+                    className="fixed inset-0 bg-black/50 z-[10000] flex items-center justify-center"
+                    onClick={() => setShowCancelAccount(false)}
+                >
+                    <div
+                        className="w-full max-w-lg bg-white rounded-2xl shadow-xl p-5"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <h3 className="text-lg font-bold text-gray-800">환불 계좌</h3>
+                        <p className="text-sm text-gray-500 mt-1">가상계좌 결제 취소에는 환불 계좌가 필요합니다.</p>
+                        <input className="w-full border px-3 py-2 rounded mt-4" placeholder="은행명" value={bankName} onChange={(e) => setBankName(e.target.value)} />
+                        <input className="w-full border px-3 py-2 rounded mt-2" placeholder="계좌번호" value={accountNumber} onChange={(e) => setAccountNumber(e.target.value)} />
+                        <input className="w-full border px-3 py-2 rounded mt-2" placeholder="예금주" value={accountHolder} onChange={(e) => setAccountHolder(e.target.value)} />
+                        <div className="mt-5 flex gap-2">
+                            <button type="button" className="flex-1 h-[46px] rounded-xl border" onClick={() => setShowCancelAccount(false)}>닫기</button>
+                            <button type="button" className="flex-1 h-[46px] rounded-xl bg-[#D0AC88] text-white" onClick={submitAdminCancelAccount}>취소 처리</button>
+                        </div>
                     </div>
                 </div>
             )}

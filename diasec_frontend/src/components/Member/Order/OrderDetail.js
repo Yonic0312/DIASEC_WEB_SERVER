@@ -1,3 +1,4 @@
+/** 로컬 코드 복사 X */
 import { useEffect, useState, useContext } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
@@ -256,6 +257,7 @@ const OrderDetail = () => {
     const [bankName, setBankName] = useState(''); // 은행명
     const [accountNumber, setAccountNumber] = useState(''); // 계좌번호
     const [accountHolder, setAccountHolder] = useState(''); // 계좌주
+    const [showCancelAccount, setShowCancelAccount] = useState(false);
     const MAX_CLAIM_IMAGES = 3;
     const MAX_FILE_SIZE = 5 * 1024 * 1024;
 
@@ -347,34 +349,63 @@ const OrderDetail = () => {
     const currentStepIndex = steps.indexOf(order.items[0].orderStatus);
 
     // 주문 취소 함수
-    const handleCancel = (item) => {
-        if (!window.confirm(`"${item.title}"을(를) 취소하시겠습니까?`)) return;
+    const submitCancel = (item, refundAccount) => {
+        const isPaid = order.items[0].orderStatus === '결제완료';
 
-        fetch(`${API}/order/cancel`, {
-            credentials:'include',
+        fetch(`${API}${isPaid ? '/order/cancelRequest' : '/order/cancel'}`, {
+            credentials: 'include',
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ 
-                oid: item.oid, 
-                pid: item.pid,
+            headers: { 'Content-Type' : "application/json"},
+            body: JSON.stringify({
+                oid: item.oid,
+                pid:item.pid,
                 usedCredit: order.usedCredit || 0,
-                id: member?.id
-            }) 
+                id: member?.id,
+                ...(!member?.id && guestPasswordFromSearch
+                        ? { guestPassword : guestPasswordFromSearch }
+                        : {}),
+                ...(refundAccount || {})
+            })
         })
-            .then(res => res.json())
-            .then(data => {
-                if (data.success) {
-                toast.success('주문이 취소되었습니다.');
-                if (member) {
-                    navigate('/orderList');
-                } else {
-                    navigate('/guestOrderSearch');
-                }   
+
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                setShowCancelAccount(false);
+                toast.success((isPaid ? '취소 요청이 접수되었습니다.' : '주문이 취소되었습니다.'));
+                if (member) navigate('/orderList')
+                else navigate('/guestOrderSearch');
             } else {
-                toast.error('취소 실패 : ' + data.message);
+                toast.error((isPaid ? '취소 요청 실패 ' : '취소 실패 : ') + data.message)
             }
         })
-        .catch(err => toast.error('요청 실패'));
+        .catch(() => toast.error('요청 실패'));
+    };
+
+    const handleCancel = (item) => {
+        const status = order.items[0].orderStatus;
+        const isPaid = status === '결제완료';
+        if (isPaid && order.paymentMethod === '가상계좌') {
+            setShowCancelAccount(true);
+            return;
+        }
+        const message = isPaid
+            ? '결제된 주문입니다. 취소 요청만 가능합니다. 취소 요청을 보내시겠습니까?'
+            : `"${item.title}"을(를) 취소하겠습니까?`
+        if (!window.confirm(message)) return;
+        submitCancel(item);
+    };
+
+    const submitCancelAccount = (item) => {
+        if (!bankName.trim() || !accountNumber.trim() || !accountHolder.trim()) {
+            toast.error('환불 계좌 정보를 모두 입력해주세요.');
+            return;
+        }
+        submitCancel(item, {
+            bankName: bankName.trim(),
+            accountNumber: accountNumber.trim(),
+            accountHolder: accountHolder.trim()
+        });
     };
 
     const addClaimFiles = (files) => {
@@ -490,7 +521,7 @@ const OrderDetail = () => {
                                 </div>
                             )}
                             {/* 주문취소 */}
-                            {['입금대기', '결제완료', '배송준비중'].includes(order.items[0].orderStatus) && (
+                            {['입금대기', '결제완료'].includes(order.items[0].orderStatus) && (
                                 <button 
                                     className="
                                         px-2 py-1 
@@ -1241,6 +1272,54 @@ const OrderDetail = () => {
                             onClick={saveRetouch}
                             >
                             저장
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+            {showCancelAccount && (
+                <div
+                    className="fixed inset-0 bg-black/50 z-[10000] flex items-center justify-center"
+                    onClick={() => setShowCancelAccount(false)}
+                >
+                    <div
+                        className="w-full max-w-lg bg-white rounded-2xl shadow-xl p-5"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <h3 className="text-lg font-bold text-gray-800">환불 계좌</h3>
+                        <p className="text-sm text-gray-500 mt-1">가상계좌 결제 취소에는 환불 계좌가 필요합니다.</p>
+                        <input
+                            className="w-full border px-3 py-2 rounded mt-4"
+                            placeholder="은행명"
+                            value={bankName}
+                            onChange={(e) => setBankName(e.target.value)}
+                        />
+                        <input
+                            className="w-full border px-3 py-2 rounded mt-2"
+                            placeholder="계좌번호"
+                            value={accountNumber}
+                            onChange={(e) => setAccountNumber(e.target.value)}
+                        />
+                        <input
+                            className="w-full border px-3 py-2 rounded mt-2"
+                            placeholder="예금주"
+                            value={accountHolder}
+                            onChange={(e) => setAccountHolder(e.target.value)}
+                        />
+                        <div className="mt-5 flex gap-2">
+                            <button
+                                type="button"
+                                className="flex-1 h-[46px] rounded-xl border border-gray-200"
+                                onClick={() => setShowCancelAccount(false)}
+                            >
+                                닫기
+                            </button>
+                            <button
+                                type="button"
+                                className="flex-1 h-[46px] rounded-xl bg-[#D0AC88] text-white"
+                                onClick={() => submitCancelAccount(order.items[0])}
+                            >
+                                취소 요청
                             </button>
                         </div>
                     </div>

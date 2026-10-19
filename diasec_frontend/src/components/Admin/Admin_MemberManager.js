@@ -245,16 +245,29 @@ const Admin_MemberManager = () => {
                                 </select>
                             </td>
                             <td className="border p-2 text-center">
-                                <button
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        setSelectedCreditMember(member);
-                                        fetchCreditHistory(member.id);
-                                    }}
-                                    className="text-blue-600 underline"
-                                >
-                                    적립금 확인
-                                </button>
+                                {Number(member.credit) > 0 ? (
+                                    <button
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            setSelectedCreditMember(member);
+                                            fetchCreditHistory(member.id);
+                                        }}
+                                        className="text-green-600 font-semibold underline"
+                                    >
+                                        {Number(member.credit).toLocaleString()}원
+                                    </button>
+                                ) : (
+                                    <button
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            setSelectedCreditMember(member);
+                                            fetchCreditHistory(member.id);
+                                        }}
+                                        className="text-blue-600 underline"
+                                    >
+                                        적립금 없음
+                                    </button>
+                                )}
                             </td>
                             <td className="border p-2 text-center">
                                 <button 
