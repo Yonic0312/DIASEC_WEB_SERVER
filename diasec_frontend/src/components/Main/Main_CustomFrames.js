@@ -335,7 +335,7 @@ const Main_CustomFrames = () => {
         return new File([u8arr], filename, { type: mime });
     };
 
-    const handleImageUpload = (e) => {
+    const handleImageUpload = async (e) => {
         const files = Array.from(e.target.files);
         if (!files.length) return;
 
@@ -362,7 +362,12 @@ const Main_CustomFrames = () => {
             )
         }
 
-        filesToProcess.forEach(rawFile => {
+        // 파일 선택 초기화 (연속으로 같은 이미지 넣을때)
+        if (e.target && typeof e.target.value !== 'undefined') {
+            e.target.value = "";
+        }
+
+        const tasks = filesToProcess.map((rawFile) => new Promise((resolve) => {
             const tempId = uuidv4();
             // 1) 즉시 임시 카드 추가
             setCustomItems(prev => [
@@ -386,11 +391,6 @@ const Main_CustomFrames = () => {
                     isUploading: true,
                 }
             ]);
-
-            // 파일 선택 초기화 (연속으로 같은 이미지 넣을때)
-            if (e.target && typeof e.target.value !== 'undefined') {
-                e.target.value = "";
-            }
 
             setSelectedItemId(tempId);
 
@@ -451,16 +451,9 @@ const Main_CustomFrames = () => {
                             setCustomItems(prev => prev.map(it => (it.id === tempId ? newItem : it)));
                             setSelectedItemId(tempId);
                             activateSizeAdjustHint();
-                            toast.success(
-                                <>
-                                    이미지가 등록되었습니다.
-                                    <br />
-                                    원하는 크기로 조정해 보세요.
-                                    <br />
-                                    사이즈에 따라 작품 가격이 자동으로 계산됩니다.
-                                </>,
-                                { autoClose: 9000 }
-                            );
+                            resolve(true);
+                        } catch (err) {
+                            resolve(false);
                         } finally {
                             if (objectUrl) URL.revokeObjectURL(objectUrl);
                         }
@@ -471,15 +464,31 @@ const Main_CustomFrames = () => {
                         URL.revokeObjectURL(objectUrl);
                         setCustomItems(prev => prev.filter(it => it.id !== tempId));
                         toast.error('이미지를 불러오지 못했습니다.');
+                        resolve(false);
                     };
                     img.src = objectUrl;
                 } catch (err) {
                    if (objectUrl) URL.revokeObjectURL(objectUrl) ;
                    setCustomItems(prev => prev.filter(it => it.id !== tempId));
                    toast.error('HEIF/HEIC 이미지를 변환하지 못했습니다. JPG로 저장 후 다시 시도해 주세요.');
+                   resolve(false);
                 }
             })();
-        })
+        }));
+
+        const results = await Promise.all(tasks);
+        if (results.some(Boolean)) {
+            toast.success(
+                <>
+                    이미지가 등록되었습니다.
+                    <br />
+                    원하는 크기로 조정해 보세요.
+                    <br />
+                    사이즈에 따라 작품 가격이 자동으로 계산됩니다.
+                </>,
+                { autoClose: 9000 }
+            )
+        }
     }
 
     // 입력 완료 후 반영(딜레이 입력)
