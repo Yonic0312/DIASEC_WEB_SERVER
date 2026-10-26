@@ -43,6 +43,31 @@ const Admin_EventManager = () => {
         currentPage * eventsPerPage
     );
 
+    const moveEvent = async (index, direction) => {
+        const targetIndex = index + direction;
+        if (targetIndex < 0 || targetIndex >= events.length) return;
+
+        const current = events[index];
+        const target = events[targetIndex];
+
+        try {
+            const res = await fetch(`${API}/event/order`, {
+                method: "PUT",
+                credentials: "include",
+                headers: { "Content-Type" : "application/json" },
+                body: JSON.stringify([
+                    { eventId : current.eventId, sortOrder: target.sortOrder },
+                    { eventId : target.eventId, sortOrder: current.sortOrder },
+                ]),
+            });
+            if (!res.ok) throw new Error("order update failed");
+            fetchEvents();
+        } catch (err) {
+            console.error("순서 변경 실패", err);
+            toast.error("순서 변경 중 오류가 발생했습니다.");
+        }
+    };
+
     // 이벤트 삭제 요청
     const handleDelete = async (eventId) => {
         if (!window.confirm("이벤트를 삭제하시겠습니까?")) return;
@@ -88,17 +113,36 @@ const Admin_EventManager = () => {
             <table className="w-full text-sm border-collapse">
                 <thead className="bg-gray-100">
                     <tr>
-                        <th className="w-[10%] p-2 border">ID</th>
-                        <th className="w-[45%] p-2 border">제목</th>
+                        <th className="w-[8%] p-2 border">ID</th>
+                        <th className="w-[10%] p-2 border">순서</th>
+                        <th className="w-[37%] p-2 border">제목</th>
                         <th className="w-[25%] p-2 border">기간</th>
                         <th className="w-[10%] p-2 border">상태</th>
                         <th className="w-[10%] p-2 border">관리</th>
                     </tr>
                 </thead>
                 <tbody>
-                    {events.map((e) => (
-                        <tr key={e.id} className="border-b">
+                    {events.map((e, index) => (
+                        <tr key={e.eventId} className="border-b">
                             <td className="p-2 border text-center">{e.eventId}</td>
+                            <td className="p-2 border text-center whitespace-nowrap">
+                                <button
+                                    type="button"
+                                    onClick={() => moveEvent(index, -1)}
+                                    disabled={index === 0}
+                                    className="px-2 disabled:text-gray-300"
+                                >
+                                    ▲
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => moveEvent(index, 1)}
+                                    disabled={index === 0}
+                                    className="px-2 disabled:text-gray-300"
+                                >
+                                    ▼
+                                </button>
+                            </td>
                             <td className="p-2 border">{e.title}</td>
                             <td className="p-2 border">{e.period}</td>
                             <td className= {

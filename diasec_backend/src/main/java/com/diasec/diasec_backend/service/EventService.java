@@ -8,6 +8,8 @@ import org.springframework.stereotype.Service;
 import com.diasec.diasec_backend.dao.EventMapper;
 import com.diasec.diasec_backend.vo.EventVo;
 
+import jakarta.transaction.Transactional;
+
 @Service
 public class EventService {
     
@@ -23,7 +25,16 @@ public class EventService {
     }
 
     public void insertEvent(EventVo event) {
+        Integer min = eventMapper.selectMinSortOrder();
+        event.setSortOrder(min == null ? 1 : min - 1);
         eventMapper.insertEvent(event);
+    }
+
+    @Transactional 
+    public void updateEventOrder(List<EventVo> orders) {
+        for (EventVo order : orders) {
+            eventMapper.updateEventSortOrder(order.getEventId(), order.getSortOrder());
+        }
     }
     
     public void updateEvent(EventVo event) {

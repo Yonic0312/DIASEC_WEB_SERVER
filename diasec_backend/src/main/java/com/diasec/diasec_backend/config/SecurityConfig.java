@@ -135,6 +135,7 @@ public class SecurityConfig {
                 // 5. 관리자
                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
                 .requestMatchers("/api/product/insert", "/api/order/delete", "/api/inquiry/answer", "/api/event/insert").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.PUT, "/api/event/order").hasRole("ADMIN")
                 .requestMatchers(HttpMethod.POST, "/api/review/hide/**").hasRole("ADMIN")
                 .requestMatchers(HttpMethod.DELETE, "/api/review/delete/**").hasRole("ADMIN")
 

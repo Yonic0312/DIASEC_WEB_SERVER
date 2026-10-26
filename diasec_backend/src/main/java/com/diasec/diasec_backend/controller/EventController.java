@@ -97,6 +97,11 @@ public class EventController {
 
     }
 
+    @PutMapping("/order")
+    public void updateEventOrder(@RequestBody List<EventVo> orders) {
+        eventService.updateEventOrder(orders);
+    }
+
     @DeleteMapping("/delete/{id}")
     public void deleteEvent(@PathVariable("id") int eventId) {
         EventVo existingEvent = eventService.getEventById(eventId);

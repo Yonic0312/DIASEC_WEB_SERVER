@@ -13,4 +13,5 @@ public class EventVo {
     private String status;
     private String content;
     private Timestamp createdAt;
+    private int sortOrder;
 }

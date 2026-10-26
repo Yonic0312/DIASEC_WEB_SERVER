@@ -2,6 +2,7 @@ package com.diasec.diasec_backend.dao;
 
 import java.util.List;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 
 import com.diasec.diasec_backend.vo.EventVo;
 
@@ -12,4 +13,6 @@ public interface EventMapper {
     int insertEvent(EventVo event);
     int updateEvent(EventVo event);
     int deleteEvent(int eventId);
+    Integer selectMinSortOrder();
+    int updateEventSortOrder(@Param("eventId") int eventId, @Param("sortOrder") int sortOrder);
 }
