@@ -109,7 +109,7 @@ public class SecurityConfig {
                 // 맞춤액자 원본 tmp 업로드 (나이스페이 결제 전, 비회원 포함)
                 .requestMatchers(HttpMethod.POST, "/api/uploads/customFrames/tmp").permitAll()
 
-                 // 4. 비회원 주문 관련
+                // 4. 비회원 주문 관련
                 .requestMatchers(
                     "/api/order/insert", "/api/order/guest-search", "/api/order/detail/**",
                     "/api/order/cancel", "/api/order/cancelRequest", "/api/order/guest-reset-password", "/api/order/update-retouch",

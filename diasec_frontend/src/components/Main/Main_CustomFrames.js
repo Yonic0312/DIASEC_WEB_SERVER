@@ -1823,11 +1823,21 @@ const Main_CustomFrames = () => {
                         {/* 버튼 */}
                         <div className='flex flex-col w-full gap-2 md:mt-2'>
                             <div ref={buyButtonSectionRef}>
-                                <button 
-                                    className='flex items-center justify-center w-full h-[50px] bg-[#D0AC88] text-white'
-                                    onClick={(e) => handleBuyNow()}>
-                                    바로구매
-                                </button>
+                                {customItems.length === 0 ? (
+                                    <label
+                                        htmlFor="fileInput"
+                                        className="flex items-center justify-center w-full h-[50px] bg-[#D0AC88] text-white cursor-pointer"
+                                    >
+                                        이미지 업로드
+                                    </label>
+                                ) : (
+                                    <button 
+                                        type="button"
+                                        className='flex items-center justify-center w-full h-[50px] bg-[#D0AC88] text-white'
+                                        onClick={(e) => handleBuyNow()}>
+                                        바로구매
+                                    </button>
+                                )}
                             </div>
                             {/* 
                             <div className="flex gap-2">
@@ -2145,23 +2155,32 @@ const Main_CustomFrames = () => {
             {showBottomBuy && (
                 <div className="fixed md:hidden bottom-0 left-0 right-0 z-[100]">
                     <div className="w-full">
-                        <button
-                            type="button"
-                            className="w-full h-[50px] px-3 bg-[#D0AC88] text-white font-semibold flex items-center justify-center gap-1.5"
-                            onClick={(e) => handleBuyNow()}
-                        >
-                            {totalPriceWithoutShipping > 0 && totalPriceWithoutShippingDiscounted < totalPriceWithoutShipping && (
-                                <span className="text-[12px] font-normal line-through text-white/70">
-                                    {totalPriceWithoutShipping.toLocaleString()}원
-                                </span>
-                            )}
-                            {totalPriceWithoutShippingDiscounted > 0 && (
-                                <span className="text-[16px] font-bold">
-                                    {totalPriceWithoutShippingDiscounted.toLocaleString()}원
-                                </span>
-                            )}
-                            <span>바로구매</span>
-                        </button>
+                        {customItems.length === 0 ? (
+                            <label
+                                htmlFor="fileInput"
+                                className="w-full h-[50px] px-3 bg-[#D0AC88] text-white font-semibold flex items-center justify-center cursor-pointer"
+                            >
+                                이미지 업로드
+                            </label>
+                        ) : (
+                            <button
+                                type="button"
+                                className="w-full h-[50px] px-3 bg-[#D0AC88] text-white font-semibold flex items-center justify-center gap-1.5"
+                                onClick={(e) => handleBuyNow()}
+                            >
+                                {totalPriceWithoutShipping > 0 && totalPriceWithoutShippingDiscounted < totalPriceWithoutShipping && (
+                                    <span className="text-[12px] font-normal line-through text-white/70">
+                                        {totalPriceWithoutShipping.toLocaleString()}원
+                                    </span>
+                                )}
+                                {totalPriceWithoutShippingDiscounted > 0 && (
+                                    <span className="text-[16px] font-bold">
+                                        {totalPriceWithoutShippingDiscounted.toLocaleString()}원
+                                    </span>
+                                )}
+                                <span>바로구매</span>
+                            </button>
+                        )}
                     </div>
                 </div>
             )}
