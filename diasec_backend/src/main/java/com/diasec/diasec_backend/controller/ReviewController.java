@@ -22,12 +22,11 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.diasec.diasec_backend.service.AdminOrderService;
-// [종료된 이벤트] 후기 작성 시 5000P 지급 - 재개 시 CreditService / CreditVo import 복구
-// import com.diasec.diasec_backend.service.CreditService;
+import com.diasec.diasec_backend.service.CreditService;
 import com.diasec.diasec_backend.service.OrderService;
 import com.diasec.diasec_backend.service.ReviewService;
 import com.diasec.diasec_backend.util.ImageUtil;
-// import com.diasec.diasec_backend.vo.CreditVo;
+import com.diasec.diasec_backend.vo.CreditVo;
 import com.diasec.diasec_backend.vo.OrderItemsVo;
 import com.diasec.diasec_backend.vo.OrderVo;
 import com.diasec.diasec_backend.vo.ReviewVo;
@@ -41,9 +40,8 @@ public class ReviewController {
     @Autowired
     private ReviewService reviewService;
 
-    // [종료된 이벤트] 후기 작성 시 5000P 지급 - 재개 시 아래 주입 복구
-    // @Autowired
-    // private CreditService creditService;
+    @Autowired
+    private CreditService creditService;
 
     @Autowired
     private OrderService orderService;
@@ -190,20 +188,14 @@ public class ReviewController {
                 }
             }
 
-            // ============================================================
-            // [종료된 이벤트] 후기 작성 시 5000P 지급
-            // - 재개 시 아래 블록 주석 해제 + rewardAmount를 5000으로 되돌리면 됨
-            // ============================================================
-            // final int rewardAmount = 5000;
-            // CreditVo rewardCredit = new CreditVo();
-            // rewardCredit.setId(id);
-            // rewardCredit.setType("적립");
-            // rewardCredit.setAmount(rewardAmount);
-            // rewardCredit.setDescription("리뷰 작성 이벤트");
-            // rewardCredit.setOid(orderService.getOidByItemId((long) itemId));
-            // creditService.insertCreditHistory(rewardCredit);
-
-            final int rewardAmount = 0;
+            final int rewardAmount = 5000;
+            CreditVo rewardCredit = new CreditVo();
+            rewardCredit.setId(id);
+            rewardCredit.setType("적립");
+            rewardCredit.setAmount(rewardAmount);
+            rewardCredit.setDescription("리뷰 작성 이벤트");
+            rewardCredit.setOid(orderService.getOidByItemId((long) itemId));
+            creditService.insertCreditHistory(rewardCredit);
 
             return ResponseEntity.ok().body(Map.of(
                 "success", true,
