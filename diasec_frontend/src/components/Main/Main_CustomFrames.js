@@ -371,7 +371,6 @@ const Main_CustomFrames = () => {
             const tempId = uuidv4();
             // 1) 즉시 임시 카드 추가
             setCustomItems(prev => [
-                ...prev,
                 {
                     id: tempId,
                     imageSrc: '',
@@ -389,7 +388,8 @@ const Main_CustomFrames = () => {
                     retouch: { enabled: false, types: [], note: '' },
                     quantity: 1,
                     isUploading: true,
-                }
+                },
+                ...prev,
             ]);
 
             setSelectedItemId(tempId);

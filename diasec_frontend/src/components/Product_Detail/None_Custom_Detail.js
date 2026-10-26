@@ -188,7 +188,7 @@ const None_Custom_Detail = () => {
             quantity: 1,
         };
 
-        setCustomItems(prev => [...prev, newItem]);
+        setCustomItems(prev => [newItem, ...prev]);
         setSelectedItemId(newId);
     }
 
@@ -752,7 +752,7 @@ const None_Custom_Detail = () => {
             return;
         }
 
-        setSelectedItems(prev => [...prev, { size, frameType, quantity: 1, price }]);
+        setSelectedItems(prev => [{ size, frameType, quantity: 1, price }, ...prev]);
     };
 
     const updateQuantity = (size, delta) => {
