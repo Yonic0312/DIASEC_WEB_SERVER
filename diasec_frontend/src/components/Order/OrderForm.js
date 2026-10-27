@@ -262,38 +262,77 @@ const OrderForm = () => {
         return v;
     };
     
+    const ordererNameRef = useRef(null);
+    const phone2Ref = useRef(null);
+    const phone3Ref = useRef(null);
+    const emailLocalRef = useRef(null);
+    const customDomainRef = useRef(null);
+    const guestPasswordRef = useRef(null);
+    const guestPasswordConfirmRef = useRef(null);
+    const recipientRef = useRef(null);
+    const postcodeRef = useRef(null);
+    const recipientPhone2Ref = useRef(null);
+    const recipientPhone3Ref = useRef(null);
+    const paymentMethodRef = useRef(null);
+    const agreeRef = useRef(null);
+
+    const focusInvalid = (el) => {
+        if (!el) return;
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        el.focus({ preventScroll: true });
+    };
 
     // 예시 유효성 검사 (결제 버튼 클릭 시)
     const validateOrder = () => {
         if (!ordererName.trim()) {
             toast.error("주문자 이름을 입력해주세요.");
+            focusInvalid(ordererNameRef.current);
             return false;
         }
 
         if (isGuest) {
             if (!guestPassword || guestPassword.length < 6 || guestPassword.length > 20) {
                 toast.error("비회원 주문 비밀번호를 입력해주세요. (6자 이상 ~ 20자 이하)");
+                focusInvalid(guestPasswordRef.current);
+                return false;
+            }
+
+            if (!guestPasswordConfirm) {
+                toast.error("비회원 주문 비밀번호 확인을 입력해주세요.");
+                focusInvalid(guestPasswordConfirmRef.current);
                 return false;
             }
 
             if (guestPwdMatch === false) {
                 toast.error("비회원 주문 비밀번호가 일치하지 않습니다.");
+                focusInvalid(guestPasswordConfirmRef.current);
                 return false;
             }
         }
 
         if (!phone2.trim() || !phone3.trim()) {
             toast.error("휴대폰 번호를 입력해주세요.");
+            focusInvalid(!phone2.trim() ? phone2Ref.current : phone3Ref.current);
             return false;
         }
 
         if (!emailLocal.trim() || (emailDomain === '직접입력' && !customDomain.trim())) {
             toast.error("이메일을 정확히 입력해주세요.");
+            focusInvalid(!emailLocal.trim() ? emailLocalRef.current : customDomainRef.current);
             return false;
         }
 
         if (!recipient.trim() || !postcode.trim() || !address.trim()) {
             toast.error("배송지 정보를 모두 입력해주세요.");
+
+            if (!recipient.trim()) focusInvalid(recipientRef.current);
+            else focusInvalid(postcodeRef.current);
+            return false;
+        }
+
+        if (!recipientPhone2.trim() || !recipientPhone3.trim()) {
+            toast.error("배송지 휴대폰 번호를 입력해주세요.");
+            focusInvalid(!recipientPhone2.trim() ? recipientPhone2Ref.current : recipientPhone3Ref.current);
             return false;
         }
 
@@ -308,12 +347,14 @@ const OrderForm = () => {
             }
         } else if (!paymentMethod) {
             toast.error("결제수단을 선택해주세요.");
+            focusInvalid(paymentMethodRef.current);
             return false;
         }
 
-        const agreeCheck = document.getElementById("agree");
+        const agreeCheck = agreeRef.current;
         if (!agreeCheck?.checked) {
             toast.error("결제 진행 동의에 체크해주세요.");
+            focusInvalid(agreeCheck);
             return false;
         }
         return true;
@@ -1159,6 +1200,7 @@ const OrderForm = () => {
                     </div>
                     <input 
                         type="text" 
+                        ref={ordererNameRef}
                         value={ordererName} 
                         onChange={(e) => setOrdererName(e.target.value)} 
                         className="
@@ -1192,6 +1234,7 @@ const OrderForm = () => {
                         </select>
                         <input 
                             type="text" 
+                            ref={phone2Ref}
                             value={phone2} 
                             onChange={(e) => setPhone2(e.target.value)} 
                             maxLength="4" 
@@ -1202,6 +1245,7 @@ const OrderForm = () => {
                         />
                         <input 
                             type="text" 
+                            ref={phone3Ref}
                             value={phone3} 
                             onChange={(e) => setPhone3(e.target.value)} 
                             maxLength="4" 
@@ -1228,7 +1272,8 @@ const OrderForm = () => {
                         >
                             <div className="flex flex-row items-end">
                                 <input 
-                                    type="text" 
+                                    type="text"
+                                    ref={emailLocalRef}
                                     value={emailLocal} 
                                     onChange={(e) => setEmailLocal(e.target.value)} 
                                     className="
@@ -1237,7 +1282,7 @@ const OrderForm = () => {
                                 />
                                 <span className="text-[15px] md:mx-2 mx-1">@</span>
                                 {emailDomain === '직접입력' ? (
-                                    <input type="text" value={customDomain} onChange={(e) => setCustomDomain(e.target.value)} className="md:w-[200px] w-1/2 border-[1px] h-8 pl-2" 
+                                    <input type="text" ref={customDomainRef} value={customDomain} onChange={(e) => setCustomDomain(e.target.value)} className="md:w-[200px] w-1/2 border-[1px] h-8 pl-2" 
                                     />
                                 ) : (
                                     <input type="hidden" value={emailDomain} readOnly className="md:w-[200px] w-1/2 border-[1px] h-8 pl-2" />
@@ -1267,6 +1312,7 @@ const OrderForm = () => {
                             <div className="flex flex-col">
                                 <input
                                     type="password"
+                                    ref={guestPasswordRef}
                                     value={guestPassword}
                                     onChange={(e) => setGuestPassword(e.target.value)}
                                     className="
@@ -1292,6 +1338,7 @@ const OrderForm = () => {
                             <div className="flex flex-col">
                                 <input
                                     type="password"
+                                    ref={guestPasswordConfirmRef}
                                     value={guestPasswordConfirm}
                                     onChange={(e) => setGuestPasswordConfirm(e.target.value)}
                                     className="
@@ -1394,7 +1441,7 @@ const OrderForm = () => {
                             <span>주문자와 동일</span>
                         </label>
                     </div>
-                    <input type="text" value={recipient} onChange={(e) => setRecipient(e.target.value)}
+                    <input type="text" ref={recipientRef} value={recipient} onChange={(e) => setRecipient(e.target.value)}
                         disabled={isSameAsOrderer}
                         className="md:w-[200px] w-full border-[1px] h-8 px-2" />
                 </div>
@@ -1412,7 +1459,7 @@ const OrderForm = () => {
                     <div className="
                         md:w-auto w-full flex flex-col gap-2 pr-2">
                         <div className="flex">
-                            <input type="text"  value={postcode} readOnly placeholder="우편번호" 
+                            <input type="text" ref={postcodeRef}  value={postcode} readOnly placeholder="우편번호" 
                                 className="md:w-[200px] w-1/2 border-[1px] h-8 pl-2" />
                             <button className="
                                 h-8 bg-black text-white rounded border-opacity-15 
@@ -1453,6 +1500,7 @@ const OrderForm = () => {
                                 <option>019</option>
                         </select>
                         <input 
+                            ref={recipientPhone2Ref}
                             type="text" 
                             value={recipientPhone2}
                             onChange={(e) => setRecipientPhone2(e.target.value)}
@@ -1461,7 +1509,8 @@ const OrderForm = () => {
                             inputMode="numeric" 
                             className="w-[100px] h-8 border border-gray-300 pl-2"
                         />
-                        <input 
+                        <input
+                            ref={recipientPhone3Ref}
                             type="text" 
                             value={recipientPhone3}
                             onChange={(e) => setRecipientPhone3(e.target.value)}
@@ -1603,7 +1652,7 @@ const OrderForm = () => {
                 <span>결제수단</span>
             </div>
 
-            <div className="w-full mb-10">
+            <div ref={paymentMethodRef} tabIndex={-1} className="w-full mb-10 outline-none">
                 <hr/>
                 <div className="
                     flex flex-row h-[50px] items-center mt-3 mb-3 mx-3
@@ -1694,7 +1743,7 @@ const OrderForm = () => {
                 <hr/>
 
                 <div className='flex items-center ml-3 mt-4'>
-                    <input type="checkbox" id="agree" className="w-4 h-4 mr-2" />
+                    <input type="checkbox" id="agree" ref={agreeRef} className="w-4 h-4 mr-2" />
                     <label htmlFor="agree">
                         결제 정보를 확인하였으며, 구매 진행에 동의합니다.
                     </label>
