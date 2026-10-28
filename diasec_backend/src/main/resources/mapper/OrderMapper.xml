@@ -452,6 +452,7 @@
             oi.oid AS oid,
             o.id AS memberId,
             o.recipient AS recipient,
+            o.orderer_name AS ordererName,
             oi.title AS title,
             oi.retouch_enabled AS retouchEnabled,
             oi.order_status AS orderStatus,

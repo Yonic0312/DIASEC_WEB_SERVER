@@ -257,7 +257,7 @@ const AdminRetouchList = () => {
 
                             {/* 주문자 */}
                             <div className="text-center col-span-2">
-                                <div>{row.recipient || "-"}</div>
+                                <div>{row.ordererName || "-"}</div>
                             </div>
                             
                             {/* 상품/보정요청 */}
@@ -420,7 +420,7 @@ const AdminRetouchList = () => {
 
             {/* 미리보기 모달 */}
             {previewOpen && (
-                <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50" onClick={() => setPreviewOpen(false)}>
+                <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-[10000]" onClick={() => setPreviewOpen(false)}>
                     <div className="bg-white rounded-lg p-3 max-w-[90vw] max-h-[90vh]" onClick={(e) => e.stopPropagation()}>
                         <div className="flex justify-between items-center mb-2">
                             <div className="text-sm font-medium">프리뷰 미리보기</div>

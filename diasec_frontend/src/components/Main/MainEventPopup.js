@@ -104,7 +104,7 @@ export default function MainEventPopup({ events = [] }) {
                         id="main-event-popup-title"
                         className="text-[12px] md:text-[13px] font-bold tracking-wide text-gray-800"
                     >
-                        진행 중 이벤트
+                        진행중인 이벤트
                     </p>
 
                     <div className="flex flex-col items-center px-0.5">
