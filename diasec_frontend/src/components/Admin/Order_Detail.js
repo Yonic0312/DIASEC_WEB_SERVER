@@ -200,7 +200,7 @@ const Order_Detail = () => {
     const [sizeSaving, setSizeSaving] = useState(false);
 
     // 모달 입력 필드 상태 정의
-    const [trackingCompany, setTrackingCompany] = useState('한진택배');
+    const [trackingCompany, setTrackingCompany] = useState('CJ대한통운');
     const [trackingNumber, setTrackingNumber] = useState('');
     const [bankName, setBankName] = useState('');
     const [accountNumber, setAccountNumber] = useState('');
@@ -1144,7 +1144,7 @@ const Order_Detail = () => {
                                         setTrackingCompany('기타');
                                         setCustomCompany(existingCompany);
                                     } else {
-                                        setTrackingCompany('한진택배');
+                                        setTrackingCompany('CJ대한통운');
                                         setCustomCompany('');
                                     }
                                     setTrackingNumber((item.trackingNumber || '').trim());

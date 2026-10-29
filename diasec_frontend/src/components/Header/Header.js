@@ -28,11 +28,11 @@ const Header = () => {
     // 모바일 메뉴 정의 (상단 탭)
     const mainMenus = useMemo(() => ([
         { key:'diasec',              label:'ONLY 디아섹',                  link: '/main_CompanyProfile' },
+        { key:'customFrame',         label:'맞춤액자',               link:'/customFrames' },
         { key:'masterPiece',         label:'명화',                         link:'/main_Items?type=masterPiece' },
         { key:'koreanPainting',      label:'동양화',                        link:'/main_Items?type=koreanPainting' },
         { key:'photoIllustration',   label:'사진/일러스트',                  link:'/main_Items?type=photoIllustration' },
         { key:'fengShui',            label:'풍수',                         link:'/main_Items?type=fengShui' },
-        { key:'customFrame',         label:'맞춤액자/사진보정',               link:'/customFrames' },
         { key:'event',               label:'이벤트',                        link:'/mainEvent' },
     ]), []);
 

@@ -41,7 +41,7 @@ const Footer = () => {
                     aria-label="쇼핑 카테고리"
                     className="flex flex-wrap justify-center items-center gap-x-1 gap-y-1 mt-3 mb-1 text-[11px] md:text-[13px] max-w-[min(100%,520px)]"
                 >
-                    <Link to="/main_Items?type=masterPiece" className="hover:underline px-1">명화</Link>
+                    <Link to="/customFrames" className="hover:underline px-1">맞춤액자</Link>
                     <span className="opacity-70">|</span>
                     <Link to="/main_Items?type=koreanPainting" className="hover:underline px-1">동양화</Link>
                     <span className="opacity-70">|</span>
@@ -49,7 +49,7 @@ const Footer = () => {
                     <span className="opacity-70">|</span>
                     <Link to="/main_Items?type=fengShui" className="hover:underline px-1">풍수그림</Link>
                     <span className="opacity-70">|</span>
-                    <Link to="/customFrames" className="hover:underline px-1">맞춤액자</Link>
+                    <Link to="/main_Items?type=masterPiece" className="hover:underline px-1">명화</Link>   
                 </nav>
 
                 <div className="flex md:gap-2 gap-[4px]">

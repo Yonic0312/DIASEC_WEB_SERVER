@@ -332,7 +332,7 @@ const Cart = () => {
                             onClick={() => navigate("/customFrames")}
                             className="px-4 py-2 bg-black text-white rounded-xl hover:opacity-90"    
                         >
-                            맞춤액자/사진보정
+                            맞춤액자
                         </button>
                     </div>
                 </div>

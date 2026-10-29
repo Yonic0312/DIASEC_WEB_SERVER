@@ -19,11 +19,11 @@ import catFengShui from '../../assets/collections/fungShui.png';
 import catCustomFrame from '../../assets/dropDownMenu/customFrame/c1.jpg';
 
 const CATEGORY_SHORTCUTS = [
+    { label: '맞춤액자', image: catCustomFrame, link: '/customFrames' },
     { label: '명화', image: catMasterPiece, link: '/main_Items?type=masterPiece' },
     { label: '동양화', image: catKoreanPainting, link: '/main_Items?type=koreanPainting' },
     { label: '사진 · 일러스트', image: catPhotoIllustration, link: '/main_Items?type=photoIllustration' },
     { label: '풍수그림', image: catFengShui, link: '/main_Items?type=fengShui' },
-    { label: '맞춤액자', image: catCustomFrame, link: '/customFrames' },
 ];
 
 // 보정

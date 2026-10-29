@@ -16,7 +16,7 @@ const CATEGORY_LINKS = [
     { label: '동양화', url: '/main_Items?type=koreanPainting'},
     { label: '사진/일러스트', url: '/main_Items?type=photoIllustration'},
     { label: '풍수그림', url: '/main_Items?type=fengShui' },
-    { label: '맞춤액자/사진보정', url: '/customFrames' },
+    { label: '맞춤액자', url: '/customFrames' },
 ];
 
 const DRAFT_STORAGE_KEY = 'bizConsultWriteDraft';
