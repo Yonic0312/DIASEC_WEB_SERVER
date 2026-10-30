@@ -390,26 +390,35 @@ const Header = () => {
                             const open = openSections === m.key;
                             return (
                                 <li key={m.key} className="border-b last:border-none">
-                                    <button
-                                        className="w-full flex items-center gap-3 px-2 py-4"
-                                        onClick={() => {
-                                            if (categories.includes(m.key)) {
-                                                // 처음 여는 순간 데이터 없으면 1페이지 로드
-                                                if ((dropdown[m.key] || []).length === 0) fetchMore(m.key);
-                                                toggleSection(m.key);
-                                            } else if (hasChildren) {
-                                                toggleSection(m.key);
-                                            } else if (m.link) {
-                                                navigate(m.link);
-                                                setDrawerOpen(false);
-                                            }
-                                        }}
-                                    >
-                                        <span className="text-[15px]">{m.label.replace(' / ', ' ')}</span>
+                                    <div className="w-full flex items-center">
+                                        <button
+                                            type="button"
+                                            className="flex-1 text-left px-2 py-4 text-[15px]"
+                                            onClick={() => {
+                                                if (m.link) {
+                                                    navigate(m.link);
+                                                    setDrawerOpen(false);
+                                                }
+                                            }}
+                                        >
+                                            {m.label.replace(' / ', ' ')}
+                                        </button>
                                         {hasChildren && (
-                                            <ChevronDown className={`ml-auto transition-transform ${open ? 'rotate-180' : ''}`} />
+                                            <button
+                                                type="button"
+                                                className="px-3 py-4"
+                                                aria-label={`${m.label} 하위 메뉴`}
+                                                onClick={() => {
+                                                    if (categories.includes(m.key) && (dropdown[m.key] || []).length === 0) {
+                                                        fetchMore(m.key);
+                                                    }
+                                                    toggleSection(m.key);
+                                                }}
+                                            >
+                                                <ChevronDown className={`transition-transform ${open ? 'rotate-180' : ''}`} />
+                                            </button>
                                         )}
-                                    </button>
+                                    </div>
 
                                     {/* 서브 카테고리 */}
                                     {hasChildren && (

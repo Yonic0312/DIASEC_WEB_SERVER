@@ -905,7 +905,24 @@ const OrderDetail = () => {
                                     return (
                                         <>
                                         <div><span className="text-black mb-2">입금 은행:</span> {order.vbankName}</div>
-                                        <div><span className="text-black mb-2">입금 계좌:</span> {order.vbankAccount}</div>
+                                        <div className="flex items-center gap-2 flex-wrap">
+                                            <span className="text-black mb-2">입금 계좌:</span> 
+                                            <button
+                                                type="button"
+                                                className="underline underline-offset-2"
+                                                onClick={() => {
+                                                    const account = String(order.vbankAccount || '').replace(/\s/g, '');
+                                                    if (!account) return;
+                                                    navigator.clipboard
+                                                        .writeText(account)
+                                                        .then(() => toast.success('계좌번호를 복사했습니다.'))
+                                                        .catch(() => toast.error('복사에 실패했습니다.'));
+                                                }}
+                                            >
+                                                {order.vbankAccount}
+                                            </button>
+                                            <span className="text-[12px] text-gray-400">복사</span>
+                                        </div>
                                         <div><span className="text-black mb-2">예금주:</span> {order.vbankHolder}</div>
                                         {order.vbankDueDate && (
                                             <div><span className="text-black mb-2">입금 기한:</span> {String(order.vbankDueDate).slice(0, 16)} 까지</div>
