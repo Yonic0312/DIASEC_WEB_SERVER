@@ -1120,19 +1120,20 @@ const Main_CustomFrames = () => {
     return (
         <div className="flex flex-col w-full h-full">
             <div className="hidden md:block">
-                <div className='flex flex-col items-center mt-3'>
-                    <div className="text-[22px] font-semibold">
+                <div className='flex flex-col items-center mt-5'>
+                    <div className="text-[24px] font-semibold">
                         <span className="flex items-center">
                             주
                             <span className="text-[10px] font-extrabold mx-1">⁄</span> 
-                            문 
-                            <span className="text-[10px] font-extrabold mx-1">⁄</span> 
-                            방 
-                            <span className="text-[10px] font-extrabold mx-1">⁄</span> 
-                            법</span>
+                            문
+                            <span className="text-[10px] font-extrabold mx-1">⁄</span>
+                            방
+                            <span className="text-[10px] font-extrabold mx-1">⁄</span>
+                            법
+                        </span>
                     </div>
-                    <div className="flex mt-2">
-                        <div className="flex flex-col items-center w-[76px]">
+                    <div className="flex">
+                        <div className="flex flex-col items-center w-[80px]">
                             <div className='
                                     md:w-9 w-[clamp(24px,4.693vw,36px)] 
                                     md:h-9 h-[clamp(24px,4.693vw,36px)] 
@@ -1143,7 +1144,7 @@ const Main_CustomFrames = () => {
                             <span 
                                 className='
                                     md:text-sm text-[clamp(10px,1.82vw,14px)]
-                                    mt-2 text-600 font-medium text-center'
+                                    text-600 font-medium text-center'
                             >
                                 이미지 업로드
                             </span>
@@ -1174,7 +1175,7 @@ const Main_CustomFrames = () => {
                             <span 
                                 className='
                                     md:text-sm text-[clamp(10px,1.82vw,14px)]
-                                    mt-2 text-600 font-medium text-center'
+                                    text-600 font-medium text-center'
                             >
                                 사이즈 조정
                             </span>
@@ -1205,7 +1206,7 @@ const Main_CustomFrames = () => {
                             <span 
                                 className='
                                     md:text-sm text-[clamp(10px,1.82vw,14px)]
-                                    mt-2 text-600 font-medium text-center'
+                                    text-600 font-medium text-center'
                             >
                                 결제
                             </span>
