@@ -587,4 +587,41 @@ public class OrderService {
     public void markOrderPaid(Long oid) {
         orderMapper.updateOrderItemsStatus(oid, "결제완료");
     }
+
+    public void sendVbankAccountSms(OrderVo order) {
+        if (order == null || order.getOrdererPhone() == null || order.getOrdererPhone().isBlank()) {
+            return;
+        }
+        if (order.getVbankAccount() == null || order.getVbankAccount().isBlank()) {
+            return;
+        }
+
+        String due = order.getVbankDueDate() == null ? "" : order.getVbankDueDate();
+        if (due.length() >= 16) {
+            due = due.substring(0, 16);
+        }
+
+        String msg = String.format(
+            "[DIASEC KOREA] %s님, 가상계좌가 발급되었습니다.%n" +
+            "주문번호: %s%n" +
+            "입금은행: %s%n" +
+            "계좌번호: %s%n" +
+            "예금주: %s%n" +
+            "입금금액: %,d원%n" +
+            "입금기한: %s",
+            nvl(order.getOrdererName(), "고객"),
+            order.getOid(),
+            nvl(order.getVbankName(), ""),
+            order.getVbankAccount(),
+            nvl(order.getVbankHolder(), ""),
+            order.getFinalPrice(),
+            due
+        );
+
+        try {
+            solapiService.send(order.getOrdererPhone(), msg);
+        } catch (Exception e) {
+            // 문자 실패해도 주문은 유지
+        }
+    }
 }

@@ -395,6 +395,7 @@ public class NicepayService {
         // 비회원 주문조회 비밀번호가 평문 상태로 저장되지 않도록 보정
         encodeGuestPasswordIfNeeded(draft);
         orderService.insertOrder(draft);
+        orderService.sendVbankAccountSms(draft);
 
         removeDraft(orderId);
         return frontendUrl + "/orderComplete?oid=" + draft.getOid();
