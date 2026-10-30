@@ -35,6 +35,7 @@ import c6 from '../../assets/dropDownMenu/customFrame/c6.jpg';
 import c7 from '../../assets/dropDownMenu/customFrame/c7.jpg';
 import c8 from '../../assets/dropDownMenu/customFrame/c8.jpg';
 import c9 from '../../assets/dropDownMenu/customFrame/c9.jpg';
+import c10 from '../../assets/dropDownMenu/customFrame/c10.jpg';
 
 
 // 보정
@@ -61,6 +62,7 @@ const presetImageMap = {
     game: c7,
     anime: c8,
     sight: c9,
+    entertainment: c10,
 }
 
 const Main_CustomFrames = () => {
@@ -1118,98 +1120,101 @@ const Main_CustomFrames = () => {
     return (
         <div className="flex flex-col w-full h-full">
             <div className="hidden md:block">
-                <div className='flex justify-center mt-12 items-start'>
-                    <div className="flex flex-col items-center w-[80px]">
-                        <div className='
-                                md:w-9 w-[clamp(24px,4.693vw,36px)] 
-                                md:h-9 h-[clamp(24px,4.693vw,36px)] 
-                                rounded-full bg-[#D0AC88] text-white 
-                                flex items-center justify-center font-semibold'>
-                            1
+                <div className='flex flex-col items-center mt-3'>
+                    <div className="text-[22px] font-semibold">
+                        <span className="flex items-center">
+                            주
+                            <span className="text-[10px] font-extrabold mx-1">⁄</span> 
+                            문 
+                            <span className="text-[10px] font-extrabold mx-1">⁄</span> 
+                            방 
+                            <span className="text-[10px] font-extrabold mx-1">⁄</span> 
+                            법</span>
+                    </div>
+                    <div className="flex mt-2">
+                        <div className="flex flex-col items-center w-[76px]">
+                            <div className='
+                                    md:w-9 w-[clamp(24px,4.693vw,36px)] 
+                                    md:h-9 h-[clamp(24px,4.693vw,36px)] 
+                                    rounded-full bg-[#D0AC88] text-white 
+                                    flex items-center justify-center font-semibold'>
+                                1
+                            </div>
+                            <span 
+                                className='
+                                    md:text-sm text-[clamp(10px,1.82vw,14px)]
+                                    mt-2 text-600 font-medium text-center'
+                            >
+                                이미지 업로드
+                            </span>
                         </div>
-                        <span 
-                            className='
-                                md:text-sm text-[clamp(10px,1.82vw,14px)]
-                                mt-2 text-600 font-medium text-center'
-                        >
-                            이미지 업로드
-                        </span>
-                    </div>
 
-                    <div className="flex items-center h-[36px]">
-                        {/* 선 */}
-                        <div className="w-[42px] h-[2px] bg-gray-300" />
+                        <div className="flex items-center h-[36px]">
+                            {/* 선 */}
+                            <div className="w-[42px] h-[2px] bg-gray-300" />
 
-                        {/* 화살표 */}
-                        <div className="
-                            w-0 h-0
-                            border-t-[4px] border-t-transparent
-                            border-b-[4px] border-b-transparent
-                            border-l-[6px] border-l-gray-300
-                        "
-                        />
-                    </div>
-
-                    <div className="flex flex-col items-center w-[80px]">
-                        <div className='
-                                md:w-9 w-[clamp(24px,4.693vw,36px)] 
-                                md:h-9 h-[clamp(24px,4.693vw,36px)] 
-                                rounded-full bg-[#D0AC88] text-white 
-                                flex items-center justify-center font-semibold'>
-                            2
+                            {/* 화살표 */}
+                            <div className="
+                                w-0 h-0
+                                border-t-[4px] border-t-transparent
+                                border-b-[4px] border-b-transparent
+                                border-l-[6px] border-l-gray-300
+                            "
+                            />
                         </div>
-                        <span 
-                            className='
-                                md:text-sm text-[clamp(10px,1.82vw,14px)]
-                                mt-2 text-600 font-medium text-center'
-                        >
-                            사이즈 조정
-                        </span>
-                    </div>
 
-                    <div className="flex items-center h-[36px]">
-                        {/* 선 */}
-                        <div className="w-[42px] h-[2px] bg-gray-300" />
-
-                        {/* 화살표 */}
-                        <div className="
-                            w-0 h-0
-                            border-t-[4px] border-t-transparent
-                            border-b-[4px] border-b-transparent
-                            border-l-[6px] border-l-gray-300
-                        "
-                        />
-                    </div>
-
-                    <div className="flex flex-col items-center w-[80px]">
-                        <div className='
-                                md:w-9 w-[clamp(24px,4.693vw,36px)] 
-                                md:h-9 h-[clamp(24px,4.693vw,36px)] 
-                                rounded-full bg-[#D0AC88] text-white 
-                                flex items-center justify-center font-semibold'>
-                            3
+                        <div className="flex flex-col items-center w-[65px]">
+                            <div className='
+                                    md:w-9 w-[clamp(24px,4.693vw,36px)] 
+                                    md:h-9 h-[clamp(24px,4.693vw,36px)] 
+                                    rounded-full bg-[#D0AC88] text-white 
+                                    flex items-center justify-center font-semibold'>
+                                2
+                            </div>
+                            <span 
+                                className='
+                                    md:text-sm text-[clamp(10px,1.82vw,14px)]
+                                    mt-2 text-600 font-medium text-center'
+                            >
+                                사이즈 조정
+                            </span>
                         </div>
-                        <span 
-                            className='
-                                md:text-sm text-[clamp(10px,1.82vw,14px)]
-                                mt-2 text-600 font-medium text-center'
-                        >
-                            결제
-                        </span>
+
+                        <div className="flex items-center h-[36px]">
+                            {/* 선 */}
+                            <div className="w-[42px] h-[2px] bg-gray-300" />
+
+                            {/* 화살표 */}
+                            <div className="
+                                w-0 h-0
+                                border-t-[4px] border-t-transparent
+                                border-b-[4px] border-b-transparent
+                                border-l-[6px] border-l-gray-300
+                            "
+                            />
+                        </div>
+
+                        <div className="flex flex-col items-center w-[65px]">
+                            <div className='
+                                    md:w-9 w-[clamp(24px,4.693vw,36px)] 
+                                    md:h-9 h-[clamp(24px,4.693vw,36px)] 
+                                    rounded-full bg-[#D0AC88] text-white 
+                                    flex items-center justify-center font-semibold'>
+                                3
+                            </div>
+                            <span 
+                                className='
+                                    md:text-sm text-[clamp(10px,1.82vw,14px)]
+                                    mt-2 text-600 font-medium text-center'
+                            >
+                                결제
+                            </span>
+                        </div>
                     </div>
-                </div>
-                <div className="text-center">
-                    <p 
-                        className="
-                            px-3
-                            mt-2 text-gray-600
-                            md:text-sm text-[clamp(10.5px,1.825vw,14px)]">
-                        오른쪽에서 이미지 업로드를 하신 후 사이즈를 조정해 결제를 하면 주문이 완료됩니다
-                    </p>
                 </div>
             </div>
             
-            <div className="flex md:flex-row flex-col   w-full md:h-full h-auto md:overflow-hidden overflow-visible md:mt-4 gap-2 md:gap-5">
+            <div className="flex md:flex-row flex-col w-full md:h-full h-auto md:overflow-hidden overflow-visible md:mt-2 gap-2 md:gap-5">
                 {/* 이미지창 */}
                 <div className="relative h-full ">
                     <img 
@@ -1272,9 +1277,9 @@ const Main_CustomFrames = () => {
                     {/* <hr className='mt-3 border-[1px] border-gray-200 opacity-80' /> */}
 
                     {/* 이미지 업로드 */}
-                    <div className="md:mt-3">
+                    <div className="md:mt-2">
                         <label className="text-base font-semibold">이미지 업로드</label>
-                        <div className='md:mt-2'>
+                        <div className=''>
                             {/* 숨겨진 파일 업로드 input */}
                             <input 
                                 type="file"
@@ -1291,8 +1296,8 @@ const Main_CustomFrames = () => {
                                 {...(!isCustomOrderFull ? { htmlFor: 'fileInput'} : {})}
                                 className={` 
                                     w-full
-                                    md:h-[140px] h-[110px]
-                                    text-base md:mt-2 md:py-2 border-2 border-dashed border-gray-400 rounded-lg flex items-center justify-center text-gray-500 mb-2 md:mb-4 cursor-pointer
+                                    h-[110px]
+                                    text-base md:py-2 border-2 border-dashed border-gray-400 rounded-lg flex items-center justify-center text-gray-500 mb-2 cursor-pointer
                                         transition-colors duration-200 
                                         ${ isDragging ? 'border-[#ccc26c] bg-[#fdebd4]' : 'border-dashed border-gray-400'}
                                         ${isCustomOrderFull
@@ -1350,7 +1355,7 @@ const Main_CustomFrames = () => {
                                 }}
                                 >
                                 <div 
-                                    className="flex flex-col items-center"
+                                    className="flex flex-col items-center mt-[-6px]"
                                     onDragEnter={(e) => {
                                         e.preventDefault();
                                         e.stopPropagation();
@@ -1360,7 +1365,7 @@ const Main_CustomFrames = () => {
                                         e.stopPropagation();
                                     }}
                                 >
-                                    <svg className="w-8 md:w-10 h-8 md:h-10 text-[#D0AC88] md:mb-2" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
+                                    <svg className="w-8 md:w-10 text-[#D0AC88]" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" d="M3 15.75V15a4.5 4.5 0 014.5-4.5h9A4.5 4.5 0 0121 15v.75m-9-4.5V21m0-9l-3 3m3-3l3 3" />
                                     </svg>
                                     <span className="text-sm text-center">
@@ -1518,14 +1523,14 @@ const Main_CustomFrames = () => {
                             바를 움직이거나 직접 입력해 사이즈를 조정하세요
                         </span>
 
-                        <div className="w-full flex justify-between mt-2 gap-2">
+                        <div className="w-full flex justify-between mt-1 gap-2">
                             {['A3', 'A2', 'A1', 'A0'].map(k => (
                                 <button
                                     key={k}
                                     type="button"
                                     onClick={() => handlePaperPresetClick(k)}
                                     className={`
-                                        flex-1 h-[34px] rounded-md border text-sm font-semibold
+                                        flex-1 h-[28px] rounded-md border text-sm font-semibold
                                         ${paperKey === k ? 'bg-[#ecd2af] text-white border-[#ecd2af]' : 'bg-white text-gray-500 opacity-90 border-gray-300 hover:bg-[#ecd2af] hover:text-white hover:border-[#ecd2af]'}    
                                     `}
                                 >
@@ -1534,12 +1539,12 @@ const Main_CustomFrames = () => {
                             ))}
                         </div>
 
-                        <hr className='mt-3 border-[1px] border-gray-200 opacity-80' />
+                        <hr className='mt-2 border-[1px] border-gray-200 opacity-80' />
 
                         {/* 결제 목록 */}
                         {selectedItem && (
                             <>
-                                <div className="w-full mt-1 px-1">
+                                <div className="w-full px-1">
                                     <span
                                         className={`
                                             w-fit inline-flex items-center text-[12px] font-semibold
@@ -1795,8 +1800,8 @@ const Main_CustomFrames = () => {
                         )}
                         
 
-                        <div className="flex flex-col items-end mt-3">
-                            <span className="text-[13px] font-semibold text-gray-600">
+                        <div className="flex flex-col items-end mt-2 ">
+                            <span className="text-[13px] font-semibold text-blue-500">
                                 무료배송
                             </span>
                             {/* <span className="text-sm text-gray-600">
@@ -1807,18 +1812,18 @@ const Main_CustomFrames = () => {
                                 주문 후 평균 2~5일 내 수령
                             </div>
                             <span className="text-[14px] font-semibold text-gray-700">
-                                결제금액 :{' '}
+                                총 결제금액 :{' '}
                                 <span>
                                     <SitePriceTotal
                                         original={totalPriceWithoutShipping}
                                         discounted={totalPriceWithoutShippingDiscounted}
                                         originalOrderTotal={totalPriceWithoutShipping}
-                                        className={`${SITE_PRICE_TEXT} font-semibold`}
+                                        className={`${SITE_PRICE_TEXT} text-[#000] font-semibold`}
                                     />
                                 </span>
                             </span>
                             {bulkDiscountPercent > 0 && bulkDiscountPercent >= Number(partnerDiscount || 0) && (
-                                <span className="text-[11px] font-medium text-[#45b035]">
+                                <span className="text-[11px] font-medium text-[#000]">
                                     대량주문할인 {bulkDiscountPercent}% 적용
                                 </span>
                             )}
@@ -1830,7 +1835,7 @@ const Main_CustomFrames = () => {
                             </div>
                         </div>
                         {/* 버튼 */}
-                        <div className='flex flex-col w-full gap-2 md:mt-2'>
+                        <div className='flex flex-col w-full gap-2 mt-[2px]'>
                             <div ref={buyButtonSectionRef}>
                                 {customItems.length === 0 ? (
                                     <label

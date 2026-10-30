@@ -42,7 +42,8 @@ const Header_Menu = () => {
 
     // 드롭메뉴 사용하는지?
     const categories = useMemo(
-        () => ['masterPiece', 'koreanPainting', 'fengShui', 'authorCollection', 'photoIllustration', 'customFrame'], []
+        // () => ['masterPiece', 'koreanPainting', 'fengShui', 'authorCollection', 'photoIllustration', 'customFrame'], []
+        () => ['customFrame'], []
     );
 
     const PAGE_SIZE = 15;
@@ -86,6 +87,7 @@ const Header_Menu = () => {
     const pageRef = useRef(page);
     const inflightRef = useRef({});
     const scrollBoxRef = useRef(null);
+    const dropdownPanelRef = useRef(null);
 
     // 이미지 프리로드
     // 1) 브라우저 캐시에 이미지 올리기 (가장 기본)
@@ -101,7 +103,8 @@ const Header_Menu = () => {
     }
 
     const fetchCategories = useMemo(
-        () => ['masterPiece', 'koreanPainting', 'fengShui', 'authorCollection', 'photoIllustration'],
+        // () => ['masterPiece', 'koreanPainting', 'fengShui', 'authorCollection', 'photoIllustration'],
+        () => [],
         []
     );
 
@@ -236,7 +239,7 @@ const Header_Menu = () => {
         if (!categories.includes(hovered)) return;
 
         const el = scrollBoxRef.current;
-        if (el) el.scrollTop = 0;
+        if (el) el.scrollLeft = 0;
     }, [hovered]);
 
     useEffect(() => {
@@ -267,6 +270,26 @@ const Header_Menu = () => {
         if (!hovered) return [];
         return dropdown[hovered] || [];
     }, [hovered, dropdown]);
+
+    // 스크롤 올리고 내릴때 헤더 좌, 우측으로 스크롤되도록
+    useEffect(() => {
+        const panel = dropdownPanelRef.current;
+        const el = scrollBoxRef.current;
+        if (!panel || !el || !showDropdown) return;
+
+        const onWheel = (e) => {
+            // 가로로 더 스크롤할 내용이 없으면 그대로
+            if (el.scrollWidth <= el.clientWidth) return;
+            // 세로 휠만 가로로 변환 (트랙패드 가로 스와이프는 브라우저 기본)
+            if (e.deltaY === 0) return;
+
+            e.preventDefault();
+            el.scrollLeft += e.deltaY; // 내리면 우측(+), 올리면 좌측(-)
+        };
+
+        panel.addEventListener('wheel', onWheel, { passive: false });
+        return () => panel.removeEventListener('wheel', onWheel);
+    }, [showDropdown, hovered]);
 
     // 메뉴 즉시 닫기 금지
     const closeTimerRef = useRef(null);
@@ -353,9 +376,11 @@ const Header_Menu = () => {
                 </div>
             </div>
 
-            <div className={`
+            <div 
+                ref={dropdownPanelRef}
+                className={`
                 absolute w-full left-0 top-full z-50 rounded-b-lg overflow-hidden gap-9
-                    bg-white shadow-xl pb-4 h-auto
+                    bg-white shadow-xl pb-2 h-auto
                     transition-opacity duration-150
                     ${showDropdown ? "opacity-100 visible" : "opacity-0 invisible pointer-events-none"}
                 `}
@@ -364,7 +389,7 @@ const Header_Menu = () => {
                 }}
                 onMouseLeave={scheduleClose}
             >   
-                <div className={`max-w-[1300px] mx-auto px-5 mt-8 overflow-y-auto xl:max-h-[570px] lg:max-h-[560px] max-h-[440px]`}
+                <div className={`max-w-[1300px] w-full mx-auto px-2 mt-1 overflow-x-auto overflow-y-hidden max-h-[360px]`}
                     ref={scrollBoxRef}
                     onScroll={(e) => {
                         if (!activeKey) return;
@@ -372,11 +397,11 @@ const Header_Menu = () => {
                         if (!fetchCategories.includes(activeKey)) return;
 
                         const el = e.currentTarget;
-                        const nearBottom = el.scrollTop + el.clientHeight >= el.scrollHeight - 80;
-                        if (nearBottom) fetchMore(activeKey);
+                        const nearEnd = el.scrollLeft + el.clientWidth >= el.scrollWidth - 80;
+                        if (nearEnd) fetchMore(activeKey);
                     }}
                 >
-                    <div className="grid grid-cols-5 gap-[22px]">
+                    <div className="flex gap-[22px] w-max min-w-full pb-1">
                         {currentItems.map(item => (
                             <div
                                 key={item.label}
@@ -385,7 +410,10 @@ const Header_Menu = () => {
                                     setHovered(null);
                                 }}
                                 className={`
-                                    flex flex-col h-auto items-center border-[1.5px] border-gray-400 rounded-xl cursor-pointer overflow-hidden hover:opacity-80 hover:shadow-lg
+                                    flex flex-col flex-shrink-0 items-center
+                                    w-[calc((min(100vw,1300px)-1rem-110px)/6)]
+                                    border-[1.5px] border-gray-400 rounded-lg 
+                                    cursor-pointer overflow-hidden hover:opacity-80 hover:shadow-lg
                                 `}
                             >
                                 {item.img || item.imageUrl ? (
@@ -399,7 +427,7 @@ const Header_Menu = () => {
                                 )}
                                 <span className="
                                     xl:text-[14.5px] lg:text-[11px] md:text-[9.5px]
-                                    py-2 font-[700] text-center">{item.label}</span>
+                                    py-1 font-[600] text-center">{item.label}</span>
                             </div>
                         ))}
                     </div>
