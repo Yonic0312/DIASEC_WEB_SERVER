@@ -1394,7 +1394,7 @@ const Main_CustomFrames = () => {
                             <button
                                 type="button"
                                 onClick={openAdminQuoteModal}
-                                className="text-xs font-semibold px-2 py-1 rounded-md border border-[#D0AC88] text-[#a67a3e] bg-[#fffaf3] hover:border-[#ecd2af]"
+                                className="text-xs font-semibold px-2 py-1 rounded-md border border-[#D0AC88] text-[#a67a3e] bg-[#fefce8] hover:border-[#ecd2af]"
                             >
                                 가격 알아보기
                             </button>

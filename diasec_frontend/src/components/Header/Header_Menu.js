@@ -29,6 +29,7 @@ const Header_Menu = () => {
     const mainMenus =  useMemo(() => ([
         { key : 'diasec',            label: 'ONLY 디아섹',       link:'/main_CompanyProfile'},
         { key : 'customFrame',       label: '맞춤액자',  link: '/customFrames' },
+        { key:'discount',              label:'전시회',                  link: '/bulkOrderDiscount' },
         { key : 'masterPiece',       label: '명화',         link:'/main_Items?type=masterPiece' },
         { key : 'koreanPainting',       label: '동양화',         link:'/main_Items?type=koreanPainting' },
         { key : 'photoIllustration', label: '사진 / 일러스트',     link:'/main_Items?type=photoIllustration' },

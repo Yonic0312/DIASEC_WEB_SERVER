@@ -413,7 +413,7 @@ const Admin_Home = () => {
             { label: '회원 매출 순위', path: '/admin_MemberSalesRanking' },
             { label: '페이지 접속 통계', path: '/admin_PageView' },
             { label: '고객 문의', path: '/admin_InquiryList' },
-            { label: '기업컨설팅', path: '/admin_BizConsultList' },
+            // { label: '기업컨설팅', path: '/admin_BizConsultList' },
             { label: '업무제휴', path: '/admin_BizPartnerList' },
             { label: '보정 요청', path: '/admin_AdminRetouchList' },
             { label: '공지사항', path: '/admin_NoticeManager' },
@@ -479,14 +479,14 @@ const Admin_Home = () => {
                     accent={inquiryUnanswered > 0 ? 'text-amber-700' : undefined}
                     onClick={() => navigate('/admin_InquiryList')}
                 />
-                <StatCard
+                {/* <StatCard
                     title="기업컨설팅 신청"
                     value={`${bizConsultCount.toLocaleString()}건`}
                     subtitle="미완료 신청 건수"
                     hint={bizConsultCount > 0 ? '처리가 필요합니다.' : '모두 처리됨'}
                     accent={bizConsultCount > 0 ? 'text-amber-700' : undefined}
                     onClick={() => navigate('/admin_BizConsultList')}
-                />
+                /> */}
                 <StatCard 
                     title="업무제휴 신청"
                     value={`${bizPartnerCount.toLocaleString()}건`}

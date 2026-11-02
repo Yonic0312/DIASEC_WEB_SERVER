@@ -1,18 +1,17 @@
 import { useNavigate, useLocation } from 'react-router-dom';
 
 const tabs = [
-    // '고객센터홈', 
-    // '고객센터홈','자주 묻는 질문', '1:1 문의','공지사항', '후기게시판', '기업컨설팅', '업무제휴'];
-    '고객센터홈','자주 묻는 질문', '1:1 문의','공지사항', '후기게시판'];
+    // '고객센터홈',
+    '자주 묻는 질문', '1:1 문의','공지사항', '후기게시판'];
 
 const routes = {
-    '고객센터홈': '/supportMain',
+    // '고객센터홈': '/supportMain',
     '자주 묻는 질문' : '/faqMain',
     '공지사항' : '/noticeList',
     '후기게시판' : '/reviewBoard',
     '1:1 문의' : '/supportMyInquiryList',
     '업무제휴' : '1',
-    '기업컨설팅' : '2',
+    // '기업컨설팅' : '2',
 };
 
 const SupportHeader = () => {

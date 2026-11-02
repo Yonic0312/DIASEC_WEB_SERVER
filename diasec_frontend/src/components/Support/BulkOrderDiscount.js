@@ -36,27 +36,18 @@ const BulkOrderDiscount = () => {
                         대량주문할인
                     </h1>
                     <div className="space-y-1 text-sm md:text-base leading-relaxed">
-                        <p>대량 주문 시 주문 금액에 따라 추가 할인 혜택을 제공합니다.</p>
-                        {/* <p>현재 사이트에서 진행 중인 할인과 중복 적용됩니다.</p> */}
                         <p>아래와 같이 주문 금액에 따라 할인이 적용됩니다.</p>
-                        <p>제휴 할인과는 중복되지 않으며, 두가지 중 높은 할인율이 적용됩니다.</p>
                     </div>
                 </header>
 
                 <section className="border-y border-gray-300 py-8 space-y-6">
                     <div>
-                        <p className="font-semibold text-gray-800 mb-4">
-                            예산금액 <span className="text-red-500">*</span>
-                        </p>
-
                         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4">
                             {BUDGET_OPTIONS.map((option) => {
                                 const checked = selectedId === option.id;
                                 return (
                                     <button
                                         key={option.id}
-                                        type="button"
-                                        onClick={() => handleSelect(option)}
                                         className={`
                                             flex flex-col items-center gap-2 p-3 rounded-lg border transition
                                             ${checked
@@ -68,13 +59,7 @@ const BulkOrderDiscount = () => {
                                             {option.bulkPct}%
                                         </span>
                                         <span className="flex items-start gap-1.5 text-left text-[12px] md:text-[13px] text-gray-700">
-                                            <span
-                                                className={`
-                                                    mt-0.5 inline-block w-3.5 h-3.5 shrink-0 rounded-sm border
-                                                    ${checked ? 'border-blue-600 bg-blue-600' : 'border-gray-400 bg-white'}
-                                                `}
-                                                aria-hidden
-                                            />
+                                            
                                             {option.label}
                                         </span>
                                     </button>
@@ -90,32 +75,32 @@ const BulkOrderDiscount = () => {
                                 : `할인율 : ${totalPct}% (오픈기념 ${sitePct}% + 대량 ${selected.bulkPct}%)`
                             }
                         </p> */}
-                        <p className="text-sm md:text-base text-gray-500">
-                            {totalPct == null
-                                ? `구매 예정 금액을 선택하면 예상 할인율이 표시됩니다`
-                                : ``
-                            }
-                        </p>
                     </div>
                 </section>
                 <section className="rounded-xl border border-gray-200 bg-gray-50 px-5 py-6 space-y-4 text-sm md:text-base leading-relaxed">
                     <div className="space-y-1">
-                        <p className="font-semibold text-gray-900">사이트 외 대량주문 안내</p>
                         <p className="text-gray-700">
-                            사이트를 이용하지 않는 대량주문은 <strong>무통장입금</strong>으로만 가능합니다.
+                            - 이미지 파일과 규격을 이메일로 보내주시면 견적서를 보내드립니다.
                         </p>
                         <p className="text-gray-700">
-                            사업자등록증을 보내주시면, 입금 확인 후 세금계산서를 발급해 드립니다.
+                            - 사업자 등록증을 보내주시면, 입금 확인 후 세금계산서를 발급해 드립니다.
+                        </p>
+                        <p className="text-gray-700">
+                            - 결제는 무통장입금으로만 가능합니다
                         </p>
                     </div>
 
                     <div className="border-t border-gray-200 pt-4 space-y-1">
+                        
+                        <p className="text-gray-800">
+                            <span className="font-semibold">문의</span>{' '} : 010-4231-5879
+                        </p>
+                        <p className="text-gray-800">
+                            <span className="font-semibold">이메일</span>{' '} : d2one@naver.com
+                        </p>
                         <p className="text-gray-800">
                             <span className="font-semibold">입금계좌</span>{' '}
                             신한은행 110-117-372730 / 예금주: 임정원(디아섹)
-                        </p>
-                        <p className="text-gray-800">
-                            <span className="font-semibold">문의</span>{' '} : <a href="tel:010-4231-5879" className="underline">010-4231-5879</a>
                         </p>
                     </div>
                 </section>

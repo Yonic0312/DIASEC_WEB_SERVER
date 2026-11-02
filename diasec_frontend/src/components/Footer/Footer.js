@@ -53,13 +53,13 @@ const Footer = () => {
                 </nav>
 
                 <div className="flex md:gap-2 gap-[4px]">
-                    <button
+                    {/* <button
                             onClick={() => navigate('/bizConsult')}
                     >
                         기업컨설팅
                     </button>
                     
-                    |
+                    | */}
                     <button
                         onClick={() => navigate('/bizPartner')}
                     >
