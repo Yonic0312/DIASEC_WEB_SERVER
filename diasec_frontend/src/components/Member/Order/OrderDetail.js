@@ -1124,25 +1124,46 @@ const OrderDetail = () => {
                     )
                 })()}
 
-                { /* 배송지 정보 */}
+                { /* 주문자 정보 */}
                 <div>
-                    <h3 
+                    <h3
                         className="
-                            font-semibold mb-4 
+                            font-semibold mb-4
                             md:text-lg sm:text-[clamp(16px,2.346vw,18px)] text-[clamp(14px,2.503vw,16px)]
                     ">
-                        배송지 정보
+                        주문자 정보
                     </h3>
-                    <div 
+                    <div
                         className="
-                            grid grid-cols-1 sm:grid-cols-2 gap-y-2 md:gap-y-3 
+                            grid grid-cols-1 sm:grid-cols-2 gap-y-2 md:gap-y-3
                             md:text-base text-[clamp(13px,2.085vw,16px)]
                             text-gray-700">
                         <div><span className="font-medium">이름:</span> {order.ordererName}</div>
                         <div><span className="font-medium">연락처:</span> {order.ordererPhone}</div>
-                        <div><span className="font-medium">이메일:</span> {order.email}</div>
-                        <div>
-                            <span className="font-medium">주소:</span>{order.address}<br />
+                        <div className="sm:col-span-2">
+                            <span className="font-medium">이메일:</span> {order.email}
+                        </div>
+                    </div>
+                </div>
+                <br/>
+                { /* 배송지 정보 */}
+                <div className="mt-8">
+                    <h3
+                        className="
+                            font-semibold mb-4
+                            md:text-lg sm:text-[clamp(16px,2.346vw,18px)] text-[clamp(14px,2.503vw,16px)]
+                    ">
+                        배송지 정보
+                    </h3>
+                    <div
+                        className="
+                            grid grid-cols-1 sm:grid-cols-2 gap-y-2 md:gap-y-3
+                            md:text-base text-[clamp(13px,2.085vw,16px)]
+                            text-gray-700">
+                        <div><span className="font-medium">수령인:</span> {order.recipient || '-'}</div>
+                        <div><span className="font-medium">연락처:</span> {order.recipientPhone || '-'}</div>
+                        <div className="sm:col-span-2">
+                            <span className="font-medium">주소:</span> {order.address}<br />
                             {order.detailAddress}({order.postcode})
                         </div>
                         <div className="sm:col-span-2">
