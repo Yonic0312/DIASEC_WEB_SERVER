@@ -17,7 +17,13 @@ const PAPER_SIZES_CM = {
     A0: { w: 84.0, h: 119.0 },
 };
 
-const PriceQuoteModal = ({ open, onClose }) => {
+const PriceQuoteModal = ({ 
+    open, 
+    onClose,
+    initialWidth = '',
+    initialHeight = '',
+    landscape = false, // true면 A 규격 가로형
+}) => {
     const { member } = useMember();
     const { partnerDiscount } = usePartner();
     const [adminQuoteW, setAdminQuoteW] = useState('');
@@ -28,10 +34,10 @@ const PriceQuoteModal = ({ open, onClose }) => {
 
     useEffect(() => {
         if (!open) return;
-        setAdminQuoteW('');
-        setAdminQuoteH('');
+        setAdminQuoteW(initialWidth !== '' && initialWidth != null ? String(Math.round(Number(initialWidth) || 0) || '') : '');
+        setAdminQuoteH(initialHeight !== '' && initialHeight != null ? String(Math.round(Number(initialHeight) || 0) || '') : '');
         setAdminQuoteApplyPartnerDiscount(false);
-    }, [open]);
+    }, [open, initialWidth, initialHeight]);
 
     useEffect(() => {
         if (!open) return;
@@ -73,6 +79,8 @@ const PriceQuoteModal = ({ open, onClose }) => {
     const applyAdminQuotePaper = (key) => {
         const paper = PAPER_SIZES_CM[key];
         if (!paper) return;
+        const w = landscape ? paper.h : paper.w;
+        const h = landscape ? paper.w : paper.h;
         setAdminQuoteW(String(Math.round(paper.w)));
         setAdminQuoteH(String(Math.round(paper.h)));
     };
@@ -94,7 +102,7 @@ const PriceQuoteModal = ({ open, onClose }) => {
                 className="bg-white rounded-xl shadow-xl max-w-[370px] w-full p-6 border border-gray-200"
                 onClick={(e) => e.stopPropagation()}
             >
-                <p id="admin-quote-modal-title" className="text-[16px] font-medium text-gray-900 mb-8">
+                <p id="admin-quote-modal-title" className="text-[15px] font-medium text-gray-900 mb-8">
                     가로·세로 수치를 입력하면 아래에 가격이 표시됩니다
                 </p>
                 <div className="flex flex-wrap items-end gap-3 mb-4">
@@ -105,7 +113,7 @@ const PriceQuoteModal = ({ open, onClose }) => {
                             inputMode="decimal"
                             value={adminQuoteW}
                             onChange={(e) => setAdminQuoteW(e.target.value.replace(/[^\d.]/g, ''))}
-                            className="w-[110px] border border-gray-400 rounded-md px-2 py-2 text-base focus:outline-none focus:ring-2 focus:ring-[#D0AC88]"
+                            className="w-[100px] md:w-[110px] border border-gray-400 rounded-md px-2 py-2 text-base focus:outline-none focus:ring-2 focus:ring-[#D0AC88]"
                         />
                     </div>
                     <span className="text-lg font-semibold text-gray-500 pb-2">x</span>
@@ -116,7 +124,7 @@ const PriceQuoteModal = ({ open, onClose }) => {
                             inputMode="decimal"
                             value={adminQuoteH}
                             onChange={(e) => setAdminQuoteH(e.target.value.replace(/[^\d.]/g, ''))}
-                            className="w-[110px] border border-gray-400 rounded-md px-2 py-2 text-base focus:outline-none focus:ring-2 focus:ring-[#D0AC88]"
+                            className="w-[100px] md:w-[110px] border border-gray-400 rounded-md px-2 py-2 text-base focus:outline-none focus:ring-2 focus:ring-[#D0AC88]"
                         />
                     </div>
                 </div>
