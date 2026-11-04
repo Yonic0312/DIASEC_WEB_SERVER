@@ -283,6 +283,10 @@
         GROUP BY order_status
     </select>
 
+    <select id="countOrders" resultType="int">
+        SELECT COUNT(*) FROM orders
+    </select>
+
     <!-- 클레임 이미지 -->
     <insert id="insertOrderItemClaimFile" parameterType="com.diasec.diasec_backend.vo.OrderItemClaimFileVo">
         INSERT INTO order_item_claim_file (item_id, file_url, original_name, file_size, img_order)

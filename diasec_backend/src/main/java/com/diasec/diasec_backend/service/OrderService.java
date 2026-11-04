@@ -342,6 +342,10 @@ public class OrderService {
         return orderMapper.selectOrderItemCountsByStatus();
     }
 
+    public int countOrders() {
+        return orderMapper.countOrders();
+    }
+
     public void saveClaimImages(long itemId, List<MultipartFile> images) throws IOException {
         
         if (images == null || images.isEmpty()) {

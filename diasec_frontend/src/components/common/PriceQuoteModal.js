@@ -103,7 +103,7 @@ const PriceQuoteModal = ({
                 onClick={(e) => e.stopPropagation()}
             >
                 <p id="admin-quote-modal-title" className="text-[15px] font-medium text-gray-900 mb-8">
-                    가로·세로 수치를 입력하면 아래에 가격이 표시됩니다
+                    수치를 입력하면 아래에 가격이 표시됩니다
                 </p>
                 <div className="flex flex-wrap items-end gap-3 mb-4">
                     <div className="flex flex-col">
@@ -163,7 +163,7 @@ const PriceQuoteModal = ({
                         const ph = Math.round(parseFloat(String(adminQuoteH).replace(/[^\d.]/g, '')) || 0);
                         if (pw <= 0 || ph <= 0) {
                             return (
-                                <p className="text-sm text-gray-500">가로·세로에 숫자를 입력하면 견적이 표시됩니다.</p>
+                                <p className="text-md font-bold text-gray-500">가격표시</p>
                             );
                         }
                         const area = pw * ph;

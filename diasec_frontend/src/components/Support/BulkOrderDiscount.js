@@ -30,7 +30,7 @@ const BulkOrderDiscount = () => {
 
     return (
         <div className="w-full px-4 mt-20 mb-16 break-keep">
-            <div className="max-w-4xl mx-auto space-y-12">
+            <div className="max-w-4xl mx-auto space-y-8">
                 <header className="text-center space-y-3">
                     <h1 className="text-[28px] md:text-4xl font-bold">
                         대량주문할인
@@ -40,7 +40,7 @@ const BulkOrderDiscount = () => {
                     </div>
                 </header>
 
-                <section className="border-y border-gray-300 py-8 space-y-6">
+                <section>
                     <div>
                         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4">
                             {BUDGET_OPTIONS.map((option) => {
@@ -83,6 +83,12 @@ const BulkOrderDiscount = () => {
                             - 이미지 파일과 규격을 이메일로 보내주시면 견적서를 보내드립니다.
                         </p>
                         <p className="text-gray-700">
+                            - 납기일은 제품 사이즈와 수량에 따라 5일에서 10일 정도 소요됩니다.
+                        </p>
+                        <p className="text-gray-700">
+                            - 납품은 화물 무료배송으로 진행되오며 도서산간 제주도는 제외입니다.
+                        </p>
+                        <p className="text-gray-700">
                             - 사업자 등록증을 보내주시면, 입금 확인 후 세금계산서를 발급해 드립니다.
                         </p>
                         <p className="text-gray-700">
@@ -100,7 +106,7 @@ const BulkOrderDiscount = () => {
                         </p>
                         <p className="text-gray-800">
                             <span className="font-semibold">입금계좌</span>{' '}
-                            신한은행 110-117-372730 / 예금주: 임정원(디아섹)
+                            신한은행 110-117-372730 / 예금주: 임정원디아섹코리아
                         </p>
                     </div>
                 </section>

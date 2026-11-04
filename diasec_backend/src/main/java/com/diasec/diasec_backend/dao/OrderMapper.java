@@ -85,6 +85,9 @@ public interface OrderMapper {
     // 사이드바 상태 검색
     List<Map<String, Object>> selectOrderItemCountsByStatus();
 
+    // 주문 단위 건수 (상품 수와 무관)
+    int countOrders();
+
     // 클레임 이미지 정보 저장
     int insertOrderItemClaimFile(OrderItemClaimFileVo vo);
     List<OrderItemClaimFileVo> selectOrderItemClaimFiles(long itemId);

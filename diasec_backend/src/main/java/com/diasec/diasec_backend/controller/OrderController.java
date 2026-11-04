@@ -448,6 +448,17 @@ public class OrderController {
         }
     }
 
+    @GetMapping("/admin/order-count")
+    public ResponseEntity<?> countOrders() {
+        try {
+            return ResponseEntity.ok(Map.of("count", orderService.countOrders()));
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.internalServerError()
+                .body(Map.of("success", false, "message", e.getMessage()));
+        }
+    }
+
     // 고객: 승인
     @PostMapping("/retouch/{itemId}/approve")
     public ResponseEntity<?> approveRetouch(

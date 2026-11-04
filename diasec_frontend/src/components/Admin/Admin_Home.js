@@ -292,6 +292,7 @@ const Admin_Home = () => {
     const [bizConsultCount, setBizConsultCount] = useState(0);
     const [bizPartnerCount, setBizPartnerCount] = useState(0);
     const [orderCounts, setOrderCounts] = useState({});
+    const [orderTotal, setOrderTotal] = useState(0);
     const [disk, setDisk] = useState(null);
     const [loading, setLoading] = useState(true);
 
@@ -305,10 +306,11 @@ const Admin_Home = () => {
         const run = async () => {
             setLoading(true);
             try {
-                const [vis, inq, ord, bizConsult, bizPartner, diskRes] = await Promise.all([
+                const [vis, inq, ord, orderCountRes, bizConsult, bizPartner, diskRes] = await Promise.all([
                     axios.get(`${API}/admin/visit/stats`, { withCredentials: true }).then((r) => r.data),
                     axios.get(`${API}/inquiry/unanswered`).then((r) => r.data),
                     axios.get(`${API}/order/admin/count-by-status`, { withCredentials: true }).then((r) => r.data),
+                    axios.get(`${API}/order/admin/order-count`, { withCredentials: true }).then((r) => r.data),
                     axios.get(`${API}/admin/biz-consult/count`, { withCredentials: true }).then((r) => r.data),
                     axios.get(`${API}/admin/biz-partner/count`, { withCredentials: true }).then((r) => r.data),
                     axios
@@ -327,6 +329,7 @@ const Admin_Home = () => {
                     map[row.status] = Number(row.cnt || 0);
                 });
                 setOrderCounts(map);
+                setOrderTotal(Number(orderCountRes?.count) || 0);
             } catch (e) {
                 console.error('관리자 홈 요약 로드 실패', e);
             } finally {
@@ -395,6 +398,12 @@ const Admin_Home = () => {
         window.addEventListener('keydown', onKey);
         return () => window.removeEventListener('keydown', onKey);
     }, [visitModalOpen]);
+
+    const purchaseConversion = useMemo(() => {
+        const visits = Number(visitStats.total) || 0;
+        if (visits <= 0) return 0;
+        return (orderTotal / visits) * 100;
+    }, [orderTotal, visitStats.total]);
 
     const actionableOrderTotal = useMemo(() => {
         const skip = new Set(['배송완료', '교환완료', '환불완료', '취소']);
@@ -494,6 +503,12 @@ const Admin_Home = () => {
                     hint={bizPartnerCount > 0 ? '승인·반려 처리가 필요합니다.' : '모두 처리됨'}
                     accent={bizPartnerCount > 0 ? 'text-amber-700' : undefined}
                     onClick={() => navigate('/admin_BizPartnerList')}
+                />
+                <StatCard
+                    title="구매 전환율"
+                    value={`${purchaseConversion.toFixed(1)}%`}
+                    subtitle={`주문 ${orderTotal.toLocaleString()}건 / 누적 방문 ${Number(visitStats.total || 0).toLocaleString()}명`}
+                    hint="주문 1건을 1회로 계산"
                 />
             </div>
 
