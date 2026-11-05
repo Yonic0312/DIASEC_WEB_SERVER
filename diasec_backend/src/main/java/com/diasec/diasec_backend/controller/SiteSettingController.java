@@ -129,4 +129,27 @@ public class SiteSettingController {
             "items", saved
         ));
     }
+
+    // 관리자: 홈 메모 조회
+    @GetMapping("/admin/site-setting/home-memo")
+    public ResponseEntity<Map<String, String>> getAdminHomeMemo() {
+        return ResponseEntity.ok(Map.of(
+            "memo", siteSettingService.getAdminHomeMemo()
+        ));
+    }
+
+    // 관리자: 홈 메모 저장
+    @PostMapping("/admin/site-setting/home-memo")
+    public ResponseEntity<Map<String, Object>> updateAdminHomeMemo(@RequestBody Map<String, Object> body) {
+        String memo = body == null || body.get("memo") == null ? "" : String.valueOf(body.get("memo"));
+        try {
+            String saved = siteSettingService.updateAdminHomeMemo(memo);
+            return ResponseEntity.ok(Map.of("success", true, "memo", saved));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(Map.of(
+                "success", false,
+                "message", e.getMessage()
+            ));
+        }
+    }
 }

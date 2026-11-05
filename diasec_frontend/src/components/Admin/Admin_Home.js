@@ -1,6 +1,7 @@
 import { useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { toast } from 'react-toastify';
 import { MemberContext } from '../../context/MemberContext';
 
 const ORDER_PREVIEW_STATUSES = [
@@ -300,6 +301,8 @@ const Admin_Home = () => {
     const [visitDays, setVisitDays] = useState(30);
     const [visitDaily, setVisitDaily] = useState([]);
     const [visitDailyLoading, setVisitDailyLoading] = useState(false);
+    const [homeMemo, setHomeMemo] = useState('');
+    const [memoSaving, setMemoSaving] = useState(false);
 
     useEffect(() => {
         let cancelled = false;
@@ -341,6 +344,36 @@ const Admin_Home = () => {
             cancelled = true;
         };
     }, [API]);
+
+    useEffect(() => {
+        let cancelled = false;
+        axios.get(`${API}/admin/site-setting/home-memo`, { withCredentials: true })
+            .then((r) => {
+                if (!cancelled) setHomeMemo(r.data?.memo ?? '');
+            })
+            .catch(() => {});
+        return () => {
+            cancelled = true;
+        };
+    }, [API]);
+
+    const saveHomeMemo = async (nextMemo) => {
+        const value = nextMemo ?? homeMemo;
+        setMemoSaving(true);
+        try {
+            const { data } = await axios.post(
+                `${API}/admin/site-setting/home-memo`,
+                { memo: value },
+                { withCredentials: true }
+            );
+            setHomeMemo(data?.memo ?? value);
+            toast.success(value.trim() ? '메모를 저장했습니다.'  : '메모를 초기화했습니다.');
+        } catch (e) {
+            toast.error(e.response?.data?.message || '메모 저장에 실패했습니다.');
+        } finally {
+            setMemoSaving(false);
+        }
+    };
 
     // 실시간 접속자 수 폴링 (10초)
     useEffect(() => {
@@ -560,6 +593,36 @@ const Admin_Home = () => {
                             {item.label}
                         </button>
                     ))}
+                </div>
+            </div>
+
+            <div className="mt-8 rounded-xl border border-gray-200 bg-white p-5">
+                <h2 className="text-lg font-semibold text-gray-800 mb-3">메모</h2>
+                <textarea
+                    value={homeMemo}
+                    onChange={(e) => setHomeMemo(e.target.value)}
+                    maxLength={5000}
+                    rows={6}
+                    placeholder="관리자 메모를 적어 두세요."
+                    className="w-full resize-y rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#D0AC88]"
+                />
+                <div className="mt-3 flex justify-end gap-2">
+                    <button
+                        type="button"
+                        disabled={memoSaving}
+                        onClick={() => saveHomeMemo('')}
+                        className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+                    >
+                        초기화
+                    </button>
+                    <button
+                        type="button"
+                        disabled={memoSaving}
+                        onClick={() => saveHomeMemo()}
+                        className="rounded-lg bg-black px-4 py-2 text-sm text-white hover:bg-gray-800 disabled:opacity-50"
+                    >
+                        저장
+                    </button>
                 </div>
             </div>
 

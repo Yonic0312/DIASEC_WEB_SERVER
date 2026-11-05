@@ -24,8 +24,10 @@ public class SiteSettingService {
     public static final String KEY_MAIN_HOME_BLOGS = "main_home_blogs";
     public static final String KEY_SOLD_FRAMES_EXTRA = "sold_frames_extra";
     public static final String KEY_SOLD_FRAMES_MEMO = "sold_frames_memo";
+    public static final String KEY_ADMIN_HOME_MEMO = "admin_home_memo";
     private static final int DEFAULT_DISCOUNT = 20;
     private static final int MAX_SOLD_FRAMES_MEMO = 2000;
+    private static final int MAX_ADMIN_HOME_MEMO = 5000;
     private static final long MAX_SOLD_FRAMES_EXTRA = 9_999_999L;
 
     private final SiteSettingMapper siteSettingMapper;
@@ -142,6 +144,21 @@ public class SiteSettingService {
         } catch (Exception e) {
             throw new IllegalArgumentException("블로그 목록 저장에 실패했습니다.", e);
         }
+        return safe;
+    }
+
+    public String getAdminHomeMemo() {
+        String raw = siteSettingMapper.selectValue(KEY_ADMIN_HOME_MEMO);
+        return raw == null ? "" : raw;
+    }
+
+    @Transactional
+    public String updateAdminHomeMemo(String memo) {
+        String safe = memo == null ? "" : memo;
+        if (safe.length() > MAX_ADMIN_HOME_MEMO) {
+            throw new IllegalArgumentException("메모는 5000자까지 저장할 수 있습니다.");
+        }
+        siteSettingMapper.upsertValue(KEY_ADMIN_HOME_MEMO, safe);
         return safe;
     }
 

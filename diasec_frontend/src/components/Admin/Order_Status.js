@@ -160,6 +160,10 @@ const Order_Status = () => {
 
     // 진행 상태 폰트색 (처리필요/진행중/완료 그룹 기준)
     const statusBadgeColor = (status) => {
+        if (status === '결제완료') return 'text-sky-600'
+        if (status === '배송준비중') return 'text-indigo-700'
+        if (status === '배송중' || status === '교환배송중') return 'text-blue-600'
+        
         if (STATUS_GROUPS.처리필요.includes(status)) return 'text-yellow-600';
         if (STATUS_GROUPS.진행중.includes(status)) return 'text-blue-600';
         if (STATUS_GROUPS.완료.includes(status)) return 'text-green-600';
