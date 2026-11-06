@@ -29,12 +29,12 @@ const Header_Menu = () => {
     const mainMenus =  useMemo(() => ([
         { key : 'diasec',            label: 'ONLY 디아섹',       link:'/main_CompanyProfile'},
         { key : 'customFrame',       label: '맞춤액자',  link: '/customFrames' },
-        { key:'discount',              label:'전시회',                  link: '/bulkOrderDiscount' },
         { key : 'masterPiece',       label: '명화',         link:'/main_Items?type=masterPiece' },
         { key : 'koreanPainting',       label: '동양화',         link:'/main_Items?type=koreanPainting' },
         { key : 'photoIllustration', label: '사진 / 일러스트',     link:'/main_Items?type=photoIllustration' },
         { key : 'fengShui',          label: '풍수그림',           link:'/main_Items?type=fengShui'},
         { key : 'event',             label: '이벤트',             link: '/mainEvent'},
+        { key:'discount',              label:'대량주문할인',                  link: '/bulkOrderDiscount' },
         // { key : 'registerAuthor',    label: '작가등록',           link: '/authorRegisterIntro' },
         // { key : 'Contemporary', label:'현대작가', link:'' },
         // { key : 'authorCollection',  label: '작가갤러리',          link:'/main_Items?type=authorCollection'},

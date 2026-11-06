@@ -920,7 +920,7 @@ const Main = () => {
                     </div>
 
                     {topThumbnailReviews.length > reviewVisibleCount && (
-                        <div className="absolute top-1/3 -translate-y-1/2 w-full flex justify-between px-2 z-10">
+                        <div className="absolute top-[40%] -translate-y-1/2 w-full flex justify-between px-2 z-10">
                             <button
                                 onClick={() => {
                                         const maxIndex = Math.max(0, topThumbnailReviews.length - reviewVisibleCount);
