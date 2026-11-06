@@ -523,10 +523,10 @@ const Main_CustomFrames = () => {
         const minWidth = Math.ceil(getActualMinWidth());
         const maxW = Math.floor(actualMaxWidth);
         if (value < minWidth) {
-            showToastOnce(`최소 넓이는 ${minWidth}cm입니다.`);
+            showToastOnce(`최소 너비는 ${minWidth}cm입니다.`);
             value = minWidth;
         } else if (value > maxW) {
-            showToastOnce(`최대 넓이는 ${maxW}cm입니다.`);
+            showToastOnce(`최대 너비는 ${maxW}cm입니다.`);
             value = maxW;
         }
 

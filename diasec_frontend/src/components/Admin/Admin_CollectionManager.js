@@ -55,7 +55,7 @@ const Admin_CollectionManager = () => {
         times: newPeriod
         }).then(() => {
         setNewLabel('');
-        toast.success('라벨 등록을 성공했습니다.');
+        toast.success('라벨을 등록했습니다.');
         return axios.get(`${API}/collections/items?collectionId=${selectedCollectionId}`);
         }).then(res => setItems(res.data))
         .catch(err => console.error("추가 실패", err));
@@ -67,7 +67,7 @@ const Admin_CollectionManager = () => {
         }
         axios.delete(`${API}/collections/items/delete?id=${id}`)
         .then(() => setItems(prev => prev.filter(item => item.id !== id)))
-        .then(() => toast.success('라벨 삭제를 성공했습니다.'))
+        .then(() => toast.success('라벨을 삭제했습니다.'))
         .catch(err => console.error("삭제 실패", err));
     };
 
@@ -83,7 +83,7 @@ const Admin_CollectionManager = () => {
         setNewCollectionName('');
         setNewCollectionDisplayName('');
         fetchCollections();
-        toast.success('컬렉션 등록을 성공했습니다.');
+        toast.success('컬렉션을 등록했습니다.');
         }).catch(err => console.error("컬렉션 추가 실패", err));
     };
 
@@ -96,7 +96,7 @@ const Admin_CollectionManager = () => {
             fetchCollections();
             setSelectedCollectionId(null);
             setItems([]);
-            toast.success('컬렉션 삭제를 성공했습니다.');
+            toast.success('컬렉션을 삭제했습니다.');
         })
         .catch(err => console.error("컬렉션 삭제 실패", err));
     };
@@ -124,7 +124,7 @@ const Admin_CollectionManager = () => {
         .then(() => {
             setEditingCollection(null);
             fetchCollections();
-            toast.success('컬렉션 수정을 성공했습니다.')
+            toast.success('컬렉션을 수정했습니다.')
         })
         .catch(err => console.error("컬렉션 수정 실패", err));
     };
@@ -138,7 +138,7 @@ const Admin_CollectionManager = () => {
         axios.post(`${API}/collections/update/items`, payload)
         .then(() => {
             setEditingLabel(null);
-            toast.success('라벨 수정을 성공했습니다.');
+            toast.success('라벨을 수정했습니다.');
             return axios.get(`${API}/collections/items?collectionId=${selectedCollectionId}`);
         }).then(res => setItems(res.data));
     };
@@ -558,7 +558,7 @@ const Admin_CollectionManager = () => {
                                 })
                                 .then((res) => {
                                     setEditingLabel({ ...editingLabel, imageUrl: res.data });
-                                    toast.success("이미지 업로드 성공");
+                                    toast.success("이미지 업로드를 성공했습니다.");
                                 })
                                 .catch(() => toast.error("이미지 업로드 실패"));
                             }}

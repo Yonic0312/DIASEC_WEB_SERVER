@@ -95,7 +95,7 @@ const MyInquiryList = () => {
 
                 {filtered.length === 0 ? (
                     <div className="text-sm text-gray-500 border rounded p-5 text-center">
-                        아직등록된 문의가 없습니다.
+                        아직 등록된 문의가 없습니다.
                     </div>
                 ) : (
                     <>

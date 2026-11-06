@@ -321,7 +321,7 @@ const OrderTracking = () => {
                                 md:text-base text-[clamp(12px,2.085vw,16px)]
                                 mt-6 p-4 border rounded bg-yellow-50 text-yellow-700 font-medium">
                             <>
-                                입금이 확인되었습니다. 상품 준비 후 빠르게 발송해드리겠습니다.
+                                입금이 확인되었습니다. 상품 준비 후 빠르게 발송해 드리겠습니다.
                             </>
                         </div>
                     )}

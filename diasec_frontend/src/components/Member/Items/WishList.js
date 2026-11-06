@@ -268,7 +268,7 @@ const WishList = () => {
             .filter((v) => Number.isFinite(v));
 
         if (widList.length === 0) {
-            toast.error("삭제할 wid가 없습니다.");
+            toast.error("삭제할 상품을 찾지 못했습니다.");
             return;
         }
 
@@ -362,7 +362,7 @@ const WishList = () => {
                 {items.length === 0 ? (
                     <div className="text-center py-24 text-gray-600 space-y-6">
                         <div>
-                            <p className="text-lg font-semibold">장바구니가 비었습니다.</p>
+                            <p className="text-lg font-semibold">관심상품이 없습니다.</p>
                             <p className="text-sm text-gray-500 mt-1">
                                 마음에 드는 작품을 담아보세요
                             </p>

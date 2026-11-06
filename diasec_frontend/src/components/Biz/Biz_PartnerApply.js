@@ -67,7 +67,7 @@ const Biz_PartnerApply = () => {
             }, { withCredentials: true });
 
             alert(
-                '신청접수되었습니다.\n' +
+                '신청이 접수되었습니다.\n' +
                 '검토 후 마이페이지 > 업무제휴 현황에서 결과를 확인하실 수 있습니다.'
             );
             navigate('/mypage/partner');
@@ -142,7 +142,7 @@ const Biz_PartnerApply = () => {
                             className="border px-6 py-2 rounded">취소</button>
                         <button type="submit" disabled={submitting}
                             className="bg-black text-white px-6 py-2 rounded disabled:opacity-50">
-                            {submitting ? '접수 중...' : '신청접수'}        
+                            {submitting ? '접수 중...' : '신청 접수'}        
                         </button>
                     </div>
                 </form>
