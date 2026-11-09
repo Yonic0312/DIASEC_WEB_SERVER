@@ -50,7 +50,7 @@ const Cart = () => {
 
         const list = Array.isArray(res.data) ? res.data : (res.data?.list ?? []);
             setItems(list);
-            setChecked(new Set());
+            setChecked(new Set(list.map((it) => getKey(it))));
         } catch (e) {
             console.error(e);
             toast.error("장바구니를 불러오지 못했습니다.");
