@@ -51,6 +51,18 @@ const Admin_BizPartnerView = () => {
             .catch(() => toast.error('처리 실패'));  
     };
 
+    const handleDelete = () => {
+        if (!window.confirm('이 신청글을 삭제할까요?\n해당 회원의 파트너 권한도 함께 제거됩니다.')) return;
+        axios.post(`${API}/admin/biz-partner/delete`,
+            { id: Number(id) },
+            { withCredentials: true })
+            .then(() => {
+                toast.success('삭제 완료 · 파트너 권한이 제거되었습니다.');
+                navigate('/admin_BizPartnerList');
+            })
+            .catch((e) => toast.error(e.response?.data || '삭제 실패'));
+    };
+
     if (!post) return <div className="p-10 text-center">불러오는 중...</div>
 
     return (
@@ -66,6 +78,7 @@ const Admin_BizPartnerView = () => {
                         <button onClick={handleReject} className="bg-gray-700 text-white px-4 py-2 rounded">미승인</button>
                     </>
                 )}
+                <button onClick={handleDelete} className="bg-red-600 text-white px-4 py-2 rounded">삭제</button>
             </div>
 
             <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">

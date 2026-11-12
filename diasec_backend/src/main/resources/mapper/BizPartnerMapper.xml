@@ -84,6 +84,19 @@
             AND partner_status = '승인'
     </update>
 
+    <update id="clearMemberPartner">
+        UPDATE member
+        SET partner_status = NULL,
+            partner_grade = NULL,
+            partner_approved_at = NULL
+        WHERE id COLLATE utf8mb4_unicode_ci = #{memberId}
+    </update>
+
+    <delete id="deleteApplication">
+        DELETE FROM biz_partner_application
+        WHERE id = #{id}
+    </delete>
+
     <select id="countPending" resultType="int">
         SELECT COUNT(*) FROM biz_partner_application WHERE status = '대기'
     </select>

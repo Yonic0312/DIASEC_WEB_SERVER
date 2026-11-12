@@ -95,4 +95,22 @@ public class AdminBizPartnerController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("미승인 처리 실패");
         }
     }
+
+    // 신청글 삭제 + 파트너 권한 제거
+    @PostMapping("/delete")
+    public ResponseEntity<?> delete(@RequestBody Map<String,Object> payload) {
+        try {
+            if (payload == null || payload.get("id") == null) {
+                return ResponseEntity.badRequest().body("id가 필요합니다.");
+            }
+            Long id = Long.valueOf(payload.get("id").toString());
+            bizPartnerService.deleteApplication(id);
+            return ResponseEntity.ok("삭제되었습니다.");
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("삭제 실패");
+        }
+    }
 }

@@ -10,6 +10,7 @@ import com.diasec.diasec_backend.dao.BizPartnerMapper;
 import com.diasec.diasec_backend.util.PartnerGradeUtil;
 import com.diasec.diasec_backend.vo.BizPartnerApplicationVo;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -103,5 +104,23 @@ public class BizPartnerService {
 
     public int countPending() {
         return bizPartnerMapper.countPending();
+    }
+
+    // 신청글 삭제 + 해당 회원 파트너 권한 제거
+    @Transactional
+    public void deleteApplication(Long id) {
+        BizPartnerApplicationVo app = bizPartnerMapper.getApplicationDetail(id);
+        if (app == null) {
+            throw new IllegalArgumentException("신청 정보를 찾을 수 없습니다.");
+        }
+
+        int deleted = bizPartnerMapper.deleteApplication(id);
+        if (deleted <= 0) {
+            throw new IllegalStateException("신청글 삭제에 실패했습니다.");
+        }
+
+        if (app.getMemberId() != null && !app.getMemberId().isBlank()) {
+            bizPartnerMapper.clearMemberPartner(app.getMemberId());
+        }
     }
 }

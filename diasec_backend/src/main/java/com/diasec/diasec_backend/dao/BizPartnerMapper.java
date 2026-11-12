@@ -18,6 +18,8 @@ public interface BizPartnerMapper {
                              @Param("status") String status,
                              @Param("grade") String grade);
     void updateMemberPartnerGrade(@Param("memberId") String memberId, @Param("grade") String grade);
+    void clearMemberPartner(@Param("memberId") String memberId);
+    int deleteApplication(@Param("id") Long id);
     int countPending();
     BizPartnerApplicationVo getMemberPartnerInfo(@Param("memberId") String memberId);
     BizPartnerApplicationVo getLatestApplicationByMember(@Param("memberId") String memberId);
