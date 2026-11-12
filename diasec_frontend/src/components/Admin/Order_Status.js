@@ -17,8 +17,25 @@ const Order_Status = () => {
     // 심사 대기중인 사람 수
     const [pendingAuthorCount, setPendingAuthorCount] = useState(0);
 
-    // 검색
+    // 검색. keywordInput은 입력값, keyword는 조회에 쓰는 확정값
+    const [keywordInput, setKeywordInput] = useState(() => searchParams.get('keyword') || '');
     const [keyword, setKeyword] = useState(() => searchParams.get('keyword') || '');
+    const keywordTimerRef = useRef(null);
+    const keywordFocusedRef = useRef(false);
+
+    const commitKeyword = (value) => {
+        if (keywordTimerRef.current) {
+            clearTimeout(keywordTimerRef.current);
+            keywordTimerRef.current = null;
+        }
+        setKeyword(value);
+    };
+
+    useEffect(() => {
+        return () => {
+            if (keywordTimerRef.current) clearTimeout(keywordTimerRef.current);
+        };
+    }, []);
 
     // 날짜 검색
     const [startDate, setStartDate] = useState(() => searchParams.get('startDate') || '');
@@ -205,6 +222,9 @@ const Order_Status = () => {
         setStatusFilter(spStatus);
         setCategoryFilter(spCategory);
         setKeyword(spKeyword);
+        if (!keywordFocusedRef.current) {
+            setKeywordInput(spKeyword);
+        }
         setCurrentPage(spPage);
     }, [searchParams]);
 
@@ -378,7 +398,26 @@ const Order_Status = () => {
                     <span className="mx-1">~</span>
                     <input type="date" className="w-[130px] h-[40px] border text-center" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
                     
-                    <input type="text" placeholder="주문번호, 회원ID, 주문자명, 상품명" className="w-[220px] h-[40px] border text-sm px-3" value={keyword} onChange={(e) => setKeyword(e.target.value)} />
+                    <input
+                        type="text"
+                        placeholder="주문번호, 회원ID, 주문자명, 상품명"
+                        className="w-[220px] h-[40px] border text-sm px-3"
+                        value={keywordInput}
+                        onFocus={() => { keywordFocusedRef.current = true; }}
+                        onBlur={() => {
+                            keywordFocusedRef.current = false;
+                            commitKeyword(keywordInput);
+                        }}
+                        onChange={(e) => {
+                            const value = e.target.value;
+                            setKeywordInput(value);
+                            if (keywordTimerRef.current) clearTimeout(keywordTimerRef.current);
+                            keywordTimerRef.current = setTimeout(() => {
+                                keywordTimerRef.current = null;
+                                setKeyword(value);
+                            }, 400);
+                        }}
+                    />
                 </div>
             </div>
             
