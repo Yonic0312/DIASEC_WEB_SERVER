@@ -1911,45 +1911,66 @@ const Main_CustomFrames = () => {
                         비회원으로 구매하기
                     </button>
 
-                    <button
-                        onClick={() => {
-                            const pendingOrderItems = customItems.map((item) => {
-                                const enabledVal =
-                                    item.retouch?.enabled === true || (item.retouch?.types?.length ?? 0) > 0 ? 1 : 0;
-                                const typesStr = item.retouch?.types?.join(', ') ?? '';
-                                const noteStr = item.retouch?.note ?? '';
+                    <div className="relative">
+                        {/* 말풍선 */}
+                        <div className="
+                            absolute top-[5px] right-2
+                            bg-[#E6C39A] text-white
+                            text-[11px] px-2 py-1
+                            rounded-full
+                            font-semibold
+                            shadow-md
+                            animate-bounceX
+                            whitespace-nowrap
+                        ">
+                            적립금 5,000원
 
-                                return {
-                                    pid: '-3',
-                                    title: '맞춤 액자',
-                                    price: item.price,
-                                    thumbnail: item.imageSrc,
-                                    thumbnailPreview: item.thumbnailPreview,
-                                    thumbnailFile: item.thumbnailFile,
-                                    thumbnailPreviewFile: item.thumbnailPreviewFile,
-                                    size: toInchSize(item.width, item.height),
-                                    category: 'customFrames',
-                                    quantity: String(item.quantity ?? 1),
-                                    finishType: item.finishType ?? 'glossy',
-                                    retouchEnabled: enabledVal,
-                                    retouchTypes: enabledVal ? typesStr : null,
-                                    retouchNote: enabledVal ? noteStr : null,
-                                };
-                            });
+                            <div className="
+                                absolute -bottom-1 right-4
+                                w-2 h-2 bg-[#E6C39A]
+                                rotate-45
+                            "></div>
+                        </div>
+                        <button
+                            onClick={() => {
+                                const pendingOrderItems = customItems.map((item) => {
+                                    const enabledVal =
+                                        item.retouch?.enabled === true || (item.retouch?.types?.length ?? 0) > 0 ? 1 : 0;
+                                    const typesStr = item.retouch?.types?.join(', ') ?? '';
+                                    const noteStr = item.retouch?.note ?? '';
 
-                            navigate('/userLogin', {
-                                state: {
-                                    pendingOrderItems,
-                                    returnTo: `${location.pathname}${location.search}`,
-                                },
-                            });
-                        }}
-                        className="
-                            md:text-base text-[clamp(12px,2.085vw,16px)]
-                            w-full py-3 mt-3 bg-gray-200 rounded-md"
-                    >
-                        로그인 후 구매하기
-                    </button>
+                                    return {
+                                        pid: '-3',
+                                        title: '맞춤 액자',
+                                        price: item.price,
+                                        thumbnail: item.imageSrc,
+                                        thumbnailPreview: item.thumbnailPreview,
+                                        thumbnailFile: item.thumbnailFile,
+                                        thumbnailPreviewFile: item.thumbnailPreviewFile,
+                                        size: toInchSize(item.width, item.height),
+                                        category: 'customFrames',
+                                        quantity: String(item.quantity ?? 1),
+                                        finishType: item.finishType ?? 'glossy',
+                                        retouchEnabled: enabledVal,
+                                        retouchTypes: enabledVal ? typesStr : null,
+                                        retouchNote: enabledVal ? noteStr : null,
+                                    };
+                                });
+
+                                navigate('/userLogin', {
+                                    state: {
+                                        pendingOrderItems,
+                                        returnTo: `${location.pathname}${location.search}`,
+                                    },
+                                });
+                            }}
+                            className="
+                                md:text-base text-[clamp(12px,2.085vw,16px)]
+                                w-full py-3 mt-3 bg-gray-200 rounded-md"
+                        >
+                            로그인 후 구매하기
+                        </button>
+                    </div>
 
                     <button
                         onClick={() => setShowGuestChoice(false)}

@@ -137,7 +137,6 @@ const OrderForm = () => {
                     const defaultAddr = res.data.find(addr => addr.isDefault);
                     if (defaultAddr) {
                         setSelectedAddress(defaultAddr);
-                        setRecipient(defaultAddr.recipient || '');
                         setPostcode(defaultAddr.postcode || '');
                         setAddress(defaultAddr.address || '');
                         setDetailAddress(defaultAddr.detailAddress || '');
@@ -157,7 +156,7 @@ const OrderForm = () => {
     const [postcode, setPostcode] = useState('');
     const [address, setAddress] = useState('');
     const [detailAddress, setDetailAddress] = useState('');
-    const [isSameAsOrderer, setIsSameAsOrderer] = useState(false);
+    const [isSameAsOrderer, setIsSameAsOrderer] = useState(true);
 
     useEffect(() => {
         if (!selectedAddress) return;

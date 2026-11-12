@@ -1478,34 +1478,55 @@ const None_Custom_Detail = () => {
                     비회원으로 구매하기
                 </button>
 
-                <button
-                    onClick={() => {
-                        const pendingOrderItems = customItems.map((it) => ({
-                            pid: parseInt(pid),
-                            title: product.title,
-                            author: product.author,
-                            price: it.price,
-                            thumbnail: it.imageSrc,
-                            size: toInchSize(it.width, it.height),
-                            category: `${category}`,
-                            quantity: it.quantity ?? 1,
-                            cid: null,
-                            finishType: it.finishType ?? 'glossy',
-                        }));
+                <div className="relative">
+                    {/* 말풍선 */}
+                    <div className="
+                        absolute top-[5px] right-2
+                        bg-[#E6C39A] text-white
+                        text-[11px] px-2 py-1
+                        rounded-full
+                        font-semibold
+                        shadow-md
+                        animate-bounceX
+                        whitespace-nowrap
+                    ">
+                        적립금 5,000원
 
-                        navigate('/userLogin', {
-                            state: {
-                                pendingOrderItems,
-                                returnTo: `${location.pathname}${location.search}`,
-                            },
-                        });
-                    }}
-                    className="
-                        md:text-base text-[clamp(12px,2.085vw,16px)]
-                        w-full py-3 mt-3 bg-gray-200 rounded-md"
-                >
-                    로그인 후 구매하기
-                </button>
+                        <div className="
+                            absolute -bottom-1 right-4
+                            w-2 h-2 bg-[#E6C39A]
+                            rotate-45
+                        "></div>
+                    </div>
+                    <button
+                        onClick={() => {
+                            const pendingOrderItems = customItems.map((it) => ({
+                                pid: parseInt(pid),
+                                title: product.title,
+                                author: product.author,
+                                price: it.price,
+                                thumbnail: it.imageSrc,
+                                size: toInchSize(it.width, it.height),
+                                category: `${category}`,
+                                quantity: it.quantity ?? 1,
+                                cid: null,
+                                finishType: it.finishType ?? 'glossy',
+                            }));
+
+                            navigate('/userLogin', {
+                                state: {
+                                    pendingOrderItems,
+                                    returnTo: `${location.pathname}${location.search}`,
+                                },
+                            });
+                        }}
+                        className="
+                            md:text-base text-[clamp(12px,2.085vw,16px)]
+                            w-full py-3 mt-3 bg-gray-200 rounded-md"
+                    >
+                        로그인 후 구매하기
+                    </button>
+                </div>
 
                 <button
                     onClick={() => setShowGuestChoice(false)}
