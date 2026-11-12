@@ -18,7 +18,7 @@ const Order_Status = () => {
     const [pendingAuthorCount, setPendingAuthorCount] = useState(0);
 
     // 검색. keywordInput은 입력값, keyword는 조회에 쓰는 확정값
-    const [keywordInput, setKeywordInput] = useState(() => searchParams.get('keyword') || '');
+    const [keywordInput, setKeywordInput] = useState(() => searchParams.get('keyword') || '')
     const [keyword, setKeyword] = useState(() => searchParams.get('keyword') || '');
     const keywordTimerRef = useRef(null);
     const keywordFocusedRef = useRef(false);
@@ -35,7 +35,7 @@ const Order_Status = () => {
         return () => {
             if (keywordTimerRef.current) clearTimeout(keywordTimerRef.current);
         };
-    }, []);
+    }, [])
 
     // 날짜 검색
     const [startDate, setStartDate] = useState(() => searchParams.get('startDate') || '');
@@ -71,12 +71,14 @@ const Order_Status = () => {
 
     const STATUS_GROUPS = {
         전체: [],
-        처리필요: ['입금대기', '취소요청', '교환신청', '반품신청'],
-        진행중: ['결제완료', '배송준비중', '배송중', '교환회수완료', '교환배송중', '반품회수완료', '환불처리중'],
+        진행중: [
+                '입금대기', '취소요청', '교환신청', '반품신청',
+                '결제완료', '배송준비중', '배송중', 
+                '교환회수완료', '교환배송중', '반품회수완료', '환불처리중'],
         완료: ['배송완료', '취소', '교환완료', '환불완료'],
     };
 
-    const [workFilter, setWorkFilter] = useState('전체');
+    const [workFilter, setWorkFilter] = useState('진행중');
 
     // 목록 불러오기
     useEffect(() => {
@@ -180,8 +182,7 @@ const Order_Status = () => {
         if (status === '결제완료') return 'text-sky-600'
         if (status === '배송준비중') return 'text-indigo-700'
         if (status === '배송중' || status === '교환배송중') return 'text-blue-600'
-        
-        if (STATUS_GROUPS.처리필요.includes(status)) return 'text-yellow-600';
+
         if (STATUS_GROUPS.진행중.includes(status)) return 'text-blue-600';
         if (STATUS_GROUPS.완료.includes(status)) return 'text-green-600';
         return 'text-gray-600';
@@ -403,7 +404,7 @@ const Order_Status = () => {
                         placeholder="주문번호, 회원ID, 주문자명, 상품명"
                         className="w-[220px] h-[40px] border text-sm px-3"
                         value={keywordInput}
-                        onFocus={() => { keywordFocusedRef.current = true; }}
+                        onFocus={() => {keywordFocusedRef.current = true; }}
                         onBlur={() => {
                             keywordFocusedRef.current = false;
                             commitKeyword(keywordInput);
@@ -415,8 +416,8 @@ const Order_Status = () => {
                             keywordTimerRef.current = setTimeout(() => {
                                 keywordTimerRef.current = null;
                                 setKeyword(value);
-                            }, 400);
-                        }}
+                            }, 300);
+                        }} 
                     />
                 </div>
             </div>
