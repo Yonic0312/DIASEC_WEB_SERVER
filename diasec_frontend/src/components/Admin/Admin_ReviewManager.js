@@ -6,6 +6,8 @@ const Admin_ReviewManager = () => {
     const API = process.env.REACT_APP_API_BASE;
     const [reviews, setReviews] = useState([]);
     const [searchKeyword, setSearchKeyword] = useState('');
+    const [selectedRating, setSelectedRating] = useState('');
+    const [showHiddenOnly, setShowHiddenOnly] = useState(false);
     const [startDate, setStartDate] = useState('');
     const [endDate, setEndDate] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
@@ -26,7 +28,13 @@ const Admin_ReviewManager = () => {
         const dateMatch = 
             (!startDate || review.createdAt >= startDate) && 
             (!endDate || review.createdAt <= endDate);
-        return keywordMatch && dateMatch;
+
+        const ratingMatch = selectedRating
+            ? Number(review.rating) === Number(selectedRating)
+            : true;
+
+        const hiddenMatch = showHiddenOnly ? !!review.hidden : true;
+        return keywordMatch && dateMatch && ratingMatch && hiddenMatch;
     });
 
     // 삭제
@@ -76,6 +84,33 @@ const Admin_ReviewManager = () => {
 
             {/* 필터 UI */}
             <div className="flex flex-wrap gap-4 mb-6">
+                <button
+                    type="button"
+                    onClick={() => {
+                        setShowHiddenOnly((prev) => !prev);
+                        setCurrentPage(1);
+                    }}
+                    className={`border p-2 text-sm ${
+                        showHiddenOnly ? 'bg-red-600 text-white border-red-600' : 'bg-white text-gray-700'
+                    }`}
+                >
+                    숨김만 표시
+                </button>
+                <select
+                    value={selectedRating}
+                    onChange={(e) => {
+                        setSelectedRating(e.target.value);
+                        setCurrentPage(1);
+                    }}
+                    className="border p-2 text-sm"
+                >
+                    <option value="">전체 별점</option>
+                    <option value="5">5점</option>
+                    <option value="4">4점</option>
+                    <option value="3">3점</option>
+                    <option value="2">2점</option>
+                    <option value="1">1점</option>
+                </select>
                 <input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} className="border p-2 text-sm" /> 
                 <span>~</span>
                 <input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} className="border p-2 text-sm" />
@@ -87,8 +122,8 @@ const Admin_ReviewManager = () => {
             <table className="table-fixed w-full text-sm bg-white shadow-sm rounded-md overflow-hidden">
                 <div className="grid grid-cols-2 gap-6">
                     {currentItems.map((review, index) => (
-                        <div 
-                            key={review.rid} 
+                        <div
+                            key={review.rid}
                             className={`bg-white rounded-lg shadow-md p-4 flex flex-col justify-between ${
                                 review.hidden ? 'opacity-70 ring-1 ring-red-200' : ''
                             }`}
@@ -105,7 +140,9 @@ const Admin_ReviewManager = () => {
                                 <div className="font-bold text-lg text-gray-800 truncate">{review.title}</div>
                                 <div className="text-sm text-gray-500">작성자: <span className="font-medium">{review.id}</span></div>
                                 <div className="text-sm text-yellow-600 mt-1">평점: {review.rating}점</div>
-                                <div className="text-sm text-gray-600 mt-2 line-clamp-3">{review.content}</div>
+                                <div className="text-sm text-gray-600 mt-2 leading-5 max-h-[5rem] overflow-y-auto whitespace-pre-wrap break-words">
+                                    {review.content}
+                                </div>
                             </div>
 
                             {review.images?.length > 0 && (
@@ -127,8 +164,8 @@ const Admin_ReviewManager = () => {
                                         {review.hidden ? '표시' : '숨김'}
                                     </button>
                                     <button
-                                        type="button" 
-                                        onClick={() => handleDelete(review.rid)} 
+                                        type="button"
+                                        onClick={() => handleDelete(review.rid)}
                                         className="text-red-500 hover:underline"
                                     >
                                         삭제

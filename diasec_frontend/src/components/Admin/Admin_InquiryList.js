@@ -1,7 +1,8 @@
-import { useEffect, useState, useContext } from 'react';
+import { useCallback ,useEffect, useState, useContext } from 'react';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import { MemberContext } from '../../context/MemberContext';
+import { refreshAdminCounts} from '../../utils/adminCounts';
 
 const Admin_InquiryList = () => {
     const API = process.env.REACT_APP_API_BASE;
@@ -20,11 +21,15 @@ const Admin_InquiryList = () => {
         'etc' : '기타 문의'
     }
 
-    useEffect(() => {
+    const fetchInquiries = useCallback(() => {
         axios.get(`${API}/inquiry/admin/list`)
             .then(res => setInquiries(res.data))
             .catch(err => console.error('불러오기 실패', err));
-    }, []);
+    }, [API]);
+
+    useEffect(() => {
+        fetchInquiries();
+    }, [fetchInquiries]);
 
     const toggle = (index) => {
         setOpenIndex(openIndex === index ? null : index);
@@ -44,7 +49,9 @@ const Admin_InquiryList = () => {
                 answer: replyContent
             });
             toast.success('답변이 등록되었습니다.');
-            window.location.reload();
+            setReplyContent('');
+            fetchInquiries();
+            refreshAdminCounts();
         } catch (err) {
             console.error('답변 실패', err);
             toast.error('답변 등록에 실패했습니다.');
@@ -83,6 +90,11 @@ const Admin_InquiryList = () => {
     });
 
     const totalPages = Math.max(1, Math.ceil(filteredInquiries.length / inquiriesPerPage));
+
+    useEffect(() => {
+        if (currentPage > totalPages) setCurrentPage(totalPages);
+    }, [currentPage, totalPages]);
+
     const currentInquiries = filteredInquiries.slice(
         (currentPage - 1) * inquiriesPerPage,
         currentPage * inquiriesPerPage
@@ -312,7 +324,8 @@ const Admin_InquiryList = () => {
                                                             });
                                                             toast.success('답변이 수정되었습니다.');
                                                             setEditingIndex(null);
-                                                            window.location.reload();
+                                                            fetchInquiries();
+                                                            refreshAdminCounts();
                                                         } catch (err) {
                                                             console.error('답변 수정 실패', err);
                                                             toast.error('수정에 실패했습니다.');

@@ -156,7 +156,7 @@ const PRINT_ORDER_STYLES = `
             display: block;
             position: fixed;
             bottom: 0.5mm;
-            left: 0.5mm;
+            right: 0.5mm;
             margin-top: 0;
             padding-top: 0;
         }
@@ -641,7 +641,7 @@ const Order_Detail = () => {
                     display: block !important;
                     position: absolute;
                     bottom: 0;
-                    left: 0;
+                    right: 0;
                 }
 
                 .print-title {
