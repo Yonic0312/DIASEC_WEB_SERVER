@@ -1,18 +1,28 @@
 import { useEffect, useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
+import { ADMIN_COUNTS_REFRESH } from '../../utils/adminCounts';
 import axios from 'axios';
 
 const Admin_Sidebar = () => {
     const API = process.env.REACT_APP_API_BASE;
     const navigate = useNavigate();
+    const location = useLocation();
+    const currentStatus = new URLSearchParams(location.search).get('status');
+
+    const menuClass = (active) => 
+        active
+            ? 'text-sm font-semibold text-black opacity-100'
+            : 'text-sm opacity-65';
+
+    const isOrderMenu =
+        location.pathname === '/admin/order_Status' ||
+        location.pathname.startsWith('/admin/order_Detail');
+
+    const isPartnerMenu =
+        location.pathname === '/admin_BizPartnerList' ||
+        location.pathname.startsWith('/admin_biz-partner/');
 
     const [partnerCount, setPartnerCount] = useState(0);
-
-    useEffect(() => {
-        axios.get(`${API}/admin/biz-partner/count`, { withCredentials: true })
-            .then((res) => setPartnerCount(Number(res.data) || 0))
-            .catch(() => {});
-    }, [API]);
 
     const [inquiryUnanswered, setInquiryUnanswered] = useState(0);
     const [bizConsultCount, setBizConsultCount] = useState(0);
@@ -58,39 +68,39 @@ const Admin_Sidebar = () => {
         [ORDER_STATUS_LIST, EXCLUDED_FROM_SIDEBAR_TOTAL, orderCounts]
     );
 
-    // 주문 상태별 개수 불러오기
+    // 첫 진입과 상태 변경 신호마다 사이드바 건수를 다시 불러온다
     useEffect(() => {
-        axios.get(`${API}/order/admin/count-by-status`, { withCredentials: true })
-        .then(res => {
-            const map = {};
-            (res.data || []).forEach(r => {
-                const status = r.status;
-                const cnt = Number(r.cnt || 0);
-                map[status] = cnt;
-            });
-            setOrderCounts(map);
-        })
-        .catch(err => console.error("주문 상태 불러오기 실패", err));
-    }, [API])
+        const loadCounts = () => {
+            axios.get(`${API}/admin/biz-partner/count`, { withCredentials: true })
+                .then((res) => setPartnerCount(Number(res.data) || 0))
+                .catch(() => {});
 
-    useEffect(() => {
-        axios.get(`${API}/inquiry/unanswered`)
-        .then(res => {
-            setInquiryUnanswered(res.data);
-        })
-        .catch(err => console.error('inquiry/unanswered 불러오기 실패 : ' + err));
-    }, [API]);
+            axios.get(`${API}/order/admin/count-by-status`, {withCredentials: true})
+                .then((res) => {
+                    const map = {};
+                    (res.data || []).forEach((r) => {
+                        map[r.status] = Number(r.cnt || 0);
+                    });
+                    setOrderCounts(map);
+                })
+                .catch((err) => console.error('주문 상태 불러오기 실패', err));
+            
+            axios.get(`${API}/inquiry/unanswered`)
+                .then((res) => setInquiryUnanswered(res.data))
+                .catch((err) => console.error('inquiry/unanswered 불러오기 실패', err));
 
-    useEffect(() => {
-        axios.get(`${API}/admin/biz-consult/count`, { withCredentials: true })
-            .then((res) => setBizConsultCount(Number(res.data) || 0))
-            .catch((err) => console.error('기업컨설팅 건수 불러오기 실패', err));
-    }, [API]);
+            axios.get(`${API}/admin/biz-consult/count`, { withCredentials: true })
+                .then((res) => setBizConsultCount(Number(res.data) || 0))
+                .catch((err) => console.error('기업컨설팅 건수 불러오기 실패', err));
 
-    useEffect(() => {
-        axios.get(`${API}/admin/retouch/count`, { withCredentials: true })
-            .then((res) => setRetouchPendingCount(Number(res.data) || 0))
-            .catch((err) => console.error('보정 요청 건수 불러오기 실패', err));
+            axios.get(`${API}/admin/retouch/count`, { withCredentials: true })
+                .then((res) => setRetouchPendingCount(Number(res.data) || 0))
+                .catch((err) => console.error('보정 요청 건수 불러오기 실패', err));
+        };
+
+        loadCounts();
+        window.addEventListener(ADMIN_COUNTS_REFRESH, loadCounts);
+        return () => window.removeEventListener(ADMIN_COUNTS_REFRESH, loadCounts);
     }, [API]);
 
     return (
@@ -106,14 +116,14 @@ const Admin_Sidebar = () => {
             </div>
 
             <span className="text-lg font-bold">상품 관리</span>
-            <button className="text-sm opacity-65" onClick={() => navigate('/admin/insert_Product')}>상품 등록하기</button>
-            <button className="text-sm opacity-65" onClick={() => navigate('/admin_ProductManager')}>상품 수정</button>
-            <button className="text-sm opacity-65" onClick={() => navigate('/admin_CollectionManager')}>컬렉션 관리</button>
+            <button className={menuClass(location.pathname === '/admin/insert_Product')} onClick={() => navigate('/admin/insert_Product')}>상품 등록하기</button>
+            <button className={menuClass(location.pathname === '/admin_ProductManager')} onClick={() => navigate('/admin_ProductManager')}>상품 수정</button>
+            <button className={menuClass(location.pathname === '/admin_CollectionManager')} onClick={() => navigate('/admin_CollectionManager')}>컬렉션 관리</button>
             
             <span className="text-lg font-bold mt-10">주문 관리</span>
             
             <div className="w-full">
-                <button className="text-sm opacity-65" onClick={() => navigate('/admin/order_Status')}>
+                <button className={menuClass(isOrderMenu)} onClick={() => navigate('/admin/order_Status')}>
                     주문 상태 변경 &nbsp;
                 </button>
                 <button type="button" className="text-sm opacity-65" onClick={() => setOpenOrderStatus(v => !v)}>
@@ -126,7 +136,11 @@ const Admin_Sidebar = () => {
                             <button
                                 key={status}
                                 type="button"
-                                className="w-full text-[13px] opacity-70 flex items-center justify-between hover:opacity-100"
+                                className={`w-full text-[13px] flex items-center justify-between hover:opacity-100 ${
+                                    location.pathname === '/admin/order_Status' && currentStatus === status
+                                        ? 'font-semibold text-black opacity-100'
+                                        : 'opacity-70'
+                                }`}
                                 onClick={() => navigate(`/admin/order_Status?status=${encodeURIComponent(status)}`)}
                             >
                                 <span>{status}</span>
@@ -140,31 +154,31 @@ const Admin_Sidebar = () => {
 
                 
             </div>
-            <button className="text-sm opacity-65"
+            <button className={menuClass(location.pathname === '/admin_AdminRetouchList')}
                 onClick={() => navigate(`/admin_AdminRetouchList`)}
             >
                 보정 요청사항({retouchPendingCount}건)
             </button>
 
             <span className="text-lg font-bold mt-10">정보 관리</span>
-            <button className="text-sm opacity-65" onClick={() => navigate('/admin_MemberManager')}>회원 정보 관리</button>
-            <button className="text-sm opacity-65" onClick={() => navigate('/admin_MemberSalesRanking')}>회원 매출 순위</button>
-            <button className="text-sm opacity-65" onClick={() => navigate('/admin_PageView')}>페이지 접속 통계</button>
+            <button className={menuClass(location.pathname === '/admin_MemberManager')} onClick={() => navigate('/admin_MemberManager')}>회원 정보 관리</button>
+            <button className={menuClass(location.pathname === '/admin_MemberSalesRanking')} onClick={() => navigate('/admin_MemberSalesRanking')}>회원 매출 순위</button>
+            <button className={menuClass(location.pathname === '/admin_PageView')} onClick={() => navigate('/admin_PageView')}>페이지 접속 통계</button>
             {/* <button className="text-sm opacity-65" onClick={() => navigate('/admin_AuthorManager')}>작가 상태 관리({pendingAuthorCount}명 / {pendingWorkCount}건)</button> */}
 
             <span className="text-lg font-bold mt-10">문의 관리</span>
-            <button className="text-sm opacity-65" onClick={() => navigate('/admin_InquiryList')}>고객 문의 답변하기({inquiryUnanswered}건)</button>
+            <button className={menuClass(location.pathname === '/admin_InquiryList')} onClick={() => navigate('/admin_InquiryList')}>고객 문의 답변하기({inquiryUnanswered}건)</button>
             {/* <button className="text-sm opacity-65" onClick={() => navigate('/admin_BizConsultList')}>기업컨설팅 관리({bizConsultCount}건)</button> */}
-            <button className="text-sm opacity-65" onClick={() => navigate('/admin_BizPartnerList')}>업무제휴 관리({partnerCount}건)</button>
+            <button className={menuClass(isPartnerMenu)} onClick={() => navigate('/admin_BizPartnerList')}>업무제휴 관리({partnerCount}건)</button>
 
             <span className="text-lg font-bold mt-10">콘텐츠 관리</span>
-            <button className="text-sm opacity-65" onClick={() => navigate('/admin_NoticeManager')}>공지사항 관리</button>
-            <button className="text-sm opacity-65" onClick={() => navigate('/admin_FAQManager')}>FAQ 관리</button>
-            <button className="text-sm opacity-65" onClick={() => navigate('/admin_ReviewManager')}>후기 관리</button>
-            <button className="text-sm opacity-65" onClick={() => navigate('/admin_EventManager')}>이벤트 관리</button>
-            <button className="text-sm opacity-65" onClick={() => navigate('/admin_SiteDiscount')}>사이트 할인율 관리</button>
-            <button className="text-sm opacity-65" onClick={() => navigate('/admin_SoldFrames')}>판매 액자 수</button>
-            <button className="text-sm opacity-65" onClick={() => navigate('/admin_MainBlog')}>메인 홈 블로그 관리</button>
+            <button className={menuClass(location.pathname === '/admin_NoticeManager')} onClick={() => navigate('/admin_NoticeManager')}>공지사항 관리</button>
+            <button className={menuClass(location.pathname === '/admin_FAQManager')} onClick={() => navigate('/admin_FAQManager')}>FAQ 관리</button>
+            <button className={menuClass(location.pathname === '/admin_ReviewManager')} onClick={() => navigate('/admin_ReviewManager')}>후기 관리</button>
+            <button className={menuClass(location.pathname === '/admin_EventManager')} onClick={() => navigate('/admin_EventManager')}>이벤트 관리</button>
+            <button className={menuClass(location.pathname === '/admin_SiteDiscount')} onClick={() => navigate('/admin_SiteDiscount')}>사이트 할인율 관리</button>
+            <button className={menuClass(location.pathname === '/admin_SoldFrames')} onClick={() => navigate('/admin_SoldFrames')}>판매 액자 수</button>
+            <button className={menuClass(location.pathname === '/admin_MainBlog')} onClick={() => navigate('/admin_MainBlog')}>메인 홈 블로그 관리</button>
         </div>
     )
 }

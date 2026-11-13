@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
+import { refreshAdminCounts } from "../../utils/adminCounts";
 
 const AdminRetouchList = () => {
     const API = process.env.REACT_APP_API_BASE;
@@ -107,6 +108,7 @@ const AdminRetouchList = () => {
                 toast.success("프리뷰 업로드 완료 → 고객 승인대기로 전환");
             }
             await fetchList();
+            refreshAdminCounts();
         } catch (err) {
             console.error(err);
             toast.error(err.message || "업로드 오류");
@@ -331,6 +333,7 @@ const AdminRetouchList = () => {
                                                 await approveRetouch(row.itemId);
                                                 toast.success("승인 처리 완료");
                                                 await fetchList();
+                                                refreshAdminCounts();
                                             } catch (e) {
                                                 console.error(e);
                                                 toast.error(e.message || "승인 오류");
@@ -369,6 +372,7 @@ const AdminRetouchList = () => {
                                                 await deletePreview(row.itemId);
                                                 toast.success("프리뷰 삭제 완료");
                                                 await fetchList();
+                                                refreshAdminCounts();
                                             } catch (e) {
                                                 console.error(e);
                                                 toast.error(e.message || "삭제 오류");
@@ -394,6 +398,7 @@ const AdminRetouchList = () => {
                                                 await clearRetouchRequest(row.itemId);
                                                 toast.success("보정 요청 글 삭제 완료");
                                                 await fetchList();
+                                                refreshAdminCounts();
                                             } catch (e) {
                                                 console.error(e);
                                                 toast.error(e.message || "삭제 오류");

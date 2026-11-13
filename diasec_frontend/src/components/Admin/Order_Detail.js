@@ -130,6 +130,19 @@ const PRINT_ORDER_STYLES = `
         -webkit-print-color-adjust: exact;
         print-color-adjust: exact;
     }
+    .print-wrap .print-delivery-message {
+        margin-top: 10px;
+        font-size: 22px;
+        font-weight: 800;
+        color: #111 !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+    .print-wrap .print-delivery-message .print-note-label {
+        font-size: 22px;
+        font-weight: 800;
+        color: #2563eb !important;
+    }
     @media print {
         @page {
             size: A4;
@@ -193,7 +206,7 @@ const Order_Detail = () => {
     const [order, setOrder] = useState(null);
     const [siblingItemIds, setSiblingItemIds] = useState(siblingItemIdsFromState);
 
-    // 사이즈 수정 (화면 cm 입력 -> DB 인치 저장)
+    // 사이즈 수정 (화면 cm 입력 → DB 인치 저장)
     const [showSizeModal, setShowSizeModal] = useState(false);
     const [sizeWidthCm, setSizeWidthCm] = useState('');
     const [sizeHeightCm, setSizeHeightCm] = useState('');
@@ -211,7 +224,6 @@ const Order_Detail = () => {
 
     // 비회원 비밀번호 수정
     const [showGuestPwModal, setShowGuestPwModal] = useState(false);
-    const [showCancelAccount, setShowCancelAccount] = useState(false);
     const [newGuestPw, setNewGuestPw] = useState('');
     const [confirmGuestPw, setConfirmGuestPw] = useState('');
 
@@ -275,19 +287,6 @@ const Order_Detail = () => {
         const item = order?.items?.[0];
         if (!item) return;
 
-        const needsRefundAccount = newStatus == '취소'
-            && order.paymentMethod === '가상계좌'
-            && ['결제완료', '취소요청'].includes(item.orderStatus)
-            && (!item.bankName || !item.accountNumber || !item.accountHolder);
-        
-        if (needsRefundAccount) {
-            setBankName(item.bankName || '');
-            setAccountNumber(item.accountNumber || '');
-            setAccountHolder(item.accountHolder || '');
-            setShowCancelAccount(true);
-            return;
-        }
-
         // 1) 상태 변경 confirm
         const ok = window.confirm(`주문 상태를 "${newStatus}"(으)로 변경할까요?`);
         if (!ok) return;
@@ -326,7 +325,7 @@ const Order_Detail = () => {
         const data = await res.json();
 
         if (!data.success) {
-            toast.error(data.message || '상태 변경 실패');
+            toast.error("상태 변경 실패");
             return;
         }
 
@@ -346,59 +345,6 @@ const Order_Detail = () => {
         } catch (err) {
             console.error(err.message || "처리 중 오류") ;
             reload();
-        }
-    };
-
-    const submitAdminCancelAccount = async () => {
-        if (!bankName.trim() || !accountNumber.trim() || !accountHolder.trim()) {
-            toast.error('환불 계좌 정보를 모두 입력해주세요.');
-            return;
-        }
-        const item = order.items[0];
-        try {
-            const saveRes = await fetch(`${API}/admin/order/update-detail`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                credentials: 'include',
-                body: JSON.stringify({
-                    itemId: item.itemId,
-                    trackingCompany: item.trackingCompany || '',
-                    trackingNumber: item.trackingNumber || '',
-                    bankName: bankName.trim(),
-                    accountNumber: accountNumber.trim(),
-                    accountHolder: accountHolder.trim(),
-                    applyToSameOrder: false
-                })
-            });
-            const saved = await saveRes.json();
-            if (!saved.success) {
-                toast.error(saved.message || '환불 계좌 저장에 실패했습니다.');
-                return;
-            }
-    
-            const res = await fetch(`${API}/admin/order/update-status`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                credentials: 'include',
-                body: JSON.stringify({
-                    itemId: item.itemId,
-                    orderStatus: '취소',
-                    id: order.id,
-                    usedCredit: order.usedCredit,
-                    oid: order.oid
-                })
-            });
-            const data = await res.json();
-            if (!data.success) {
-                toast.error(data.message || '상태 변경 실패');
-                return;
-            }
-            setShowCancelAccount(false);
-            toast.success('상태가 변경되었습니다.');
-            reload();
-        } catch (err) {
-            console.error(err);
-            toast.error('서버 오류');
         }
     };
     
@@ -792,7 +738,7 @@ const Order_Detail = () => {
                 <span className="print-size-c">C: {cW} x {cH}</span>
                 {'  |  '}
                 <span className="print-size-p">
-                    {isSmallFrame ? 'P: 후면 거치대 2개' : `P: ${pW} x ${pH}`}
+                    {isSmallFrame ? 'P: 후면 거치대 2개' : `P: ${pW} x ${pH}`} 
                 </span>
                 {'  |  '}
                 <span className="print-size-b">B: {bW} x {bH}</span>
@@ -813,8 +759,16 @@ const Order_Detail = () => {
         };
     };
 
+    const boxSize = (() => {
+        const { wCm, hCm } = parseSizeToCm(order.items[0]?.size);
+        const w = Number(wCm);
+        const h = Number(hCm);
+        if (!w || !h) return null;
+        return { bW: w + 5, bH: h + 5 };
+    })();
+
     const openSizeModal = () => {
-        const { wCm, hCm } = parseSizeToCm(order.items?.[0]?.size);
+        const { wCm, hCm } = parseSizeToCm(order?.items?.[0]?.size);
         setSizeWidthCm(wCm);
         setSizeHeightCm(hCm);
         setShowSizeModal(true);
@@ -852,7 +806,8 @@ const Order_Detail = () => {
             setShowSizeModal(false);
             reload();
         } catch (err) {
-            console.error('사이즈 저장 중 오류');
+            console.error(err);
+            toast.error('사이즈 저장 중 오류');
         } finally {
             setSizeSaving(false);
         }
@@ -1219,7 +1174,7 @@ const Order_Detail = () => {
 
                             <div className="print-size-line whitespace-pre flex flex-wrap items-center gap-2">
                                 <span className="print-label">사이즈:</span>
-                                {renderPrintSize(order.items[0].size, order.items[0].price)}
+                                {renderPrintSize(order.items[0].size)}
                                 <button
                                     type="button"
                                     className="no-print px-2 py-0.5 text-[11px] font-medium border rounded bg-gray-800 text-white hover:bg-gray-700"
@@ -1289,10 +1244,6 @@ const Order_Detail = () => {
                 {/* <h3 className="print-section-title font-semibold text-lg">배송지 정보</h3> */}
                 <div>
                     <span className="print-note-label">구매자 요청:</span> {order.buyerRequest}
-                </div>
-
-                <div>
-                    <span className="print-note-label">배송 메시지:</span> {order.deliveryMessage}
                 </div>
             </div>
                     
@@ -1690,6 +1641,20 @@ const Order_Detail = () => {
                     </button>
                 </div>
             </div>
+            
+            <br/><br/><br/><br/><br/>
+            <div>
+                <span className="print-note-label">발송자 : 디아섹코리아(010-4231-5879)</span>
+                &emsp;&emsp;&emsp;
+                {boxSize && (
+                    <span className="print-note-label">박스 규격 : {boxSize.bW} x {boxSize.bH}</span>
+                )}
+            </div>
+            <br/>
+            <hr className="border-dotted"/>
+            <div className="print-delivery-message">
+                <span className="print-note-label">배송 메시지:</span> {order.deliveryMessage}
+            </div>
 
             {/* 사이즈 수정 모달 */}
             {showSizeModal && (
@@ -1708,7 +1673,7 @@ const Order_Detail = () => {
                         <div className="grid grid-cols-2 gap-3 mb-3">
                             <label className="flex flex-col gap-1 text-sm">
                                 <span className="font-medium text-gray-700">가로 (cm)</span>
-                                <input 
+                                <input
                                     type="number"
                                     min="1"
                                     step="1"
@@ -1719,7 +1684,7 @@ const Order_Detail = () => {
                             </label>
                             <label className="flex flex-col gap-1 text-sm">
                                 <span className="font-medium text-gray-700">세로 (cm)</span>
-                                <input 
+                                <input
                                     type="number"
                                     min="1"
                                     step="1"
@@ -1732,7 +1697,7 @@ const Order_Detail = () => {
 
                         {Number(sizeWidthCm) > 0 && Number(sizeHeightCm) > 0 && (
                             <p className="text-xs text-gray-600 mb-4">
-                                저장 예정(인치): {' '}
+                                저장 예정(인치):{' '}
                                 <strong>
                                     {(Number(sizeWidthCm) / 2.54).toFixed(1)} X {(Number(sizeHeightCm) / 2.54).toFixed(1)}
                                 </strong>
@@ -1834,28 +1799,6 @@ const Order_Detail = () => {
                             className="absolute top-3 right-3 text-gray-400 hover:text-black">
                         ✕
                         </button>
-                    </div>
-                </div>
-            )}
-
-            {showCancelAccount && (
-                <div
-                    className="fixed inset-0 bg-black/50 z-[10000] flex items-center justify-center"
-                    onClick={() => setShowCancelAccount(false)}
-                >
-                    <div
-                        className="w-full max-w-lg bg-white rounded-2xl shadow-xl p-5"
-                        onClick={(e) => e.stopPropagation()}
-                    >
-                        <h3 className="text-lg font-bold text-gray-800">환불 계좌</h3>
-                        <p className="text-sm text-gray-500 mt-1">가상계좌 결제 취소에는 환불 계좌가 필요합니다.</p>
-                        <input className="w-full border px-3 py-2 rounded mt-4" placeholder="은행명" value={bankName} onChange={(e) => setBankName(e.target.value)} />
-                        <input className="w-full border px-3 py-2 rounded mt-2" placeholder="계좌번호" value={accountNumber} onChange={(e) => setAccountNumber(e.target.value)} />
-                        <input className="w-full border px-3 py-2 rounded mt-2" placeholder="예금주" value={accountHolder} onChange={(e) => setAccountHolder(e.target.value)} />
-                        <div className="mt-5 flex gap-2">
-                            <button type="button" className="flex-1 h-[46px] rounded-xl border" onClick={() => setShowCancelAccount(false)}>닫기</button>
-                            <button type="button" className="flex-1 h-[46px] rounded-xl bg-[#D0AC88] text-white" onClick={submitAdminCancelAccount}>취소 처리</button>
-                        </div>
                     </div>
                 </div>
             )}

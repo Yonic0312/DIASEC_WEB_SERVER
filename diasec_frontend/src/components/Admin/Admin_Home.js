@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import { MemberContext } from '../../context/MemberContext';
+import { ADMIN_COUNTS_REFRESH } from '../../utils/adminCounts';
 
 const ORDER_PREVIEW_STATUSES = [
     '입금대기',
@@ -339,9 +340,15 @@ const Admin_Home = () => {
                 if (!cancelled) setLoading(false);
             }
         };
+        const onRefresh = () => {
+            if (!cancelled) run();
+        };
+        
         run();
+        window.addEventListener(ADMIN_COUNTS_REFRESH, onRefresh);
         return () => {
             cancelled = true;
+            window.removeEventListener(ADMIN_COUNTS_REFRESH, onRefresh);
         };
     }, [API]);
 

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { toast } from 'react-toastify';
+import { refreshAdminCounts } from '../../utils/adminCounts';
 
 const Info = ({ label, value }) => (
     <div>
@@ -38,7 +39,7 @@ const Admin_BizPartnerView = () => {
         axios.post(`${API}/admin/biz-partner/approve`,
             { id: Number(id), adminReply: reply || DEFAULT_APPROVE },
             { withCredentials: true })
-            .then(() => { toast.success('승인 완료'); navigate('/admin_BizPartnerList'); })
+            .then(() => { toast.success('승인 완료'); refreshAdminCounts(); navigate('/admin_BizPartnerList'); })
             .catch(() => toast.error('승인 실패'));
     };
 
@@ -47,7 +48,7 @@ const Admin_BizPartnerView = () => {
         axios.post(`${API}/admin/biz-partner/reject`,
             { id: Number(id), adminReply: reply || DEFAULT_REJECT },
             { withCredentials: true })
-            .then(() => { toast.success('미승인 처리 완료'); navigate('/admin_BizPartnerList'); })
+            .then(() => { toast.success('미승인 처리 완료'); refreshAdminCounts(); navigate('/admin_BizPartnerList'); })
             .catch(() => toast.error('처리 실패'));  
     };
 
@@ -58,6 +59,7 @@ const Admin_BizPartnerView = () => {
             { withCredentials: true })
             .then(() => {
                 toast.success('삭제 완료 · 파트너 권한이 제거되었습니다.');
+                refreshAdminCounts();
                 navigate('/admin_BizPartnerList');
             })
             .catch((e) => toast.error(e.response?.data || '삭제 실패'));

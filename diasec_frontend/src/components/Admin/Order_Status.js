@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import { refreshAdminCounts } from '../../utils/adminCounts';
 
 const Order_Status = () => {
     const API = process.env.REACT_APP_API_BASE;
@@ -159,6 +160,8 @@ const Order_Status = () => {
         }
 
         toast.success('상태가 변경되었습니다.');
+        fetchOrders();
+        refreshAdminCounts();
 
         // 삭제/적립금 결과 토스트
         if (data.deletedClaimFiles > 0) {
