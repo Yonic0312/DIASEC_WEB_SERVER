@@ -63,11 +63,19 @@ const Biz_PartnerMain = () => {
                 <section className="space-y-3">
                     <h2 className="text-xl font-bold">파트너십 혜택</h2>
                     <ul className="list-disc pl-5 space-y-1 text-gray-700">
-                        <li>할인 혜택 : 가입승인이 완료후 홈페이지 결제시 10% 자동할인 적용되며 거래실적에 따라 최대 30%까지 할인율이 상향됩니다(홈페이지 기본할인과 추가합산 적용됩니다)</li>
-                        <li>거래실적 반영 : 결제완료된 주문금액은 실시간 누적되어 파트너 등급에 반영됩니다 (배송비, 설치비, 부가세, 별도 외주 비용 제외)</li>
-                        <li>거래조건 : 모든 주문 선결제 방식이며, 월말 정산 및 후불거래는 제공하지 않습니다</li>
-                        <li>등급조정 : 누적 거래금액, 결제이력, 주문규모 및 협업 지속성에 따라 파트너 등급이 조정될 수 있습니다.</li>
-                        <li>등급 및 할인 확인 : 마이페이지 > 업무제휴 현황에서 등급, 누적 거래실적 및 적용 할인율을 확인하실 수 있습니다.</li>
+                        <li>거래 실적에 따라 할인율이 최대 30%까지 상향됩니다.</li>
+                        <li>홈페이지 기본 할인과 등급 할인이 합산되어 적용됩니다. (최대 40%)</li>
+                        <li>대량주문 할인과 파트너 등급 할인은 중복되지 않으며, 둘 중 더 높은 할인율이 적용됩니다.</li>
+                    </ul>
+                </section>
+
+                <section className="space-y-3">
+                    <h2 className="text-xl font-bold">거래 안내</h2>
+                    <ul className="list-disc pl-5 space-y-1 text-gray-700">
+                        <li>결제 완료된 주문 금액은 실시간 누적되어 파트너 등급에 반영됩니다. (배송비, 설치비, 부가세, 별도 외주 비용 제외)</li>
+                        <li>모든 주문은 선결제이며, 월말 정산 및 후불 거래는 제공하지 않습니다.</li>
+                        <li>누적 거래금액, 결제 이력, 주문 규모 및 협업 지속성에 따라 파트너 등급이 조정될 수 있습니다.</li>
+                        <li>등급, 누적 거래실적, 적용 할인율은 마이페이지 &gt; 업무제휴 현황에서 확인할 수 있습니다.</li>
                     </ul>
                 </section>
 
@@ -98,6 +106,9 @@ const Biz_PartnerMain = () => {
                         </table>
                     </div>
                     <div className="text-xs text-gray-500 space-y-1">
+                        <p>
+                            ※ 대량주문 할인과 파트너 등급 할인은 중복되지 않으며, <strong className="text-gray-600">더 높은 할인율</strong>이 적용됩니다.
+                        </p>
                         <p>
                             ※ 파트너 할인은 홈페이지 기본 할인에 <strong className="text-gray-600">등급별 추가 할인</strong>이
                             합산되어 주문 시 자동 적용됩니다.

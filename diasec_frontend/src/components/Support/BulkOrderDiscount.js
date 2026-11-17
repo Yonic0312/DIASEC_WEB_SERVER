@@ -80,19 +80,25 @@ const BulkOrderDiscount = () => {
                 <section className="rounded-xl border border-gray-200 bg-gray-50 px-5 py-6 space-y-4 text-sm md:text-base leading-relaxed">
                     <div className="space-y-1">
                         <p className="text-gray-700">
-                            - 이미지 파일과 규격을 이메일로 보내주시면 견적서를 보내드립니다.
+                            - 사이트 기본 할인과 대량주문 할인을 합쳐 최대 40%까지 적용됩니다.
                         </p>
                         <p className="text-gray-700">
-                            - 납기일은 제품 사이즈와 수량에 따라 5일에서 10일 정도 소요됩니다.
+                            - 업무제휴 할인과는 중복되지 않으며, 업무제휴와 대량주문 중 더 높은 할인이 적용됩니다.
                         </p>
                         <p className="text-gray-700">
-                            - 납품은 화물 무료배송으로 진행되오며 도서산간 제주도는 제외입니다.
+                            - 납기는 제품 사이즈와 수량에 따라 5~10일 정도 소요됩니다.
                         </p>
                         <p className="text-gray-700">
-                            - 사업자 등록증을 보내주시면, 입금 확인 후 세금계산서를 발급해 드립니다.
+                            - 납품은 화물 무료배송이며, 제주 및 도서산간 지역은 제외됩니다.
                         </p>
                         <p className="text-gray-700">
-                            - 결제는 무통장입금으로만 가능합니다
+                            - 사이트 외 결제는 무통장 입금만 가능합니다.
+                        </p>
+                        <p className="text-gray-700">
+                            - 이미지 파일과 규격을 이메일로 보내 주시면 견적서를 보내 드립니다.
+                        </p>
+                        <p className="text-gray-700">
+                            - 사업자 등록증을 보내 주시면 입금 확인 후 세금계산서를 발행해 드립니다.
                         </p>
                     </div>
 
