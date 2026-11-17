@@ -52,6 +52,25 @@ const Admin_BizPartnerView = () => {
             .catch(() => toast.error('처리 실패'));  
     };
 
+    const handleDownloadLicense = async () => {
+        try {
+            const res = await axios.get(`${API}/admin/biz-partner/license/${id}`, {
+                withCredentials: true,
+                responseType: 'blob',
+            });
+            const url = window.URL.createObjectURL(res.data);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = post.businessLicenseName || '사업자등록증';
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            window.URL.revokeObjectURL(url);
+        } catch {
+            toast.error('사업자 등록증을 받지 못했습니다.');
+        }
+    };
+
     const handleDelete = () => {
         if (!window.confirm('이 신청글을 삭제할까요?\n해당 회원의 파트너 권한도 함께 제거됩니다.')) return;
         axios.post(`${API}/admin/biz-partner/delete`,
@@ -91,6 +110,20 @@ const Admin_BizPartnerView = () => {
                 <Info label="연락처" value={post.phone} />
                 <Info label="이메일" value={post.email} />
                 <Info label="업종" value={post.industry} />
+                <div>
+                    <div className="text-sm text-gray-600">사업자 등록증</div>
+                    {post.businessLicenseName ? (
+                        <button
+                            type="button"
+                            onClick={handleDownloadLicense}
+                            className="font-medium text-[#a67a3e] hover:underline"
+                        >
+                            {post.businessLicenseName} 다운로드
+                        </button>
+                    ) : (
+                        <div className="font-medium">-</div>
+                    )}
+                </div>
                 <Info label="상태" value={post.status} />
                 <Info label="신청일" value={post.createdAt?.substring(0, 10)} />
                 <Info label="누적 거래금액" value={`${Number(post.cumulativeAmount || 0).toLocaleString()}원`} />

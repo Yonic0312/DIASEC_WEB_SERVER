@@ -1,9 +1,16 @@
 package com.diasec.diasec_backend.controller;
 
+import java.io.File;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.diasec.diasec_backend.service.BizPartnerService;
+import com.diasec.diasec_backend.util.ImageUtil;
 import com.diasec.diasec_backend.vo.BizPartnerApplicationVo;
 
 import lombok.RequiredArgsConstructor;
@@ -25,6 +33,7 @@ import lombok.RequiredArgsConstructor;
 public class AdminBizPartnerController {
 
     private final BizPartnerService bizPartnerService;
+    private final ImageUtil imageUtil;
 
     private static final String DEFAULT_APPROVE_REPLY =
         "업무제휴가 승인되었습니다. 신청 시 동의하신 계약 내용에 따라 업무가 진행됩니다.";
@@ -46,6 +55,26 @@ public class AdminBizPartnerController {
     public ResponseEntity<?> view(@PathVariable Long id) {
         BizPartnerApplicationVo vo = bizPartnerService.getApplicationDetail(id);
         return vo == null ? ResponseEntity.notFound().build() : ResponseEntity.ok(vo);
+    }
+
+    // 사업자 등록증 다운로드 (관리자)
+    @GetMapping("/license/{id}")
+    public ResponseEntity<Resource> downloadLicense(@PathVariable Long id) {
+        BizPartnerApplicationVo vo = bizPartnerService.getApplicationDetail(id);
+        if (vo == null || vo.getBusinessLicensePath() == null || vo.getBusinessLicensePath().isBlank()) {
+            return ResponseEntity.notFound().build();
+        }
+        File file = imageUtil.resolveUploadFile(vo.getBusinessLicensePath());
+        if (file == null || !file.isFile()) {
+            return ResponseEntity.notFound().build();
+        }
+        String name = vo.getBusinessLicenseName();
+        if (name == null || name.isBlank()) name = file.getName();
+        String encoded = URLEncoder.encode(name, StandardCharsets.UTF_8).replace("+", "%20");
+        return ResponseEntity.ok()
+            .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename*=UTF-8''" + encoded)
+            .contentType(MediaType.APPLICATION_OCTET_STREAM)
+            .body(new FileSystemResource(file));
     }
 
     // 대기 건수 (사이드바 배지용)

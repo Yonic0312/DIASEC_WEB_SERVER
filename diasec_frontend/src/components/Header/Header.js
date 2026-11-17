@@ -231,11 +231,15 @@ const Header = () => {
                     <div className="
                             
                             lg:text-[14.5px] md:text-[clamp(11px,1.4173vw,14.5px)] text-[11px]
-                            xl:gap-4 lg:gap-3 md:gap-2
+                            md:gap-2
                             md:flex hidden
                             flex-row items-center
                         "
                     >
+                        <button type="button" onClick={() => setPriceQuoteOpen(true)}>
+                            가격알아보기
+                        </button>
+                        <span className="opacity-15">|</span>
                         {member ? (
                             <>  
                                 {/* 관리자 */}
@@ -270,7 +274,7 @@ const Header = () => {
                                 onClick={() => navigate('/supportMain')}
                                 className="
                                     inline-flex items-center gap-1
-                                    px-2 rounded-full h-full
+                                    rounded-full h-full
                                     transition
                                 "
                             >
@@ -292,13 +296,15 @@ const Header = () => {
                                 `}
                             >
                                 <div className="py-2 bg-white">
+                                    {/* 
                                     <button
                                         type="button"
                                         onClick={() => {setPriceQuoteOpen(true); setSupportOpen(false)}}
                                         className="w-full text-left px-4 py-2 text-[13px] text-gray-700 bg-white hover:bg-[#ecd2af]/35 transition"
                                     >
                                         가격 알아보기
-                                    </button>
+                                    </button> 
+                                    */}
                                     <button
                                         type="button"
                                         onClick={() => { navigate("/faqMain"); setSupportOpen(false); }}
@@ -354,7 +360,7 @@ const Header = () => {
                                     >
                                         업무제휴
                                     </button>
-                                </div>      
+                                </div> 
                             </div>
                         </div>
                     </div>
@@ -619,7 +625,7 @@ const Header = () => {
                     </div>
                 </div>
             </aside>
-            <PriceQuoteModal 
+            <PriceQuoteModal
                 open={priceQuoteOpen}
                 onClose={() => setPriceQuoteOpen(false)}
             />

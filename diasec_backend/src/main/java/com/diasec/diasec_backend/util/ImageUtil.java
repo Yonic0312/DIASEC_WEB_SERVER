@@ -83,6 +83,29 @@ public class ImageUtil {
         return "/uploads/" + folder + "/" + fileName;
     }
 
+    // 업로드 URL을 디스크 파일로 변환. 업로드 폴더 밖이면 null
+    public File resolveUploadFile(String url) {
+        try {
+            if (url == null || accessUrl == null || !url.startsWith(accessUrl)) {
+                return null;
+            }
+            String relative = url.substring(accessUrl.length());
+            if (relative.contains("..")) return null;
+            while (relative.startsWith("/") || relative.startsWith("\\")) {
+                relative = relative.substring(1);
+            }
+            
+            File base = new File(uploadDir).getCanonicalFile();
+            File file = new File(base, relative).getCanonicalFile();
+            String basePath = base.getPath();
+            if (!basePath.endsWith(File.separator)) basePath += File.separator;
+            if (!file.getPath().startsWith(basePath)) return null;
+            return file;
+        } catch (IOException e) {
+            return null;
+        }
+    }
+
     // 실제 이미지 삭제
     public void deleteImage(String url) {
         try {

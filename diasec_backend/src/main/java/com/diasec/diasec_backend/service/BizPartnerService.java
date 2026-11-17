@@ -7,6 +7,7 @@ import java.util.Map;
 import org.springframework.stereotype.Service;
 
 import com.diasec.diasec_backend.dao.BizPartnerMapper;
+import com.diasec.diasec_backend.util.ImageUtil;
 import com.diasec.diasec_backend.util.PartnerGradeUtil;
 import com.diasec.diasec_backend.vo.BizPartnerApplicationVo;
 
@@ -17,6 +18,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class BizPartnerService {
     private final BizPartnerMapper bizPartnerMapper;
+    private final ImageUtil imageUtil;
 
     public void apply(BizPartnerApplicationVo vo) {
         if (!vo.isContractAgreed()) throw new IllegalArgumentException("계약 동의 필수");
@@ -121,6 +123,9 @@ public class BizPartnerService {
 
         if (app.getMemberId() != null && !app.getMemberId().isBlank()) {
             bizPartnerMapper.clearMemberPartner(app.getMemberId());
+        }
+        if (app.getBusinessLicensePath() != null && !app.getBusinessLicensePath().isBlank()) {
+            imageUtil.deleteImage(app.getBusinessLicensePath());
         }
     }
 }

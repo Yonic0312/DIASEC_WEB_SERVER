@@ -54,6 +54,8 @@ public class SecurityConfig {
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
+                // 사업자등록증은 관리자만 접근
+                .requestMatchers("/uploads/BizPartner/**").hasRole("ADMIN")
                 // 1. 정적/업로드
                 .requestMatchers( "/uploads/**", "/css/**", "/js/**", "/img/**").permitAll()
 

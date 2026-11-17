@@ -19,6 +19,7 @@ const Biz_PartnerApply = () => {
         etcRequest: '',
         contractAgreed: false,
     });
+    const [licenseFile, setLicenseFile] = useState(null);
     const [submitting, setSubmitting] = useState(false);
 
     useEffect(() => {
@@ -52,19 +53,31 @@ const Biz_PartnerApply = () => {
         if (!phone || phone.length < 10) { toast.error('연락처를 입력해주세요.'); return; }
         if (!form.email) { toast.error('이메일을 입력해주세요.'); return; }
         if (!form.industry) { toast.error('업종을 선택해주세요.'); return; }
+        if (!licenseFile) { toast.error('사업자 등록증을 첨부해주세요.'); return; }
+        const licenseExt = licenseFile.name.split('.').pop()?.toLowerCase();
+        if (!['pdf', 'jpg', 'jpeg', 'png'].includes(licenseExt)) {
+            toast.error('사업자 등록증은 PDF, JPG, PNG만 가능합니다.');
+            return;
+        }
+        if (licenseFile.size > 10 * 1024 * 1024) {
+            toast.error('사업자 등록증은 10MB 이하만 가능합니다.');
+            return;
+        }
         if (!form.contractAgreed) { toast.error('제휴 계약서에 동의해주세요.'); return; }
+
+        const data = new FormData();
+        data.append('companyName', form.companyName);
+        data.append('managerNameTitle', form.managerNameTitle);
+        data.append('phone', phone);
+        data.append('email', form.email);
+        data.append('industry', form.industry);
+        data.append('etcRequest', form.etcRequest);
+        data.append('contractAgreed', 'true');
+        data.append('license', licenseFile);
 
         setSubmitting(true);
         try {
-            await axios.post(`${API}/biz-partner/apply`, {
-                companyName: form.companyName,
-                managerNameTitle: form.managerNameTitle,
-                phone,
-                email: form.email,
-                industry: form.industry,
-                etcRequest: form.etcRequest,
-                contractAgreed: true,
-            }, { withCredentials: true });
+            await axios.post(`${API}/biz-partner/apply`, data, { withCredentials: true });
 
             alert(
                 '신청이 접수되었습니다.\n' +
@@ -122,6 +135,20 @@ const Biz_PartnerApply = () => {
                         <label className="block text-sm mb-1">기타 요청사항</label>
                         <textarea name="etcRequest" value={form.etcRequest} onChange={handleChange}
                             rows={4} className="w-full border p-2 rounded" />
+                    </div>
+
+                    <div>
+                        <label className="block text-sm mb-1">사업자 등록증 <span className="text-red-500">*</span></label>
+                        <input
+                            type="file"
+                            accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png"
+                            onChange={(e) => setLicenseFile(e.target.files?.[0] || null)}
+                            className="w-full border p-2 rounded bg-white text-sm"
+                        />
+                        <p className="mt-1 text-xs text-gray-500">PDF, JPG, PNG / 10MB 이하</p>
+                        {licenseFile && (
+                            <p className="mt-1 text-sm text-gray-700">{licenseFile.name}</p>
+                        )}
                     </div>
 
                     {/* 계약서 미리보기 */}

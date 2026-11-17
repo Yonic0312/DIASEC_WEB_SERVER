@@ -5,10 +5,12 @@
     <insert id="insertApplication" parameterType="BizPartnerApplicationVo" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO biz_partner_application (
             member_id, company_name, manager_name_title, phone, email,
-            industry, etc_request, contract_agreed, status, created_at
+            industry, etc_request, contract_agreed, business_license_path, business_license_name,
+            status, created_at
         ) VALUES (
             #{memberId}, #{companyName}, #{managerNameTitle}, #{phone}, #{email},
-            #{industry}, #{etcRequest}, #{contractAgreed}, '대기', NOW()
+            #{industry}, #{etcRequest}, #{contractAgreed}, #{businessLicensePath}, #{businessLicenseName},
+            '대기', NOW()
         )
     </insert>
 
@@ -41,6 +43,8 @@
             a.id, a.member_id AS memberId, a.company_name AS companyName,
             a.manager_name_title AS managerNameTitle, a.phone, a.email,
             a.industry, a.etc_request AS etcRequest, a.contract_agreed AS contractAgreed,
+            a.business_license_path AS businessLicensePath,
+            a.business_license_name AS businessLicenseName,
             a.status, a.admin_reply AS adminReply,
             a.created_at AS createdAt, a.reviewed_at AS reviewedAt,
             m.name AS memberName, m.partner_status AS partnerStatus,
