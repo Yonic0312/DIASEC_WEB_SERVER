@@ -31,6 +31,10 @@ const Biz_PartnerMain = () => {
               partnerStatus !== '승인' &&
               partnerStatus !== '대기'
 
+    // 승인된 파트너는 이 페이지에서 현황 버튼을 숨김 (조회 중 깜빡임 방지)
+    const showMyStatusButton =
+        !member?.id || (partnerStatus != null && partnerStatus !== '승인');
+
     return (
         <div className="w-full px-4 mt-20 mb-16 break-keep">
             <div className="max-w-4xl mx-auto space-y-5">
@@ -63,6 +67,7 @@ const Biz_PartnerMain = () => {
                 <section className="space-y-3">
                     <h2 className="text-xl font-bold">파트너십 혜택</h2>
                     <ul className="list-disc pl-5 space-y-1 text-gray-700">
+                        <li>가입 승인 완료 후 홈페이지에서 결제 시 10% 할인이 자동 적용됩니다.</li>
                         <li>거래 실적에 따라 할인율이 최대 30%까지 상향됩니다.</li>
                         <li>홈페이지 기본 할인과 등급 할인이 합산되어 적용됩니다. (최대 40%)</li>
                         <li>대량주문 할인과 파트너 등급 할인은 중복되지 않으며, 둘 중 더 높은 할인율이 적용됩니다.</li>
@@ -105,32 +110,6 @@ const Biz_PartnerMain = () => {
                             </tbody>
                         </table>
                     </div>
-                    <div className="text-xs text-gray-500 space-y-1">
-                        <p>
-                            ※ 대량주문 할인과 파트너 등급 할인은 중복되지 않으며, <strong className="text-gray-600">더 높은 할인율</strong>이 적용됩니다.
-                        </p>
-                        <p>
-                            ※ 파트너 할인은 홈페이지 기본 할인에 <strong className="text-gray-600">등급별 추가 할인</strong>이
-                            합산되어 주문 시 자동 적용됩니다.
-                        </p>
-                        <p>
-                            ※ 파트너 등급·누적 거래금액은 <strong className="text-gray-600">결제 완료된 주문</strong> 기준으로
-                            실시간 반영되며, 승인 완료 후부터 파트너 할인이 적용됩니다.
-                        </p>
-                        <p>
-                            ※ 누적 거래금액 산정 시 배송비, 설치비, 부가세, 별도 외주 비용은 포함되지 않습니다.
-                        </p>
-                        <p>
-                            ※ 본 제휴는 선결제 방식이며, 월말 정산·후불 거래는 제공하지 않습니다.
-                        </p>
-                        <p>
-                            ※ 거래 실적, 결제 이력, 주문 규모, 협업 지속성 등에 따라 등급이 조정될 수 있습니다.
-                        </p>
-                        <p>
-                            ※ 현재 등급·누적 실적·적용 할인율은 로그인 후 <strong className="text-gray-600">마이페이지 &gt; 업무제휴 현황</strong>에서
-                            확인하실 수 있습니다.
-                        </p>
-                    </div>
                 </section>
 
                 <div className="flex flex-col items-start sm:ml-[10%] ml-[18%] gap-3 pt-4">
@@ -149,10 +128,16 @@ const Biz_PartnerMain = () => {
                                 업무 제휴 신청하기
                             </button>
                         )}
-                        {member?.id && (
+                        {showMyStatusButton && (
                             <button
                                 type="button"
-                                onClick={() => navigate('/mypage/partner')}
+                                onClick={() => {
+                                    if (!member?.id) {
+                                        alert('로그인 후 확인할 수 있습니다.');
+                                        return;
+                                    }
+                                    navigate('/mypage/partner');
+                                }}
                                 className="border border-black px-6 py-3 rounded font-medium"
                             >
                                 내 파트너 현황
@@ -160,9 +145,17 @@ const Biz_PartnerMain = () => {
                         )}
                     </div>
                 </div>
-                <div className='flex sm:ml-[18%] ml-[30%]'>
-                    <p className="mt-2 w-fit text-sm md:text-[15px]">
-                        <span className="font-semibold">문의</span>{' '} : <a href="tel:010-4231-5879">010-4231-5879</a>
+                <div className='flex sm:ml-[12%] ml-[30%]'>
+                    <p className="w-fit text-sm md:text-[15px]">
+                        <span className="font-semibold">
+                            문의
+                        </span>{' '}
+                         :{' '}
+                         <span>d2one@naver.com</span> 
+                        &nbsp;/&nbsp; 
+                         <a href="tel:010-4231-5879">
+                            010-4231-5879
+                        </a>
                     </p>
                 </div>
             </div>
