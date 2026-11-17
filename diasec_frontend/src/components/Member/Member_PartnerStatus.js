@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { PARTNER_TIERS } from '../../config/partnerTiers';
-import { getSiteDiscountPercent, getTotalDiscountPercent } from '../../utils/siteDiscount';
+import { getSiteDiscountPercent, getTotalDiscountPercent, MAX_TOTAL_DISCOUNT_PERCENT } from '../../utils/siteDiscount';
 
 const formatWon = (n) => `${Number(n || 0).toLocaleString()}원`;
 
@@ -66,8 +66,18 @@ const Member_PartnerStatus = () => {
                 <p className="text-sm font-medium text-blue-900 mb-1">주문 시 적용 할인</p>
                 {status.partnerStatus === '승인' ? (
                     <p className="text-sm text-blue-800">
-                        사이트 기본 <strong>{sitePct}%</strong> + 파트너 <strong>{partnerPct}%</strong>
-                        {' '}= 총 <strong>{totalPct}%</strong> 할인이 작품 결제에 적용됩니다.
+                        {sitePct + partnerPct > totalPct ? (
+                            <>
+                                사이트 기본 <strong>{sitePct}%</strong> + 파트너 <strong>{partnerPct}%</strong>를
+                                합산하면 {sitePct + partnerPct}%이지만, 최대 할인 {' '}
+                                <strong>{MAX_TOTAL_DISCOUNT_PERCENT}%</strong>가 작품 결제에 적용됩니다.
+                            </>
+                        ) : (
+                            <>
+                                사이트 기본 <strong>{sitePct}%</strong> + 파트너 <strong>{partnerPct}%</strong>
+                                {' '}= 총 <strong>{totalPct}%</strong> 할인이 작품 결제에 적용됩니다.
+                            </>
+                        )}
                     </p>
                 ) : (
                     <p className="text-sm text-blue-800">

@@ -54,7 +54,7 @@ public class OrderPriceValidator {
 
         int sitePct = Math.min(100, siteSettingService.getSiteDiscountPercent());
         int extraPct = Math.max(resolvePartnerPercent(order.getId()), bulkPercent(originalSubtotal));
-        int totalPct = Math.min(50, sitePct + extraPct);
+        int totalPct = Math.min(40, sitePct + extraPct);
 
         long expectedTotal = 0;
         for (int i = 0; i < items.size(); i++) {

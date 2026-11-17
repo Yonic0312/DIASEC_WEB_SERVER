@@ -8,6 +8,7 @@ import {
     getSiteDiscountPercent,
     getEffectiveExtraPercent,
     getBulkDiscountPercent,
+    getTotalDiscountPercent,
 } from '../../utils/siteDiscount';
 
 const PAPER_SIZES_CM = {
@@ -179,12 +180,19 @@ const PriceQuoteModal = ({
                             ? Math.max(0, Number(partnerDiscount) || 0)
                             : 0;
                         const hasDiscount = discounted < original;
+                        const appliedPct = getTotalDiscountPercent(extraPercent);
                         const discountLabel = (() => {
                             const parts = [];
                             if (sitePct > 0) parts.push(`사이트 ${sitePct}%`);
+                            const extraPct = bulkPct > 0 && bulkPct >= partnerPct ? bulkPct : partnerPct;
                             if (bulkPct > 0 && bulkPct >= partnerPct) parts.push(`대량 ${bulkPct}%`);
                             else if (partnerPct > 0) parts.push(`파트너 ${partnerPct}%`);
-                            return parts.length ? `${parts.join(' + ')} 할인 적용` : '';
+                            if (!parts.length) return '';
+                            const raw = sitePct + extraPct;
+                            if (raw > appliedPct) {
+                                return `${parts.join(' + ')} -> 최대 ${appliedPct}% 적용`;
+                            }
+                            return `${parts.join(' + ')} 할인 적용`;
                         })();
                         return (
                             <div className="space-y-2">

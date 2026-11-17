@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useSitePromo } from '../../context/SitePromoContext';
+import { MAX_TOTAL_DISCOUNT_PERCENT } from '../../utils/siteDiscount';
 
 const BUDGET_OPTIONS = [
     { id: 'under100', label: '100만원 이하', bulkPct: 0 },
@@ -16,11 +17,13 @@ const BulkOrderDiscount = () => {
     const [selectedId, setSelectedId] = useState(null);
 
     const selected = BUDGET_OPTIONS.find((o) => o.id === selectedId) || null;
-    const totalPct = selected ? Math.min(100, sitePct + selected.bulkPct) : null;
+    const totalPct = selected 
+        ? Math.min(MAX_TOTAL_DISCOUNT_PERCENT, sitePct + selected.bulkPct) 
+        : null;
 
     const handleSelect = (option) => {
         setSelectedId(option.id);
-        const total = Math.min(100, sitePct + option.bulkPct);
+        const total = Math.min(MAX_TOTAL_DISCOUNT_PERCENT, sitePct + option.bulkPct);
         // const sitePart = sitePct > 0 ? `오픈기념 ${sitePct}% + 대량 ${option.bulkPct}%` : `대량주문 ${option.bulkPct}%`;
         const sitePart = `대량주문 ${option.bulkPct}%`;
         window.alert(

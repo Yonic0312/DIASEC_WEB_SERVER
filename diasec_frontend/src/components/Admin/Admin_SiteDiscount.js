@@ -54,7 +54,7 @@ const Admin_SiteDiscount = () => {
             <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">사이트 할인율 관리</h1>
             <p className="text-sm text-gray-600 mb-6">
                 상품·장바구니·주문에 공통으로 적용되는 사이트 기본 할인율입니다.
-                파트너 할인은 이 값에 추가로 합산됩니다. (합산 최대 50%)
+                파트너 할인은 이 값에 추가로 합산됩니다. (합산 최대 40%)
             </p>
 
             <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">

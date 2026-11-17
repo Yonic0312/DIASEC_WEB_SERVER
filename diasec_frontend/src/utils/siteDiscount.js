@@ -1,5 +1,8 @@
 import { getSiteWideDiscountPercent } from '../config/sitePromo';
 
+// 사이트 기본 + 추가(파트너/대량) 합산 시 적용되는 최대 할인율
+export const MAX_TOTAL_DISCOUNT_PERCENT = 40;
+
 // 실제 할인율 계산기
 export function getSiteDiscountPercent() {
     const p = Number(getSiteWideDiscountPercent());
@@ -29,7 +32,7 @@ export function getDiscountedUnitPrice(original, extraPartnerPercent = 0) {
     const base = Math.round(Number(original) || 0);
     const sitePct = getSiteDiscountPercent();
     const partnerPct = Math.max(0, Number(extraPartnerPercent || 0));
-    const totalPct = Math.min(50, sitePct + partnerPct);
+    const totalPct = Math.min(MAX_TOTAL_DISCOUNT_PERCENT, sitePct + partnerPct);
     if (totalPct <= 0) return base;
     return Math.round(base * (1 - totalPct / 100));
 }
@@ -38,5 +41,5 @@ export function getDiscountedUnitPrice(original, extraPartnerPercent = 0) {
 export function getTotalDiscountPercent(extraPartnerPercent = 0) {
     const sitePct = getSiteDiscountPercent();
     const partnerPct = Math.max(0, Number(extraPartnerPercent) || 0);
-    return Math.min(50, sitePct + partnerPct);
+    return Math.min(MAX_TOTAL_DISCOUNT_PERCENT, sitePct + partnerPct);
 }
