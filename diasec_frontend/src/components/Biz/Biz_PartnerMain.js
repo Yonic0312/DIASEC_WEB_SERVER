@@ -85,7 +85,7 @@ const Biz_PartnerMain = () => {
                 </section>
 
                 {/* 등급표 */}
-                <section className="space-y-4">
+                <section className="w-fit space-y-4">
                     <h2 className="text-xl font-bold">파트너 등급 및 할인 기준</h2>
                     <p className="text-sm text-gray-600">
                         거래 실적에 따라 파트너 등급이 자동 조정되며, 등급에 따라 할인 혜택이 차등 적용됩니다.
@@ -110,9 +110,7 @@ const Biz_PartnerMain = () => {
                             </tbody>
                         </table>
                     </div>
-                </section>
-
-                <div className="flex flex-col items-start sm:ml-[10%] ml-[18%] gap-3 pt-4">
+                    <div className="flex flex-col items-center gap-3 pt-4">
                     {member?.id && partnerStatus === '대기' && (
                         <p className="text-sm text-amber-800 bg-amber-50 border border-amber-200 rounded-lg px-4 py-3 text-center max-w-lg">
                             제휴 신청이 검토 중입니다. 검토 후 승인 여부를 안내드립니다.
@@ -145,22 +143,21 @@ const Biz_PartnerMain = () => {
                         )}
                     </div>
                 </div>
-                <div className='flex sm:ml-[12%] ml-[30%]'>
-                    <p className="w-fit text-sm md:text-[15px]">
-                        <span className="font-semibold">
-                            문의
-                        </span>{' '}
-                         :{' '}
-                         <span>d2one@naver.com</span> 
-                        &nbsp;/&nbsp; 
-                         <a href="tel:010-4231-5879">
-                            010-4231-5879
-                        </a>
+                <div className='flex justify-center'>
+                    <p className="w-fit text-sm md:text-[15px] flex flex-col sm:flex-row md:items-center">
+                        <span>
+                            <span className="font-semibold">이메일 : </span>
+                            <span>d2one@naver.com</span>
+                        </span>
+                        <span className="hidden sm:inline">&nbsp;/&nbsp;</span>
+                        <span>
+                            <span className="font-semibold">문의 : </span>
+                            <a href="tel:010-4231-5879">010-4231-5879</a>
+                        </span>
                     </p>
                 </div>
-            </div>
-
-            
+                </section>
+            </div> 
         </div>
     );
 };

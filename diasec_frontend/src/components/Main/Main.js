@@ -890,14 +890,23 @@ const Main = () => {
                         style={{ transform: `translateX(-${reviewIndex * (100 / reviewVisibleCount)}%)` }} // 4등분(25%)씩 이동
                     >
                         {topThumbnailReviews.map((review, i) => (
-                            <div key={i} className="w-1/2 md:w-1/3 flex-shrink-0 px-3 cursor-pointer"
+                            <div key={i} className="group w-1/2 md:w-1/3 flex-shrink-0 px-3 cursor-pointer"
                                 onClick={() => setSelectedReview(review)}
-                            >
-                                <img
-                                    src={review.images?.[0]}
-                                    alt="리뷰 이미지"
-                                    className="w-full aspect-[300/240] object-cover"
-                                />
+                            >   
+                                <div className="relative w-full aspect-[300/240] overflow-hidden">
+                                    <img
+                                        src={review.images?.[0]}
+                                        alt="리뷰 이미지"
+                                        className="w-full h-full object-cover"
+                                    />
+                                    {review.images?.length >= 2 && (
+                                        <img
+                                            src={review.images[1]}
+                                            alt=""
+                                            className="absolute inset-0 w-full h-full object-cover opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+                                        />
+                                    )}
+                                </div>
                                 <div className="py-2">
                                     <div className="
                                         md:text-base text-[clamp(14px,2.085vw,16px)]
@@ -920,7 +929,7 @@ const Main = () => {
                     </div>
 
                     {topThumbnailReviews.length > reviewVisibleCount && (
-                        <div className="absolute top-[40%] -translate-y-1/2 w-full flex justify-between px-2 z-10">
+                        <div className="absolute top-[40%] -translate-y-1/2 w-full flex justify-between px-2 z-10 pointer-events-none">
                             <button
                                 onClick={() => {
                                         const maxIndex = Math.max(0, topThumbnailReviews.length - reviewVisibleCount);
@@ -928,6 +937,7 @@ const Main = () => {
                                     }
                                 }
                                 className="
+                                pointer-events-auto
                                 xl:w-10 lg:w-9 md:w-8 w-7
                                 xl:h-10 lg:h-9 md:h-8 h-7
                                 text-[12px]
@@ -943,6 +953,7 @@ const Main = () => {
                                     }
                                 }
                                 className="
+                                pointer-events-auto
                                 xl:w-10 lg:w-9 md:w-8 w-7
                                 xl:h-10 lg:h-9 md:h-8 h-7
                                 text-[12px]
@@ -970,6 +981,11 @@ const Main = () => {
             {selectedReview && (
                 <div
                     className="fixed inset-0 bg-black/55 backdrop-blur-[2px] flex items-center justify-center px-4 py-6 z-[10000]"
+                    onClick={() => {
+                        setSelectedReview(null);
+                        setSelectedImageIndex(0);
+                        setImageZoomOpen(false);
+                    }}
                 >
                     <div
                         role="dialog"
@@ -1025,6 +1041,7 @@ const Main = () => {
                                                 : "border-gray-200 hover:border-gray-400"}
                                         `}
                                         onClick={() => setSelectedImageIndex(idx)}
+                                        onMouseEnter={() => setSelectedImageIndex(idx)}
                                     >
                                         <img
                                             src={img}
