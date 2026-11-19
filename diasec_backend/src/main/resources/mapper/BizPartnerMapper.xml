@@ -23,8 +23,11 @@
         SELECT COALESCE(SUM(oi.price * oi.quantity), 0)
         FROM order_items oi
         JOIN orders o ON oi.oid = o.oid
+        JOIN member m ON o.id COLLATE utf8mb4_unicode_ci = m.id
         WHERE o.id COLLATE utf8mb4_unicode_ci = #{memberId}
             AND oi.order_status IN ('배송완료', '교환완료')
+            AND m.partner_approved_at IS NOT NULL
+            AND o.created_at >= m.partner_approved_at
     </select>
 
     <select id="getApplicationList" resultType="BizPartnerApplicationVo">

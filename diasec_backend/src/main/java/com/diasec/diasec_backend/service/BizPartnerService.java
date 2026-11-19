@@ -78,10 +78,9 @@ public class BizPartnerService {
 
     public void approve(Long id, String adminReply) {
         var app = bizPartnerMapper.getApplicationDetail(id);
-        long cumulative = bizPartnerMapper.getCumulativeAmount(app.getMemberId());
-        String grade = PartnerGradeUtil.resolveGrade(cumulative);
         bizPartnerMapper.approveApplication(id, adminReply);
-        bizPartnerMapper.updateMemberPartner(app.getMemberId(), "승인", grade);
+        // 승인 시점 이후 주문부터 누적하므로 시작 등급은 신규
+        bizPartnerMapper.updateMemberPartner(app.getMemberId(), "승인", "신규");
         sendResultSms(app.getPhone(), true);
     }
 
