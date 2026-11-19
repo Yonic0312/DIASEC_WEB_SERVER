@@ -71,7 +71,7 @@ const Biz_PartnerApply = () => {
         data.append('phone', phone);
         data.append('email', form.email);
         data.append('industry', form.industry);
-        data.append('etcRequest', form.etcRequest);
+        data.append('etcRequest', form.etcRequest || '');
         data.append('contractAgreed', 'true');
         data.append('license', licenseFile);
 
@@ -80,8 +80,7 @@ const Biz_PartnerApply = () => {
             await axios.post(`${API}/biz-partner/apply`, data, { withCredentials: true });
 
             alert(
-                '신청이 접수되었습니다.\n' +
-                '검토 후 마이페이지 > 업무제휴 현황에서 결과를 확인하실 수 있습니다.'
+                `신청이 정상적으로 접수되었습니다. \n영업일 기준 48시간 이내에 검토 결과를 안내해 드리겠습니다.`
             );
             navigate('/mypage/partner');
         } catch (err) {

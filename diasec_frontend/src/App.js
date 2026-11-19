@@ -509,7 +509,7 @@ function Layout() {
             </div>
 
             <div className={`
-                h-[240px] md:h-[220px] xl:h-[210px] 
+                h-[240px]
                 w-full bg-white ${extraPb}`}>
                 <Footer />
             </div>

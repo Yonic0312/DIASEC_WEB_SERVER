@@ -82,23 +82,28 @@ public class BizPartnerService {
         String grade = PartnerGradeUtil.resolveGrade(cumulative);
         bizPartnerMapper.approveApplication(id, adminReply);
         bizPartnerMapper.updateMemberPartner(app.getMemberId(), "승인", grade);
-        sendResultSms(app.getPhone());
+        sendResultSms(app.getPhone(), true);
     }
 
     public void reject(Long id, String adminReply) {
         var app = bizPartnerMapper.getApplicationDetail(id);
         bizPartnerMapper.rejectApplication(id, adminReply);
         bizPartnerMapper.updateMemberPartner(app.getMemberId(), "미승인", null);
-        sendResultSms(app.getPhone());
+        sendResultSms(app.getPhone(), false);
     }
 
-    private void sendResultSms(String phone) {
+    private void sendResultSms(String phone, boolean approved) {
         if (phone == null || phone.isBlank()) return;
         try {
-            String msg =
-                "[DIASEC KOREA]\n"
-                + "업무제휴 신청이 처리되었습니다.\n"
-                + "마이페이지 > 업무제휴 현황에서 결과를 확인해 주세요.";
+            String msg = approved
+                ? "[DIASEC KOREA]\n"
+                    + "귀사의 업무제휴 신청이 승인되었습니다.\n"
+                    + "지금부터 주문이 가능하며, 제휴 할인 10%가 자동 적용됩니다.\n"
+                    + "감사합니다."
+                : "[DIASEC KOREA]\n"
+                    + "제휴 신청에 감사드립니다.\n"
+                    + "내부 검토 결과, 현재 협업 방향성과 부합하지 않아 이번 제휴는 진행이 어렵습니다.\n"
+                    + "향후 여건이 맞는 경우 다시 협의할 수 있기를 바랍니다.";
             solapiService.send(phone, msg);
         } catch (Exception e) {
             e.printStackTrace();

@@ -176,8 +176,16 @@ const Main = () => {
     const [blogIndex, setBlogIndex] = useState(0);
 
     const [reviewVisibleCount, setReviewVisibleCount] = useState(3);
+    // 768 이하: 2개(1줄), 초과: 4 x 2줄 = 8개
+    const [blogVisibleCount, setBlogVisibleCount] = useState(() =>
+        (typeof window !== 'undefined' && window.innerWidth <= 768) ? 2 : 8
+    );
     useEffect(() => {
-        const calc = () => setReviewVisibleCount(window.innerWidth < 768 ? 2 : 3);
+        const calc = () => {
+            const width = window.innerWidth;
+            setReviewVisibleCount(width < 768 ? 2 : 3);
+            setBlogVisibleCount(width <= 768 ? 2 : 8);
+        };
         calc();
         window.addEventListener('resize', calc);
         return () => window.removeEventListener('resize', calc);
@@ -370,10 +378,13 @@ const Main = () => {
     }, [reviewVisibleCount, topThumbnailReviews.length]);
 
     // 화면 데이터에 맞게 blogIndex 범위 클렘프
+    // 768 초과는 8개 단위 페이지, 이하는 1개씩 이동
     useEffect(() => {
-        const maxIndex = Math.max(0, mainHomeBlogs.length - reviewVisibleCount);
+        const maxIndex = blogVisibleCount === 8
+            ? Math.max(0, Math.ceil(mainHomeBlogs.length / 8) - 1)
+            : Math.max(0, mainHomeBlogs.length - blogVisibleCount);
         setBlogIndex((prev) => Math.min(prev, maxIndex));
-    }, [reviewVisibleCount, mainHomeBlogs.length]);
+    }, [blogVisibleCount, mainHomeBlogs.length]);
 
     // 리뷰 상세 페이지 이미지 슬라이드
     const [selectedImageIndex, setSelectedImageIndex] = useState(0);
@@ -528,6 +539,42 @@ const Main = () => {
     }, [API]);
 
     const [currentIndex, setCurrentIndex] = useState(0); // 이벤트 슬라이더
+
+    const blogMaxIndex = blogVisibleCount === 8
+        ? Math.max(0, Math.ceil(mainHomeBlogs.length / 8) - 1)
+        : Math.max(0, mainHomeBlogs.length - blogVisibleCount);
+    
+    const renderBlogCard = (post, i, className) => (
+        <a
+            key={`${post.linkUrl}-${i}`}
+            href={post.linkUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={className}
+        >
+            <div className="relative overflow-hidden rounded-xl border border-gray-100 shadow-sm aspect-square">
+                <img
+                    src={post.imageUrl}
+                    alt={post.title}
+                    referrerPolicy="no-referrer"
+                    className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
+                />
+                <div className="
+                    absolute inset-0 flex items-center justify-center p-4
+                    bg-black/60 opacity-0 group-hover:opacity-100
+                    transition-opacity duration-300
+                ">
+                    <p className="
+                        text-white text-center font-semibold leading-snug
+                        md:text-base text-[clamp(13px,2.085vw,16px)]
+                        line-clamp-4
+                    ">
+                        {post.title}
+                    </p>
+                </div>
+            </div>
+        </a>
+    )
 
 
     return (
@@ -1099,54 +1146,38 @@ const Main = () => {
                     <p className="
                         md:text-base text-[clamp(11px,2.086vw,16px)]
                         text-center text-gray-600 mb-4">
-                        공간에 어울리는 작품과 액자 이야기를 만나보세요.
+                        공간과 일상 속에 담긴 디아섹의 이야기를 만나보세요.
                     </p>
 
                     <div className="relative overflow-hidden mt-3">
                         <div 
                             className="flex transition-transform duration-500 ease-in-out"
-                            style={{ transform: `translateX(-${blogIndex * (100 / reviewVisibleCount)}%)` }}
+                            style={{
+                                transform: `translateX(-${blogIndex * (blogVisibleCount === 8 ? 100 : 100 / blogVisibleCount)}%)`,
+                            }}
                         >
-                            {mainHomeBlogs.map((post, i) => (
-                                <a
-                                    key={`${post.linkUrl}-${i}`}
-                                    href={post.linkUrl}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="group w-1/2 md:w-1/3 flex-shrink-0 px-3"
-                                >
-                                    <div className="relative overflow-hidden rounded-xl border border-gray-100 shadow-sm aspect-square">
-                                        <img 
-                                            src={post.imageUrl}
-                                            alt={post.title}
-                                            referrerPolicy="no-referrer"
-                                            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
-                                        />
-                                        <div className="
-                                            absolute inset-0 flex items-center justify-center p-4
-                                            bg-black/60 opacity-0 group-hover:opacity-100
-                                            transition-opacity duration-300
-                                        ">
-                                            <p className="
-                                                text-white text-center font-semibold leading-snug
-                                                md:text-base text-[clamp(13px,2.085vw,16px)]
-                                                line-clamp-4 
-                                            ">
-                                                {post.title}
-                                            </p>
+                                {blogVisibleCount === 8
+                                    ? Array.from(
+                                        { length: Math.ceil(mainHomeBlogs.length / 8) },
+                                        (_, page) => mainHomeBlogs.slice(page * 8, page * 8 + 8)
+                                    ).map((pagePosts, page) => (
+                                        <div key={page} className="w-full flex-shrink-0 grid grid-cols-4 gap-y-4">
+                                            {pagePosts.map((post, i) =>
+                                                renderBlogCard(post, page * 8 + i, 'group w-full px-3')
+                                            )}
                                         </div>
-                                    </div>
-                                </a>
-                            ))}
+                                    ))
+                                    : mainHomeBlogs.map((post, i) =>
+                                        renderBlogCard(post, i, 'group w-1/2 flex-shrink-0 px-3')
+                                )}
                         </div>
 
-                        {mainHomeBlogs.length > reviewVisibleCount && (
+                        {mainHomeBlogs.length > blogVisibleCount && (
                             <div className="absolute top-1/2 -translate-y-1/2 w-full flex justify-between px-2 z-10 pointer-events-none">
                                 <button
                                     type="button"
                                     onClick={() => {
-                                        const maxIndex = Math.max(0, mainHomeBlogs.length - reviewVisibleCount);
-                                        setBlogIndex((prev) => (prev === 0 ? maxIndex : prev - 1));
+                                        setBlogIndex((prev) => (prev === 0 ? blogMaxIndex : prev - 1));
                                     }}
                                     className="
                                         xl:w-10 lg:w-9 md:w-8 w-7
@@ -1161,8 +1192,7 @@ const Main = () => {
                                 <button
                                     type="button"
                                     onClick={() => {
-                                        const maxIndex = Math.max(0, mainHomeBlogs.length - reviewVisibleCount);
-                                        setBlogIndex((prev) => (prev === maxIndex ? 0 : prev + 1));
+                                        setBlogIndex((prev) => (prev === blogMaxIndex ? 0 : prev + 1));
                                     }}
                                     className="
                                         xl:w-10 lg:w-9 md:w-8 w-7
