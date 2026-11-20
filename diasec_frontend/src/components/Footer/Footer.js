@@ -25,7 +25,6 @@ const Footer = () => {
                         href="https://blog.naver.com/diasec_korea"
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="hover:underline"
                     >
                         블로그
                     </a>

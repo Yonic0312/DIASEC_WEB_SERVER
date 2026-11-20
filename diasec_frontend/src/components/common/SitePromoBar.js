@@ -54,7 +54,7 @@ const SitePromoBar = () => {
             <div ref={barRef} className="relative w-full bg-[#303030] text-white">
                 <div className="max-w-[1300px] mx-auto px-8 md:px-10 py-[6px] flex items-center justify-center text-center">
                     <span className="text-[11px] md:text-[13px] font-semibold tracking-wide">
-                        전 상품 <span className="text-red-500">15% 할인</span> + 무료 배송
+                    전 상품 <span className="text-red-500">15% 할인 🔥</span> + 무료 배송
                         {/* BLACK FRIDAY <span className="text-red-500">15% 할인</span> + 전 상품 무료 배송 */}
                     </span>
                 </div>

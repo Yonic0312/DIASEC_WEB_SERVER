@@ -268,7 +268,7 @@ const Main_CompanyProfile = () => {
         <div className="flex flex-col w-full break-keep">
             
             {/* Hero 배너 */}
-            <div className="w-full bg-gray-800 flex items-center justify-center relative">
+            <div className="w-full bg-white flex items-center justify-center relative">
                 <img src={p0} />
             </div>
 
@@ -496,7 +496,7 @@ const Main_CompanyProfile = () => {
                 <h2 className="
                     text-[clamp(19px,4.693vw,36px)] md:text-4xl
                     font-bold break-keep">
-                    받는 순간의 만족보다, 
+                    받는 순간의 만족보다
                     
                 </h2>
                 <h2 className="

@@ -36,12 +36,12 @@ const Header = () => {
         { key:'photoIllustration',   label:'사진/일러스트',                  link:'/main_Items?type=photoIllustration' },
         { key:'fengShui',            label:'풍수',                         link:'/main_Items?type=fengShui' },
         { key:'event',               label:'이벤트',                        link:'/mainEvent' },
+        { key:'priceQuote',               label:'가격 알아보기',              link:'/priceQuote' },
         { key:'discount',              label:'대량주문할인',                  link: '/bulkOrderDiscount' },
     ]), []);
 
     // PC 고객센터 드롭다운과 동일 (모바일 드로어용)
     const supportLinks = useMemo(() => ([
-        { label: '가격 알아보기', action: 'priceQuote' },
         { label: '자주 묻는 질문', link: '/faqMain' },
         { label: '1:1문의', link: '/supportMyInquiryList' },
         { label: '공지사항', link: '/noticeList' },
@@ -236,10 +236,6 @@ const Header = () => {
                             flex-row items-center
                         "
                     >
-                        <button type="button" onClick={() => setPriceQuoteOpen(true)}>
-                            가격알아보기
-                        </button>
-                        <span className="opacity-15">|</span>
                         {member ? (
                             <>  
                                 {/* 관리자 */}
@@ -249,6 +245,10 @@ const Header = () => {
                                         <span className="opacity-15">|</span>
                                     </>
                                 )}
+                                <button type="button" onClick={() => setPriceQuoteOpen(true)}>
+                                    가격알아보기
+                                </button>
+                                <span className="opacity-15">|</span>
                                 <button onClick={handleLogout}>로그아웃</button>
                                 <span className="opacity-15">|</span>
                                 <button onClick={() => navigate('/mypage')}>마이페이지</button>
@@ -257,6 +257,10 @@ const Header = () => {
                             </>
                         ) : (
                             <>
+                                <button type="button" onClick={() => setPriceQuoteOpen(true)}>
+                                    가격알아보기
+                                </button>
+                                <span className="opacity-15">|</span>
                                 <button onClick={() => navigate('/userLogin')}>로그인</button>
                                 <span className="opacity-15">|</span>
                                 <button onClick={() => navigate('/join')}>회원가입</button>
@@ -414,6 +418,12 @@ const Header = () => {
                                             type="button"
                                             className="flex-1 text-left px-2 py-4 text-[15px]"
                                             onClick={() => {
+                                                if (m.key === 'priceQuote') {
+                                                    setPriceQuoteOpen(true);
+                                                    setDrawerOpen(false);
+                                                    return;
+                                                }
+
                                                 if (m.link) {
                                                     navigate(m.link);
                                                     setDrawerOpen(false);
