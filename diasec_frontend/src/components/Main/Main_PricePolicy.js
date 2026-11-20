@@ -32,45 +32,33 @@ const Main_PricePolicy = () => {
                         </span>
                         <div className="flex-1 border-t-[1px] border-[#D0AC88]"></div>
                     </div>
-                </div>
-
-                <div className="flex flex-col items-center px-4">
-                    <section className="flex flex-col lg:flex-row items-start gap-4 md:gap-10 mb-10">
-                        <div className="w-full max-w-[850px] flex flex-col justify-center md:flex-row md:items-stretch px-4 gap-8 md:gap-10">
-                            <div className="w-full md:w-[40%] shrink-0 overflow-hidden rounded-xl bg-gray-100 shadow-sm ring-1 ring-black/5">
-                                <img 
-                                    className="w-full h-auto object-cover" 
-                                    src={P1} 
-                                    alt="디아섹 작품 보존"
-                                />
+                    <div className="flex flex-col items-center px-4">
+                        <section className="flex flex-col lg:flex-row items-start gap-4 md:gap-10 mb-10">
+                            <div className="w-full max-w-[850px] flex flex-col justify-center md:flex-row md:items-stretch px-4 gap-8 md:gap-10">
+                                <div className="w-full md:w-[40%] shrink-0 overflow-hidden rounded-xl bg-gray-100 shadow-sm ring-1 ring-black/5">
+                                    <img 
+                                        className="w-full h-auto object-cover" 
+                                        src={P1} 
+                                        alt="디아섹 작품 보존"
+                                    />
+                                </div>
+                                <div className="flex min-w-0 flex-1 flex-col justify-center gap-2 text-left">
+                                    <h3 className="
+                                        text-[15px] md:text-[22px]
+                                        font-bold text-gray-900">
+                                        고객의 소중한 추억을 오랜 기간 동안 간직하도록 설계 제작된 정통 디아섹만을 만듭니다
+                                    </h3>
+                                    <span className=" text-[13px] md:text-[17px] leading-relaxed text-gray-600">
+                                        디아섹코리아는 디아섹 최초 개발자인
+                                        스위스 Heinz Sovilla 부부의{' '}
+                                        작품 보존 정신을 계승한,{' '}
+                                        독일식 정통 제작 공법을 기준으로 제작합니다.
+                                        19년의 오랜 제작 경험과 축적된 노하우로 오랜시간이 지나도 작품 본연의 색감과
+                                        형태를 그대로 유지하는 기술력으로 프리미엄 디아섹액자를 생산합니다
+                                    </span>
+                                </div>
                             </div>
-                            <div className="flex min-w-0 flex-1 flex-col justify-center gap-2 text-left">
-                                <h3 className="
-                                    text-[15px] md:text-[22px]
-                                    font-bold text-gray-900">
-                                    고객의 소중한 추억을 오랜 기간 동안 간직하도록 설계 제작된 정통 디아섹만을 만듭니다
-                                </h3>
-                                <span className=" text-[13px] md:text-[17px] leading-relaxed text-gray-600">
-                                    디아섹코리아는 디아섹 최초 개발자인
-                                    스위스 Heinz Sovilla 부부의{' '}
-                                    작품 보존 정신을 계승한,{' '}
-                                    독일식 정통 제작 공법을 기준으로 제작합니다.
-                                    19년의 오랜 제작 경험과 축적된 노하우로 오랜시간이 지나도 작품 본연의 색감과
-                                    형태를 그대로 유지하는 기술력으로 프리미엄 디아섹액자를 생산합니다
-                                </span>
-                            </div>
-                        </div>
-                    </section>
-
-                    <div className="flex items-center justify-center w-full py-6 md:py-8 border-y border-[#D0AC88]">
-                        <p className="
-                            text-[15px] md:text-[20px]
-                            text-center text-gray-800 leading-relaxed"
-                        >
-                            이것이 디아섹코리아가{' '}
-                            <span className="font-bold text-[#a67a3e]">‘10년 품질 보증’</span>을
-                            약속할 수 있는 이유입니다.
-                        </p>
+                        </section>
                     </div>
                 </div>
 
@@ -107,6 +95,17 @@ const Main_PricePolicy = () => {
                                 </p>
                             </section>
                         ))}
+                    </div>
+
+                    <div className="flex items-center justify-center w-full mt-16 border-[#D0AC88]">
+                        <p className="
+                            text-[17px] md:text-[28px]
+                            text-center text-gray-800 leading-relaxed break-keep"
+                        >
+                            이것이 디아섹코리아가{' '}
+                            <span className="font-bold text-[#a67a3e]">‘10년 품질 보증’</span>을
+                            약속할 수 있는 이유입니다.
+                        </p>
                     </div>
                 </div>
             </div>

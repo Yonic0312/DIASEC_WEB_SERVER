@@ -72,16 +72,16 @@ const Main_Event = () => {
                     <div
                         key={`${event.eventId}-${index}`}
                         onClick={() => (window.location.href = `/mainEventDetail/${event.eventId}`)}
-                        className="max-w-[582px] cursor-pointer rounded-b-xl hover:shadow-xl"
+                        className="max-w-[582px] cursor-pointer rounded-b-xl"
                     >
                         <div className="w-full max-h-[291px] rounded-lg overflow-hidden shadow border border-gray-100 cursor-pointer">
                             <img
                                 src={event.thumbnailUrl}
                                 alt={event.title}
-                                className=" w-full h-full object-cover"
+                                className=" w-full h-full object-cover hover:scale-105 transition-all duration-300"
                             />
                         </div>
-                        <div className="p-4">
+                        <div className="py-4">
                             <h3 className="font-semibold text-gray-800">{event.title}</h3>
                             <p className="text-sm text-gray-500 mt-1">{event.period}</p>
                         </div>

@@ -52,7 +52,7 @@ const BulkOrderDiscount = () => {
                                     <button
                                         key={option.id}
                                         className={`
-                                            flex flex-col items-center gap-2 p-3 rounded-lg border transition
+                                            flex flex-col items-center p-3 rounded-lg border transition
                                             ${checked
                                                 ? 'border-blue-600 bg-blue-50'
                                                 : 'border-gray-200 hover:border-blue-300 hover:bg-gray-50'}

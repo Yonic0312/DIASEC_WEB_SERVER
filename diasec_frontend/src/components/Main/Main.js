@@ -1323,7 +1323,7 @@ const Main = () => {
                                         {faq.question}
                                     </div>
                                     <span className="text-gray-400 shrink-0">
-                                        {expandedFaqId === faq.faqId ? '▼' : '▲'}{expandedFaqId === faq.faqId ? '▼' : '▲'}
+                                        {expandedFaqId === faq.faqId ? '▼' : '▲'}
                                     </span>
                                 </div>
                                 {expandedFaqId === faq.faqId && (

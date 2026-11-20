@@ -4,6 +4,7 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 
 const STORAGE_KEY = 'diasec_main_event_popup_hide_date';
+const FADE_MS = 700;
 
 function getLocalDateKey() {
     const d = new Date();
@@ -17,6 +18,9 @@ export default function MainEventPopup({ events = [] }) {
     const navigate = useNavigate();
     const [open, setOpen] = useState(false);
     const [idx, setIdx] = useState(0);
+    const [topIdx, setTopIdx] = useState(0);
+    const [bottomIdx, setBottomIdx] = useState(0);
+    const [topVisible, setTopVisible] = useState(true);
 
     useEffect(() => {
         if (!Array.isArray(events) || events.length === 0) return;
@@ -34,10 +38,32 @@ export default function MainEventPopup({ events = [] }) {
     }, [events.length, idx]);
 
     useEffect(() => {
+        if (!events.length) return undefined;
+        if (topIdx >= events.length) {
+            setTopIdx(0);
+            setBottomIdx(0);
+            setTopVisible(true);
+            return undefined;
+        }
+        if (idx === topIdx){
+            setTopVisible(true);
+            return undefined;
+        }
+
+        setBottomIdx(idx);
+        setTopVisible(false);
+        const timer = setTimeout(() => {
+            setTopIdx(idx);
+            setTopVisible(true);
+        }, FADE_MS);
+        return () => clearTimeout(timer);
+    }, [idx, events.length, topIdx]);
+
+    useEffect(() => {
         if (!open || events.length <= 1) return;
         const t = setInterval(
             () => setIdx((i) => (i + 1) % events.length),
-            5500
+            4500
         );
         return () => clearInterval(t);
     }, [open, events.length, idx]);
@@ -149,9 +175,17 @@ export default function MainEventPopup({ events = [] }) {
                         aria-label={`${ev?.title || '이벤트'} 상세보기`}
                     >
                         <img
-                            src={ev?.thumbnailUrl}
+                            src={events[bottomIdx]?.thumbnailUrl}
                             alt=""
-                            className="w-full h-full object-cover transition duration-300 group-hover:opacity-95"
+                            className="absolute inset-0 w-full h-full object-cover"
+                        />
+                        <img 
+                            src={events[topIdx]?.thumbnailUrl}
+                            alt=""
+                            className={`absolute inset-0 w-full h-full object-cover transition-opacity ease-in-out ${
+                                topVisible ? 'opacity-100' : 'opacity-0'
+                            }`}
+                            style={{ transitionDuration: `${FADE_MS}ms` }}
                         />
                         {events.length > 1 && (
                             <>
