@@ -34,7 +34,8 @@
 
     <!-- TOP5 조회 -->
     <select id="getTopFaqs" resultType="com.diasec.diasec_backend.vo.FaqVo">
-        SELECT * FROM faq
+        SELECT faq_id as faqId, category, question, answer, created_at as createdAt 
+        FROM faq
         ORDER BY view_count DESC
         LIMIT #{limit}
     </select>

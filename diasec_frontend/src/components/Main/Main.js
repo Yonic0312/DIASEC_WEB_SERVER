@@ -66,6 +66,8 @@ const Main = () => {
     const [bestPriceMap, setBestPriceMap] = useState({});
     const [newPriceMap, setNewPriceMap] = useState({});
     const [mainHomeBlogs, setMainHomeBlogs] = useState([]);
+    const [topFaqs, setTopFaqs] = useState([]);
+    const [expandedFaqId, setExpandedFaqId] = useState(null);
     
 
     // 올라오는 효과
@@ -514,6 +516,39 @@ const Main = () => {
 
         return () => controller.abort();
     }, [API]);
+
+    // 조회수 상위 FAQ 5개
+    useEffect(() => {
+        const controller = new AbortController();
+
+        (async () => {
+            try {
+                const data = await getData(API, '/faq/top5', {
+                    signal: controller.signal,
+                });
+                setTopFaqs(Array.isArray(data) ? data.slice(0, 5) : []);
+            } catch (err) {
+                if (err?.name === 'CancelError') return;
+                console.error('FAQ 로딩 실패:', err);
+                setTopFaqs([]);
+            }
+        })();
+
+        return () => controller.abort();
+    }, [API]);
+
+    const handleFaqToggle = async (id) => {
+        const isOpening = expandedFaqId !== id;
+        setExpandedFaqId((prev) => (prev === id ? null : id));
+
+        if (!isOpening) return;
+
+        try {
+            await axios.patch(`${API}/faq/view/${id}`);
+        } catch (err) {
+            console.error('조회수 증가 실패', err);
+        }
+    };
 
     // [이벤트] 
     const [events, setEvents] = useState([]);
@@ -1262,6 +1297,62 @@ const Main = () => {
                 </div>
             )}
 
+            {topFaqs.length > 0 && (
+                <div className="w-full px-4">
+                    <h2 className="
+                        md:text-[30px] sm:text-[clamp(24px,3.911vw,30px)] text-[clamp(18px,3.755vw,24px)]
+                        font-bold mb-2 text-center">자주 묻는 질문</h2>
+                    <p className="
+                        md:text-base text-[clamp(11px,2.086vw,16px)]
+                        text-center text-gray-600 mb-4">
+                        고객님들이 가장 궁금해하시는 질문들을 모았습니다.
+                    </p>
+
+                    <div className="max-w-3xl mx-auto divide-y border-t border-b border-gray-200">
+                        {topFaqs.map((faq) => (
+                            <div
+                                key={faq.faqId}
+                                className="py-4 md:py-5 cursor-pointer break-keep"
+                                onClick={() => handleFaqToggle(faq.faqId)}
+                            >
+                                <div className="flex justify-between itmes-start gap-3">
+                                    <div className="text-[14px] md:text-[16px] font-semibold text-gray-900">
+                                        <span className="text-orange-500 font-bold mr-2">Q</span>
+                                        {faq.question}
+                                    </div>
+                                    <span className="text-gray-400 shrink-0">
+                                        {expandedFaqId === faq.faqId ? '▲' : '▼'}
+                                    </span>
+                                </div>
+                                {expandedFaqId === faq.faqId && (
+                                    <div className="mt-3 bg-gray-50 p-4 text-[13px] md:text-[14px] text-gray-700 whitespace-pre-line">
+                                        <span className="text-blue-700 font-medium mr-1">A</span>
+                                        {faq.answer}
+                                    </div>
+                                )}
+                            </div>
+                        ))}
+                    </div>
+                    <button className="
+                        md:text-base text-[clamp(13px,2.085vw,16px)]
+                        lg:px-6 md:px-4 px-3
+                        lg:py-2 py-1
+                        flex mt-5 mx-auto font-semibold text-white bg-[#303030] rounded hover:bg-opacity-80"
+                        onClick={() => navigate('/faqMain')}
+                    >
+                        질문 더보기
+                    </button>
+                    <div className="flex justify-center mt-5">
+                        <button
+                            type="button"
+                            
+                            className="text-[13px] md:text-[15px] text-gray-600 underline underline-offset-4 hover:text-gray-900"
+                        >
+                            
+                        </button>
+                    </div>
+                </div>
+            )}
 
             {/* 회사 소개 및 디아섹이란 배너 (사진 배경형) */}
             <div
