@@ -190,7 +190,7 @@ const FaqMain = () => {
                                     {faq.question}
                                 </div>
                             </div>
-                            <span className="text-gray-400">{expandedId === faq.faqId ? '▲' : '▼'}</span>
+                            <span className="text-gray-400">{expandedId === faq.faqId ? '▼' : '▲'}</span>
                         </div>
                         {expandedId === faq.faqId && (
                             <div className="

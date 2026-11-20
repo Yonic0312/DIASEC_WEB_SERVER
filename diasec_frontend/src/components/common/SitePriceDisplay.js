@@ -45,7 +45,7 @@ export function SitePriceRow({
     const saleTotal = getDiscountedUnitPrice(originalU, extraPercent) * qty;
 
     return (
-        <span className={`flex flex-col flex-wrap ${className}`.trim()}>
+        <span className={`flex flex-row gap-1 flex-wrap items-center ${className}`.trim()}>
             <span className={strikeClassName}>
                 {originalTotal.toLocaleString()}원{suffix}
             </span>

@@ -1362,9 +1362,9 @@ const Main_Items = () => {
                                     </div>
 
                                     <span className="
-                                        lg:text-[18px] text-[clamp(16px,1.759vw,18px)]
+                                        lg:text-[16px]
                                         line-clamp-1
-                                        font-bold mt-2">
+                                        font-semibold mt-2">
                                         {product.title}
                                     </span>
 
