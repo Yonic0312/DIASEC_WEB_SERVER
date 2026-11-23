@@ -459,14 +459,14 @@ const Main_CustomFrames = () => {
         if (results.some(Boolean)) {
             toast.success(
                 <>
-                    이미지가 등록되었습니다.
+                    왼쪽에 이미지가 등록되었습니다.
                     <br />
-                    원하는 크기로 조정해 보세요.
+                    오른쪽에서 크기를 조정하시면
                     <br />
-                    사이즈에 따라 작품 가격이 자동으로 계산됩니다.
+                    가격이 자동으로 표시됩니다.
                 </>,
                 { autoClose: 9000 }
-            )
+            );
         }
     }
 

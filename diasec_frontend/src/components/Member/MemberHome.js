@@ -157,13 +157,13 @@ const MemberHome = () => {
                         <span className="font-semibold text-[#a67a3e]">{displayName}</span>님 환영합니다.
                     </p>
                 </div>
-                <button
+                {/* <button
                     type="button"
                     onClick={handleLogout}
                     className="shrink-0 text-sm text-gray-500 underline underline-offset-2 hover:text-gray-800"
                 >
                     로그아웃
-                </button>
+                </button> */}
             </div>
 
             <div className="rounded-2xl border border-[#e8dfd4] bg-[#faf8f5] px-2 py-4 mb-6">
