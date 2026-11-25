@@ -546,7 +546,7 @@ const Admin_Home = () => {
                 />
                 <StatCard
                     title="구매 전환율"
-                    value={`${purchaseConversion.toFixed(1)}%`}
+                    value={`${purchaseConversion.toFixed(2)}%`}
                     subtitle={`주문 ${orderTotal.toLocaleString()}건 / 누적 방문 ${Number(visitStats.total || 0).toLocaleString()}명`}
                     hint="주문 1건을 1회로 계산"
                 />

@@ -167,6 +167,9 @@ public class ReviewController {
             ResponseEntity<?> prepError = prepareItemForReview(itemId, null, id);
             if (prepError != null) return prepError;
 
+            Long oid = orderService.getOidByItemId((long) itemId);
+            boolean rewardThisReview = reviewService.isFirstReviewOnOrder(oid);
+
             // 1. 후기 저장
             ReviewVo review = new ReviewVo();
             review.setPid(pid);
@@ -188,14 +191,16 @@ public class ReviewController {
                 }
             }
 
-            final int rewardAmount = 5000;
-            CreditVo rewardCredit = new CreditVo();
-            rewardCredit.setId(id);
-            rewardCredit.setType("적립");
-            rewardCredit.setAmount(rewardAmount);
-            rewardCredit.setDescription("리뷰 작성 이벤트");
-            rewardCredit.setOid(orderService.getOidByItemId((long) itemId));
-            creditService.insertCreditHistory(rewardCredit);
+            final int rewardAmount = rewardThisReview ? 5000 : 0;
+            if (rewardAmount > 0) {
+                CreditVo rewardCredit = new CreditVo();
+                rewardCredit.setId(id);
+                rewardCredit.setType("적립");
+                rewardCredit.setAmount(rewardAmount);
+                rewardCredit.setDescription("리뷰 작성 이벤트");
+                rewardCredit.setOid(oid);
+                creditService.insertCreditHistory(rewardCredit);
+            }
 
             return ResponseEntity.ok().body(Map.of(
                 "success", true,

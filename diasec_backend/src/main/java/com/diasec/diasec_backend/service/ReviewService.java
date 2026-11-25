@@ -41,6 +41,13 @@ public class ReviewService {
         return reviewMapper.countReviewByItemId(itemId) > 0;
     }
 
+    /** 같은 주문에 이미 리뷰가 있으면 false. 동시에 두 건이 들어와도 한 건만 true. */
+    public boolean isFirstReviewOnOrder(Long oid) {
+        if (oid == null) return false;
+        if (reviewMapper.lockOrder(oid) == null) return false;
+        return reviewMapper.countReviewsByOid(oid) == 0;
+    }
+
     public void insertReviewImage(@Param("rid") Long rid, @Param("url") String url) {
         reviewMapper.insertReviewImage(rid, url);
     }

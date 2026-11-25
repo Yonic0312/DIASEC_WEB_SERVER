@@ -246,6 +246,11 @@ const ReviewWrite = () => {
                         비회원 주문 리뷰 작성입니다.
                     </p>
                 )}
+                {!isGuestReview && (
+                    <p className="text-center text-sm text-gray-500 mt-2">
+                        적립금 5,000원은 주문당 첫 리뷰에만 지급됩니다. 같은 주문의 다른 상품도 리뷰를 작성할 수 있습니다.
+                    </p>
+                )}
                 {/**
                  [종료된 이벤트] 후기 작성 시 5000P 지급
                  - 재개 시 아래 문구 복구 가능:

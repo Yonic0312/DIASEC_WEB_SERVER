@@ -132,6 +132,9 @@ const PRINT_ORDER_STYLES = `
     }
     .print-wrap .print-delivery-message {
         margin-top: 10px;
+        padding-right: 120px;
+        overflow-wrap: anywhere;
+        word-break: break-all;
         font-size: 22px;
         font-weight: 800;
         color: #111 !important;

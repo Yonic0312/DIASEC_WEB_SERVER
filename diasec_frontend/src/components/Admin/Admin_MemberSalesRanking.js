@@ -143,11 +143,8 @@ const Admin_MemberSalesRanking = () => {
                                     <th className="px-3 py-3 font-semibold">회원 ID</th>
                                     <th className="px-3 py-3 font-semibold">이름</th>
                                     <th className="px-3 py-3 font-semibold">이메일</th>
-                                    <th className="px-3 py-3 font-semibold">파트너</th>
-                                    <th className="px-3 py-3 font-semibold">등급</th>
                                     <th className="px-3 py-3 font-semibold text-right">매출액</th>
                                     <th className="px-3 py-3 font-semibold text-right">완료 건수</th>
-                                    <th className="px-3 py-3 font-semibold">다음 등급까지</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -169,37 +166,11 @@ const Admin_MemberSalesRanking = () => {
                                         <td className="px-3 py-2.5 text-gray-800">{row.memberId}</td>
                                         <td className="px-3 py-2.5 text-gray-800">{row.memberName || '-'}</td>
                                         <td className="px-3 py-2.5 text-gray-800">{row.email || '-'}</td>
-                                        <td className="px-3 py-2.5">
-                                            <span className={`inline-block px-2 py-0.5 rounded text-xs font-medium ${
-                                                row.partnerStatus === '승인'
-                                                    ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
-                                                    : 'bg-gray-100 text-gray-600 border border-gray-200'
-                                            }`}>
-                                                {row.partnerStatus || '없음'}
-                                            </span>
-                                        </td>
-                                        <td className="px-3 py-2.5 font-medium text-gray-900">
-                                            {gradeLabel(row.grade)}
-                                        </td>
                                         <td className="px-3 py-2.5 text-right font-semibold tabular-nums text-gray-900">
                                             {formatWon(row.totalSales)}
                                         </td>
                                         <td className="px-3 py-2.5 text-right tabular-nums text-gray-700">
                                             {Number(row.completedItemCount || 0).toLocaleString()}건
-                                        </td>
-                                        <td className="px-3 py-2.5 text-gray-700">
-                                            {row.nextGrade ? (
-                                                <span>
-                                                    <span className="text-gray-500">{nextGradeLabel(row.nextGrade)}</span>
-                                                    {' '}
-                                                    <strong className="text-[#8b6914]">
-                                                        {formatWon(row.amountToNextTier)}
-                                                    </strong>
-                                                    {' '}남음
-                                                </span>
-                                            ) : (
-                                                <span className="text-emerald-700 font-medium">최고 등급</span>
-                                            )}
                                         </td>
                                     </tr>
                                 ))}

@@ -1,7 +1,8 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { refreshAdminCounts } from '../../utils/adminCounts';
+import OrderQuoteSheet from './OrderQuoteSheet';
 
 const Order_Status = () => {
     const API = process.env.REACT_APP_API_BASE;
@@ -272,6 +273,9 @@ const Order_Status = () => {
 
     const [customCompany, setCustomCompany] = useState(''); // 직접 입력일 때 사용하는 변수
     const [applyToSameOrder, setApplyToSameOrder] = useState(true);
+    const [quoteMode, setQuoteMode] = useState(false);
+    const [quoteOpen, setQuoteOpen] = useState(false);
+    const [selectedQuoteMap, setSelectedQuoteMap] = useState({});
 
     // 모달 값 저장 함수
     const handleSave = () => {
@@ -330,6 +334,39 @@ const Order_Status = () => {
         .catch(err => console.error("상세정보 저장 실패", err));
     }
 
+    const toggleQuoteMode = () => {
+        if (quoteMode) {
+            setSelectedQuoteMap({});
+            setQuoteOpen(false);
+            setQuoteMode(false);
+            return;
+        }
+        setQuoteMode(true);
+    };
+
+    const toggleQuoteOrder = (item) => {
+        const oid = item.oid;
+        setSelectedQuoteMap((prev) => {
+            const next = { ...prev };
+            if (next[oid]) {
+                delete next[oid];
+                return next;
+            }
+            next[oid] = {
+                oid,
+                ordererName: item.ordererName,
+                createdAt: item.createdAt,
+                items: orderList.filter((row) => row.oid === oid),
+            };
+            return next;
+        });
+    };
+
+    const selectedQuoteOrders = useMemo(
+        () => Object.values(selectedQuoteMap).sort((a, b) => Number(b.oid) - Number(a.oid)),
+        [selectedQuoteMap]
+    );
+
     const groupedOrderList = orderList.filter((item) => {
         if (workFilter === '전체') return true;
         return STATUS_GROUPS[workFilter]?.includes(item.orderStatus);
@@ -350,7 +387,7 @@ const Order_Status = () => {
     const groupEnd = Math.min(groupStart + pageGroupSize - 1, totalPages);
 
     return (
-        <div className='mb-20'>
+        <div className={quoteMode ? 'mb-28' : 'mb-20'}>
             <h2 className="text-2xl font-bold mb-6 text-gray-800">주문 상태 관리</h2>
 
             <div className="w-full p-[24px] bg-[#f6f6f6] text-sm flex flex-wrap gap-2 items-center">
@@ -422,6 +459,15 @@ const Order_Status = () => {
                             }, 300);
                         }} 
                     />
+                    <button
+                        type="button"
+                        onClick={toggleQuoteMode}
+                        className={`w-[51px] h-[40px] border text-[13px] font-semibold ${
+                            quoteMode ? 'bg-black text-white border-black' : 'bg-white text-gray-800'
+                        }`}
+                    >
+                        견적서
+                    </button>
                 </div>
             </div>
             
@@ -433,6 +479,7 @@ const Order_Status = () => {
                 <table className="w-full text-sm border-collapse">
                     <thead className="bg-gray-100 border-b">
                         <tr className="text-center">
+                            {quoteMode && <th className="w-[4%] p-2 font-medium text-gray-700">선택</th>}
                             <th className="w-[9%] p-2 font-medium text-gray-700">주문일자</th>
                             <th className="w-[7%] p-2 font-medium text-gray-700">주문번호</th>
                             <th className="w-[9%] p-2 font-medium text-gray-700">회원ID</th>
@@ -469,6 +516,18 @@ const Order_Status = () => {
                                             });
                                         }}
                                     >
+                                        {quoteMode && (
+                                            <td className="px-2 py-3" onClick={(e) => e.stopPropagation()}>
+                                                {!isSameOid && (
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={!!selectedQuoteMap[item.oid]}
+                                                        onChange={() => toggleQuoteOrder(item)}
+                                                        onClick={(e) => e.stopPropagation()}
+                                                    />
+                                                )}
+                                            </td>
+                                        )}
                                         <td className="px-2 py-3">{isSameOid ? '' : item.createdAt?.slice(2, 10)}</td>
                                         <td className="px-2 py-3">{isSameOid ? '' : item.oid}</td>
                                         <td className="px-2 py-3">{isSameOid ? '' : item.id == '' ? '비회원' : item.id}</td>
@@ -675,6 +734,44 @@ const Order_Status = () => {
                     </div>
                 </div>
             )}
+
+            {quoteMode && (
+                <div className="fixed bottom-0 left-0 right-0 z-40 border-t bg-white px-6 py-3 flex items-center justify-between gap-3 shadow-lg">
+                    <div className="text-sm">
+                        <span className="font-semibold">{selectedQuoteOrders.length}건 선택</span>
+                        {selectedQuoteOrders.length > 0 && (
+                            <span className="text-gray-600">
+                                {' · '}
+                                {[...new Set(selectedQuoteOrders.map((order) => order.ordererName || '-'))].join(', ')}
+                            </span>
+                        )}
+                    </div>
+                    <div className="flex gap-2">
+                        <button
+                            type="button"
+                            onClick={() => setSelectedQuoteMap({})}
+                            className="px-3 py-2 border rounded text-sm"
+                        >
+                            선택 해제
+                        </button>
+                        <button
+                            type="button"
+                            disabled={selectedQuoteOrders.length === 0}
+                            onClick={() => setQuoteOpen(true)}
+                            className="px-4 py-2 rounded bg-black text-white text-sm disabled:bg-gray-300"
+                        >
+                            견적서 미리보기
+                        </button>
+                    </div>
+                </div>
+            )}
+
+            <OrderQuoteSheet
+                open={quoteOpen}
+                orders={selectedQuoteOrders}
+                partialWarning={statusFilter !== '전체' || categoryFilter !== '전체'}
+                onClose={() => setQuoteOpen(false)}
+            />
         </div>
     )   
 }

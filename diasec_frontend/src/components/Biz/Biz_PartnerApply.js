@@ -156,7 +156,7 @@ const Biz_PartnerApply = () => {
                         <pre className="text-xs whitespace-pre-line text-gray-700 max-h-48 overflow-y-auto">
                             {CONTRACT_TEXT}
                         </pre>
-                        <label className="flex items-start gap-2 mt-3 text-sm cursor-pointer">
+                        <label className="flex items-center gap-2 mt-3 text-sm cursor-pointer">
                             <input type="checkbox" name="contractAgreed"
                                 checked={form.contractAgreed} onChange={handleChange} />
                             <span>제휴 계약서 내용을 확인하였으며, 이에 동의합니다. (필수)</span>

@@ -52,6 +52,18 @@
         FROM reviews
         WHERE item_id = #{itemId}
     </select>
+    <select id="lockOrder" resultType="long">
+        SELECT oid
+        FROM orders
+        WHERE oid = #{oid}
+        FOR UPDATE
+    </select>
+    <select id="countReviewsByOid" resultType="int">
+        SELECT COUNT(*)
+        FROM reviews r
+        JOIN order_items oi ON oi.item_id = r.item_id
+        WHERE oi.oid = #{oid}
+    </select>
     <insert id="insertReviewImage" parameterType="map">
         INSERT INTO review_images (rid, image_url)
         VALUES (#{rid}, #{url})
