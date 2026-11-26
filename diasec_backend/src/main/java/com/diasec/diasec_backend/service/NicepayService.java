@@ -43,6 +43,7 @@ public class NicepayService {
     private final ObjectMapper objectMapper;
     private final ImageUtil imageUtil;
     private final PasswordEncoder passwordEncoder;
+    private final CartService cartService;
 
     @Value("${custom.cors.origin}")
     private String frontendUrl;
@@ -295,6 +296,7 @@ public class NicepayService {
         // 비회원 주문조회 비밀번호가 평문 상태로 저장되지 않도록 보정
         encodeGuestPasswordIfNeeded(draft);
         orderService.insertOrder(draft);
+        clearOrderedCartItems(draft);
 
         // 카드 결제 완료 알림 SMS
         orderService.sendAdminOrderPaidSms(draft.getOid(), "카드결제");
@@ -395,6 +397,7 @@ public class NicepayService {
         // 비회원 주문조회 비밀번호가 평문 상태로 저장되지 않도록 보정
         encodeGuestPasswordIfNeeded(draft);
         orderService.insertOrder(draft);
+        clearOrderedCartItems(draft);
         orderService.sendVbankAccountSms(draft);
 
         removeDraft(orderId);
@@ -458,6 +461,25 @@ public class NicepayService {
             error.put("resultCode", "ERROR");
             error.put("resultMsg", e.getMessage());
             return error;
+        }
+    }
+
+    private void clearOrderedCartItems(OrderVo draft) {
+        try {
+            if (draft == null || draft.getId() == null || draft.getId().isBlank()) return;
+            if (draft.getItems() == null) return;
+
+            List<Integer> cidList = draft.getItems().stream()
+                .map(item -> item.getCid())
+                .filter(cid -> cid != null && cid > 0)
+                .map(Long::intValue)
+                .distinct()
+                .toList();
+            if (cidList.isEmpty()) return;
+
+            cartService.deleteCartItems(draft.getId(), cidList);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 }

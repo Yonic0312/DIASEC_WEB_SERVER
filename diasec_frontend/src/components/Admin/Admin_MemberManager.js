@@ -435,47 +435,49 @@ const Admin_MemberManager = () => {
             {/* 크레딧 모달창 */}
             {selectedCreditMember && (
                 <div
-                    className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-[10000] overscroll-none"
+                    className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-[10000]"
                     onClick={() => setSelectedCreditMember(null)}
                     onTouchMove={(e) => {
                         if (e.target === e.currentTarget) e.preventDefault();
                     }}
                 >
-                    <div className="bg-white p-6 rounded w-full h-1/2 max-w-2xl overflow-y-scroll" onClick={e => e.stopPropagation()}>
+                    <div className="bg-white p-6 rounded w-full h-1/2 max-w-2xl max-h-[80vh] flex flex-col" onClick={e => e.stopPropagation()}>
                         <h3 className="text-lg font-bold mb-4">{selectedCreditMember.name}님의 적립금 관리</h3>
 
                         <div className="mb-4 text-sm">
                             현재 보유 적립금: <strong>{creditHistory[0]?.credit?.toLocaleString()}원</strong>
                         </div>
 
-                        <table className="w-full text-xs border mb-4">
-                            <thead className="bg-gray-100">
-                                <tr>
-                                    <th className="p-2 border">날짜</th>
-                                    <th className="p-2 border">유형</th>
-                                    <th className="p-2 border">금액</th>
-                                    <th className="p-2 border">설명</th>
-                                    <th className="p-2 border">삭제</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {creditHistory.map(item => (
-                                    <tr key={item.cid} className="text-center">
-                                        <td className="p-2 border">{new Date(item.createdAt).toLocaleDateString()}</td>
-                                        <td className="p-2 border">{item.type}</td>
-                                        <td className={`p-2 border font-semibold ${item.type === '사용' ? 'text-red-500' : 'text-green-600'}`}>
-                                            {item.type === '사용' ? '-' : '+'}{item.amount.toLocaleString()}원
-                                        </td>
-                                        <td className="p-2 border">{item.description}</td>
-                                        <td className="p-2 border">
-                                            <button onClick={() => handleDeleteCredit(item.cid)} className="text-red-500 text-xs">
-                                                삭제
-                                            </button>
-                                        </td>
+                        <div className="mb-4 max-h-[40vh] overflow-y-auto border">
+                            <table className="w-full text-xs">
+                                <thead className="bg-gray-100 sticky top-0">
+                                    <tr>
+                                        <th className="p-2 border">날짜</th>
+                                        <th className="p-2 border">유형</th>
+                                        <th className="p-2 border">금액</th>
+                                        <th className="p-2 border">설명</th>
+                                        <th className="p-2 border">삭제</th>
                                     </tr>
-                                ))}
-                            </tbody>
-                        </table>
+                                </thead>
+                                <tbody>
+                                    {creditHistory.map(item => (
+                                        <tr key={item.cid} className="text-center">
+                                            <td className="p-2 border">{new Date(item.createdAt).toLocaleDateString()}</td>
+                                            <td className="p-2 border">{item.type}</td>
+                                            <td className={`p-2 border font-semibold ${item.type === '사용' ? 'text-red-500' : 'text-green-600'}`}>
+                                                {item.type === '사용' ? '-' : '+'}{item.amount.toLocaleString()}원
+                                            </td>
+                                            <td className="p-2 border">{item.description}</td>
+                                            <td className="p-2 border">
+                                                <button onClick={() => handleDeleteCredit(item.cid)} className="text-red-500 text-xs">
+                                                    삭제
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
 
                         <div className="flex gap-2 mb-4">
                             <input 

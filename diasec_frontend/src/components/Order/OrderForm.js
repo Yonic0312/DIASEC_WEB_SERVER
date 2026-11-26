@@ -854,16 +854,20 @@ const OrderForm = () => {
 
             if (response.data.success) {
                 sessionStorage.removeItem(ORDER_RETRY_DRAFT_KEY);
-                // 장바구니 삭제
-                if (!isGuest && member?.id) {
-                    await axios.post(`${API}/order/deleteList`, {
-                        id: member.id,
-                        cidList: orderItems.map(item => item.cid),         
-                });
+
+                const cidList = orderItems.map(item => item.cid).filter(Boolean);
+                if (!isGuest && member?.id && cidList.length > 0) {
+                    try {
+                        await axios.post(`${API}/order/deleteList`, {
+                            id: member.id,
+                            cidList, 
+                    });
+                } catch (deleteError) {
+                    console.error("장바구니 삭제 실패:", deleteError);
+                }
             }
 
                 toast.success("주문이 완료되었습니다.");
-
                 navigate('/orderComplete', {
                     state: {
                         oid: response.data.oid,

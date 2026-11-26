@@ -583,7 +583,7 @@ const Admin_Home = () => {
                     })}
                 </div>
                 {ORDER_PREVIEW_STATUSES.every((s) => !(orderCounts[s] > 0)) && !loading && (
-                    <p className="text-sm text-gray-500">표시할 진행 중 주문이 없습니다.</p>
+                    <p className="text-sm text-gray-500">표시할 진행 중 주문이 없습니다. </p>
                 )}
             </div>
 

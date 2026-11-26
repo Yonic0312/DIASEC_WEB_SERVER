@@ -135,6 +135,37 @@ const Admin_NoticeManager = () => {
     const [newPinned, setNewPinned] = useState(false);
     const [newImages, setNewImages] = useState([]);
 
+    // 등록 모달 열림 시 배경 스크롤 잠금
+    useEffect(() => {
+        if (!showModal) return;
+
+        const scrollY = window.scrollY;
+        const prevOverflow = document.body.style.overflow;
+
+        document.body.style.position = 'fixed';
+        document.body.style.top = `-${scrollY}px`;
+        document.body.style.left = '0';
+        document.body.style.right = '0';
+        document.body.style.width = '100%';
+        document.body.style.overflow = 'hidden';
+
+        const onKey = (e) => {
+            if (e.key === 'Escape') setShowModal(false);
+        };
+        window.addEventListener('keydown', onKey);
+
+        return () => {
+            window.removeEventListener('keydown', onKey);
+            document.body.style.position = '';
+            document.body.style.top = '';
+            document.body.style.left = '';
+            document.body.style.right = '';
+            document.body.style.width = '';
+            document.body.style.overflow = prevOverflow;
+            window.scrollTo(0, scrollY);
+        };
+    }, [showModal]);
+
     const handleAddNotice = async () => {
         const formData = new FormData();
         formData.append('title', newTitle);
@@ -290,8 +321,16 @@ const Admin_NoticeManager = () => {
 
             {/* 공지사항 등록 모달 */}
             {showModal && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-                    <div className="bg-white p-6 rounded w-full max-w-lg" onClick={e => e.stopPropagation()}>
+                <div
+                    className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-[10000] overscroll-none"
+                    onTouchMove={(e) => {
+                        if (e.target === e.currentTarget) e.preventDefault();
+                    }}
+                >
+                    <div
+                        className="bg-white p-6 rounded w-full max-w-lg max-h-[90vh] overflow-y-auto"
+                        onClick={e => e.stopPropagation()}
+                    >
                         <h3 className="text-xl font-bold mb-4">공지사항 등록</h3>
 
                         <input value={newTitle} onChange={e => setNewTitle(e.target.value)} placeholder="제목" className="border w-full p-2 mb-2" />
@@ -387,29 +426,6 @@ const Admin_NoticeManager = () => {
                     )
                 })()}
             </div>
-
-            {/* 공지사항 등록 모달 */}
-            {showModal && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-                    <div className="bg-white p-6 rounded w-full max-w-lg" onClick={e => e.stopPropagation()}>
-                        <h3 className="text-xl font-bold mb-4">공지사항 등록</h3>
-
-                        <input value={newTitle} onChange={e => setNewTitle(e.target.value)} placeholder="제목" className="border w-full p-2 mb-2" />
-                        <textarea value={newContent} onChange={e => setNewContent(e.target.value)} placeholder="내용" rows={4} className="border w-full p-2 mb-2" />
-                        <label className="text-sm block mb-2">
-                            <input type="checkbox" checked={newPinned} onChange={e => setNewPinned(e.target.checked)} className="mr-2" />
-                            공지 고정
-                        </label>
-
-                        <Admin_NoticeEditor existingImage={[]} onImagesChange={setNewImages} />
-
-                        <div className="flex justify-end gap-2 mt-4">
-                            <button onClick={() => setShowModal(false)} className="bg-gray-300 px-4 py-2 rounded">취소</button>
-                            <button onClick={handleAddNotice} className="bg-blue-600 text-white px-4 py-2 rounded">등록</button>
-                        </div>
-                    </div>
-                </div>
-            )}
         </div>
     )
 }
