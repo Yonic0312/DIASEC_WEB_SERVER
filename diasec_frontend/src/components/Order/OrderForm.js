@@ -14,6 +14,7 @@ import requestRealTimeTransfer from './PaymentMethods/RealTimeTransfer'
 import requestVBankPayment from './PaymentMethods/VBankPayment';
 import { toast } from 'react-toastify';
 import { usePartner } from '../../context/PartnerContext';
+import { useSitePromo } from '../../context/SitePromoContext';
 import RetouchModal, {
     CUSTOM_FRAME_RETOUCH_OPTION_LABELS,
 } from '../Modal/RetouchModal.js';
@@ -36,7 +37,8 @@ const OrderForm = () => {
     const location = useLocation();
     const [searchParams] = useSearchParams();
     const { member, setMember } = useContext(MemberContext);
-    const { partnerDiscount } = usePartner();
+    const { partnerDiscount, refreshPartner } = usePartner();
+    const { refreshSiteDiscount } = useSitePromo();
     const initialItems = location.state?.orderItems || [];
     
     const [orderItems, setOrderItems] = useState(() => 
@@ -893,7 +895,15 @@ const OrderForm = () => {
             }
         } catch (error) {
             console.error("주문 요청 실패:", error);
-            toast.error("서버 오류로 주문을 처리할 수 없습니다.");
+            const message =
+                error.response?.data?.message ||
+                "서버 오류로 주문을 처리할 수 없습니다."
+            toast.error(message);
+
+            if (String(message).includes("금액이 올바르지 않습니다.")) {
+                refreshSiteDiscount();
+                refreshPartner();
+            }
         }
     }
 
